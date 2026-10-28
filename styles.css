@@ -76,6 +76,8 @@ a { text-decoration: none; }
 .modal-body .form-control, .modal-body .form-select { min-height: 42px; border-color: #e3e7ef; border-radius: .6rem; font-size: .84rem; }
 .modal-body .form-control:focus, .modal-body .form-select:focus { border-color: #b9c4ff; box-shadow: 0 0 0 .2rem rgba(58, 87, 232, .1); }
 .summary-card .card-body { min-height: 148px; padding: 1.3rem 1.45rem; }
+.metric-card:hover { transform: translateY(-3px); }
+.metric-card:focus-visible { outline: 3px solid rgba(58, 87, 232, .35); outline-offset: 2px; }
 .metric-label { margin: 0 0 .45rem; color: #747e93; font-size: .79rem; font-weight: 550; }
 .metric-value { color: var(--hope-text); font-size: 1.85rem; font-weight: 700; letter-spacing: -.04em; line-height: 1.15; }
 .metric-foot { margin-top: .55rem; color: var(--hope-muted); font-size: .68rem; }

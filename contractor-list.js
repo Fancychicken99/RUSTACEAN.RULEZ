@@ -73,10 +73,11 @@
     </div>
     <section class="card mb-4" aria-label="Filter contractors"><div class="card-body p-3 p-lg-4">
       <form id="contractor-filter-form" class="row g-3 align-items-end">
-        <div class="col-12 col-sm-6 col-xl-3"><label class="form-label small fw-semibold" for="contractor-region-filter">Region</label><select id="contractor-region-filter" name="region" class="form-select"><option value="">All regions</option><option value="Sub-Saharan Africa">Sub-Saharan Africa</option><option value="Eastern Europe">Eastern Europe</option><option value="Middle East">Middle East</option><option value="East Asia">East Asia</option><option value="Central Asia">Central Asia</option></select></div>
-        <div class="col-12 col-sm-6 col-xl-3"><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
-        <div class="col-12 col-sm-8 col-xl-4"><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
-        <div class="col-12 col-sm-4 col-xl-2 d-grid"><button id="contractor-search-button" class="btn btn-primary" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Search</button></div>
+        <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="contractor-region-filter">Region</label><select id="contractor-region-filter" name="region" class="form-select"><option value="">All regions</option><option value="Sub-Saharan Africa">Sub-Saharan Africa</option><option value="Eastern Europe">Eastern Europe</option><option value="Middle East">Middle East</option><option value="East Asia">East Asia</option><option value="Central Asia">Central Asia</option></select></div>
+        <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
+        <div class="col-12 col-sm-8 col-xl-3"><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
+        <div class="col-12 col-sm-4 col-xl-2"><label class="form-label small fw-semibold" for="contractor-status-filter">Status</label><select id="contractor-status-filter" name="status" class="form-select"><option value="">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Critical">Critical alerts</option></select></div>
+        <div class="col-12 col-xl-3 d-grid"><button id="contractor-search-button" class="btn btn-primary" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Search</button></div>
       </form>
     </div></section>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
@@ -125,16 +126,28 @@
     renderTable(dummyData);
     document.getElementById('contractor-filter-form').addEventListener('submit', (event) => {
       event.preventDefault();
-      const region = document.getElementById('contractor-region-filter').value.trim().toLowerCase();
-      const country = document.getElementById('contractor-country-filter').value.trim().toLowerCase();
-      const citySector = document.getElementById('contractor-city-sector-filter').value.trim().toLowerCase();
-      const filtered = dummyData.filter((contractor) =>
+      applyContractorFilters();
+    });
+  }
+
+  function applyContractorFilters(statusOverride = null) {
+    const region = document.getElementById('contractor-region-filter').value.trim().toLowerCase();
+    const country = document.getElementById('contractor-country-filter').value.trim().toLowerCase();
+    const citySector = document.getElementById('contractor-city-sector-filter').value.trim().toLowerCase();
+    const statusSelect = document.getElementById('contractor-status-filter');
+    if (statusOverride !== null) statusSelect.value = statusOverride === 'All' ? '' : statusOverride;
+    const status = statusSelect.value;
+
+    const filtered = dummyData.filter((contractor) => {
+      const matchesStatus = !status || (status === 'Critical'
+        ? contractor.status === 'Critical' || Number(contractor.days_since_last_contact) >= 300
+        : String(contractor.status ?? '').toLowerCase() === status.toLowerCase());
+      return matchesStatus &&
         (!region || String(contractor.region ?? '').toLowerCase() === region) &&
         (!country || String(contractor.country ?? '').toLowerCase().includes(country)) &&
-        (!citySector || String(contractor.city_sector ?? '').toLowerCase().includes(citySector))
-      );
-      renderTable(filtered);
+        (!citySector || String(contractor.city_sector ?? '').toLowerCase().includes(citySector));
     });
+    renderTable(filtered);
   }
 
   function renderOrganizations() {
@@ -231,6 +244,21 @@
   navOrganizations.addEventListener('click', () => {
     renderOrganizations();
     switchView('view-organizations');
+  });
+
+  document.querySelectorAll('.metric-card').forEach((card) => {
+    const applyMetricFilter = () => {
+      switchView('view-contacts');
+      renderContactList();
+      applyContractorFilters(card.dataset.filterStatus);
+    };
+    card.addEventListener('click', applyMetricFilter);
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        applyMetricFilter();
+      }
+    });
   });
 
   renderContactList();
