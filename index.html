@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -19,15 +19,15 @@
 
       <div class="nav-section-label">WORKSPACE</div>
       <nav class="nav nav-pills flex-column gap-1" aria-label="Workspace">
-        <a class="nav-link active" href="#dashboard" aria-current="page">
+        <button class="nav-link active" id="nav-dashboard" type="button" aria-current="page">
           <i class="bi bi-speedometer2" aria-hidden="true"></i><span>Dashboard</span>
-        </a>
-        <a class="nav-link" href="#contractors" data-view="contractors">
+        </button>
+        <button class="nav-link" id="nav-contacts" type="button">
           <i class="bi bi-person-badge" aria-hidden="true"></i><span>Contractors</span>
-        </a>
-        <a class="nav-link" href="#organizations">
+        </button>
+        <button class="nav-link" id="nav-organizations" type="button">
           <i class="bi bi-buildings" aria-hidden="true"></i><span>Organizations</span>
-        </a>
+        </button>
       </nav>
 
       <div class="sidebar-footer mt-auto">
@@ -68,55 +68,65 @@
       </header>
 
       <main id="app-content" class="container-fluid">
-        <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
-          <div>
-            <p class="eyebrow mb-1">OVERVIEW</p>
-            <h1 class="h3 mb-1">Dashboard</h1>
-            <p class="text-secondary mb-0">Welcome back, Jordan. Here’s your workspace at a glance.</p>
+        <div id="view-dashboard">
+          <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <p class="eyebrow mb-1">OVERVIEW</p>
+              <h1 class="h3 mb-1">Dashboard</h1>
+              <p class="text-secondary mb-0">Executive summary of your contractor workspace.</p>
+            </div>
+            <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor
+            </button>
           </div>
-          <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i> Add new record
-          </button>
+
+          <section class="row g-3 g-xl-4 mb-4" aria-label="Overview statistics">
+            <div class="col-12 col-sm-6 col-xl-3"><article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between"><div><p class="metric-label">Total Contractors</p><div class="metric-value">128</div><p class="metric-foot mb-0"><span class="trend"><i class="bi bi-arrow-up-right" aria-hidden="true"></i> 8.2%</span> <span>this month</span></p></div><span class="metric-icon contractors-icon"><i class="bi bi-people" aria-hidden="true"></i></span></div></article></div>
+            <div class="col-12 col-sm-6 col-xl-3"><article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between"><div><p class="metric-label">Active Deployments</p><div class="metric-value">54</div><p class="metric-foot mb-0"><span class="trend"><i class="bi bi-arrow-up-right" aria-hidden="true"></i> 4.6%</span> <span>this month</span></p></div><span class="metric-icon organizations-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span></div></article></div>
+            <div class="col-12 col-sm-6 col-xl-3"><article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between"><div><p class="metric-label">Pending Archive</p><div class="metric-value">08</div><p class="metric-foot mb-0"><span class="metric-neutral"><i class="bi bi-clock-history" aria-hidden="true"></i> Needs review</span></p></div><span class="metric-icon engagements-icon"><i class="bi bi-archive" aria-hidden="true"></i></span></div></article></div>
+            <div class="col-12 col-sm-6 col-xl-3"><article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between"><div><p class="metric-label">Critical Alerts</p><div class="metric-value">03</div><p class="metric-foot mb-0"><span class="text-danger fw-semibold">Requires attention</span></p></div><span class="metric-icon" style="color:#d9534f;background:#fff0ef"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span></div></article></div>
+          </section>
+
+          <section class="row g-3 g-xl-4 mb-4" aria-label="Regional and recent activity overview">
+            <div class="col-12 col-md-6">
+              <article class="card h-100">
+                <div class="card-header bg-white px-4 py-3"><h2 class="h5 mb-1">Personnel by Region</h2><p class="text-secondary small mb-0">Current distribution across regions</p></div>
+                <div class="card-body p-4">
+                  <div class="mb-4"><div class="d-flex justify-content-between mb-2"><span class="fw-semibold">Middle East</span><span class="text-secondary small">42 personnel · 34%</span></div><div class="progress" role="progressbar" aria-label="Middle East personnel" aria-valuenow="34" aria-valuemin="0" aria-valuemax="100" style="height:8px"><div class="progress-bar" style="width:34%"></div></div></div>
+                  <div class="mb-4"><div class="d-flex justify-content-between mb-2"><span class="fw-semibold">Eastern Europe</span><span class="text-secondary small">35 personnel · 27%</span></div><div class="progress" role="progressbar" aria-label="Eastern Europe personnel" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100" style="height:8px"><div class="progress-bar bg-info" style="width:27%"></div></div></div>
+                  <div class="mb-4"><div class="d-flex justify-content-between mb-2"><span class="fw-semibold">Sub-Saharan Africa</span><span class="text-secondary small">28 personnel · 22%</span></div><div class="progress" role="progressbar" aria-label="Sub-Saharan Africa personnel" aria-valuenow="22" aria-valuemin="0" aria-valuemax="100" style="height:8px"><div class="progress-bar bg-success" style="width:22%"></div></div></div>
+                  <div><div class="d-flex justify-content-between mb-2"><span class="fw-semibold">Other regions</span><span class="text-secondary small">23 personnel · 17%</span></div><div class="progress" role="progressbar" aria-label="Other regions personnel" aria-valuenow="17" aria-valuemin="0" aria-valuemax="100" style="height:8px"><div class="progress-bar bg-warning" style="width:17%"></div></div></div>
+                </div>
+              </article>
+            </div>
+            <div class="col-12 col-md-6">
+              <article class="card h-100" aria-labelledby="transience-title">
+                <div class="card-header bg-white px-4 py-3"><h2 class="h5 mb-1" id="transience-title">Recent Transience Activity</h2><p class="text-secondary small mb-0">Recent contractor record changes</p></div>
+                <div class="card-body p-4">
+                  <ol class="list-unstyled border-start ps-4 mb-0">
+                    <li class="position-relative pb-4"><span class="position-absolute top-0 start-0 translate-middle p-1 bg-primary border border-3 border-white rounded-circle" aria-hidden="true"></span><time class="d-block small text-secondary mb-1" datetime="2026-10-28T09:20">Today, 9:20 AM</time><p class="mb-0"><strong>Alex Morgan</strong> moved from <span class="text-secondary">Nairobi</span> to <span class="text-secondary">Kampala</span>.</p></li>
+                    <li class="position-relative pb-4"><span class="position-absolute top-0 start-0 translate-middle p-1 bg-info border border-3 border-white rounded-circle" aria-hidden="true"></span><time class="d-block small text-secondary mb-1" datetime="2026-10-28T08:45">Today, 8:45 AM</time><p class="mb-0"><strong>Jamie Lee</strong> status changed to <span class="badge bg-secondary">Inactive</span>.</p></li>
+                    <li class="position-relative pb-4"><span class="position-absolute top-0 start-0 translate-middle p-1 bg-primary border border-3 border-white rounded-circle" aria-hidden="true"></span><time class="d-block small text-secondary mb-1" datetime="2026-10-27T16:10">Yesterday, 4:10 PM</time><p class="mb-0"><strong>Riley Patel</strong> moved from <span class="text-secondary">Warsaw</span> to <span class="text-secondary">Kyiv</span>.</p></li>
+                    <li class="position-relative pb-4"><span class="position-absolute top-0 start-0 translate-middle p-1 bg-warning border border-3 border-white rounded-circle" aria-hidden="true"></span><time class="d-block small text-secondary mb-1" datetime="2026-10-27T13:35">Yesterday, 1:35 PM</time><p class="mb-0"><strong>Casey Bennett</strong> record flagged for archive review.</p></li>
+                    <li class="position-relative"><span class="position-absolute top-0 start-0 translate-middle p-1 bg-success border border-3 border-white rounded-circle" aria-hidden="true"></span><time class="d-block small text-secondary mb-1" datetime="2026-10-26T11:05">Oct 26, 11:05 AM</time><p class="mb-0"><strong>Jordan Ellis</strong> status changed to <span class="badge bg-success">Active</span>.</p></li>
+                  </ol>
+                </div>
+              </article>
+            </div>
+          </section>
+          <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
+        </div>        <div id="view-contacts" class="d-none"></div>
+        <div id="view-organizations" class="d-none">
+          <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <p class="eyebrow mb-1">WORKSPACE</p>
+              <h1 class="h3 mb-1">Organizations</h1>
+              <p class="text-secondary mb-0">Organizations and their active contractor rosters.</p>
+            </div>
+            <button class="btn btn-primary d-flex align-items-center gap-2" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add organization</button>
+          </div>
+          <div id="organizations-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 g-xl-4"></div>
         </div>
-
-        <section class="row g-3 g-xl-4 mb-4" aria-label="CRM summary">
-          <div class="col-12 col-sm-6 col-xl-4">
-            <article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between">
-              <div><p class="metric-label">Total contractors</p><div class="metric-value">128</div><p class="metric-foot mb-0"><span class="trend"><i class="bi bi-arrow-up-right" aria-hidden="true"></i> 8.2%</span> <span>from last month</span></p></div>
-              <span class="metric-icon contractors-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
-            </div></article>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-4">
-            <article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between">
-              <div><p class="metric-label">Organizations</p><div class="metric-value">36</div><p class="metric-foot mb-0"><span class="trend"><i class="bi bi-arrow-up-right" aria-hidden="true"></i> 4.5%</span> <span>from last month</span></p></div>
-              <span class="metric-icon organizations-icon"><i class="bi bi-buildings" aria-hidden="true"></i></span>
-            </div></article>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-4">
-            <article class="card summary-card h-100"><div class="card-body d-flex align-items-center justify-content-between">
-              <div><p class="metric-label">Active engagements</p><div class="metric-value">54</div><p class="metric-foot mb-0"><span class="metric-neutral"><i class="bi bi-dash" aria-hidden="true"></i> 1.2%</span> <span>from last month</span></p></div>
-              <span class="metric-icon engagements-icon"><i class="bi bi-briefcase" aria-hidden="true"></i></span>
-            </div></article>
-          </div>
-        </section>
-
-        <section class="card activity-card" aria-labelledby="activity-title">
-          <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div><h2 class="h5 mb-1" id="activity-title">Recent activity</h2><p class="text-secondary small mb-0">A quick look at what’s happening in your workspace.</p></div>
-            <a class="btn btn-sm btn-light" href="#activity">View all <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
-          </div>
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead><tr><th scope="col">NAME</th><th scope="col">TYPE</th><th scope="col">ORGANIZATION</th><th scope="col">UPDATED</th><th scope="col"><span class="visually-hidden">Status</span></th></tr></thead>
-              <tbody>
-                <tr><td><div class="person-cell"><span class="table-avatar avatar-blue">AM</span><span><strong>Alex Morgan</strong><small>alex.morgan@example.com</small></span></div></td><td>Contractor</td><td>Brightline Studio</td><td>Today, 10:42 AM</td><td><span class="status-badge status-active">Active</span></td></tr>
-                <tr><td><div class="person-cell"><span class="table-avatar avatar-purple">SC</span><span><strong>Summit Creative</strong><small>hello@summitcreative.co</small></span></div></td><td>Organization</td><td>—</td><td>Yesterday</td><td><span class="status-badge status-active">Active</span></td></tr>
-                <tr><td><div class="person-cell"><span class="table-avatar avatar-green">JL</span><span><strong>Jamie Lee</strong><small>jamie.lee@example.com</small></span></div></td><td>Contractor</td><td>Northstar Partners</td><td>Oct 24, 2026</td><td><span class="status-badge status-review">In review</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
       </main>
     </div>
   </div>

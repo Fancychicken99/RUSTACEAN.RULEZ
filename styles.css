@@ -29,7 +29,7 @@ a { text-decoration: none; }
 .brand-name { font-weight: 750; font-size: 1.1rem; letter-spacing: -.03em; }
 .brand-name span { color: var(--hope-blue); margin-left: .22rem; }
 .nav-section-label { padding: 0 .75rem .65rem; color: #a0a7b8; font-size: .68rem; font-weight: 700; letter-spacing: .09em; white-space: nowrap; }
-.sidebar .nav-link { display: flex; align-items: center; gap: .85rem; min-width: 226px; padding: .78rem .85rem; color: #747e93; font-weight: 550; border-radius: .65rem; white-space: nowrap; transition: color .15s ease, background .15s ease; }
+.sidebar .nav-link { display: flex; align-items: center; gap: .85rem; width: 100%; min-width: 226px; padding: .78rem .85rem; color: #747e93; background: transparent; border: 0; text-align: left; font-weight: 550; border-radius: .65rem; white-space: nowrap; transition: color .15s ease, background .15s ease; }
 .sidebar .nav-link i { width: 1.2rem; font-size: 1.08rem; text-align: center; }
 .sidebar .nav-link:hover { color: var(--hope-blue); background: #f4f6ff; }
 .sidebar .nav-link.active { color: #fff; background: var(--hope-blue); box-shadow: 0 5px 12px rgba(58, 87, 232, .2); }
@@ -94,6 +94,11 @@ a { text-decoration: none; }
 .activity-card .table thead th { padding: .85rem 1.4rem; color: #a0a7b8; background: #fcfcfe; border-bottom: 1px solid var(--hope-border); font-size: .63rem; font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
 .activity-card .table tbody td { padding: .9rem 1.4rem; border-color: #f1f2f6; white-space: nowrap; }
 .activity-card .table tbody tr:last-child td { border-bottom: 0; }
+.organization-card { transition: transform .15s ease, box-shadow .15s ease; }
+.organization-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(17, 38, 146, .1); }
+.org-logo-placeholder { display: flex; align-items: center; gap: .75rem; min-height: 76px; padding: .85rem 1rem; color: #7f8aa1; background: #f7f8fc; border: 1px dashed #dce2ef; border-radius: .75rem; }
+.org-logo-initials { display: grid; place-items: center; width: 42px; height: 42px; color: var(--hope-blue); background: #eef0ff; border-radius: .7rem; font-size: .78rem; font-weight: 750; }
+.org-logo-label { font-size: .74rem; }
 .person-cell { display: flex; align-items: center; gap: .7rem; }
 .table-avatar { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: 0 0 auto; border-radius: 50%; font-size: .68rem; font-weight: 700; }
 .avatar-blue { color: #3a57e8; background: #eef0ff; }

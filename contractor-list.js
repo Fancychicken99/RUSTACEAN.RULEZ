@@ -1,7 +1,9 @@
 (() => {
-  const appContent = document.getElementById('app-content');
-  const contractorsLink = document.querySelector('[data-view="contractors"]');
-  if (!appContent || !contractorsLink) return;
+  const contactsView = document.getElementById('view-contacts');
+  const navDashboard = document.getElementById('nav-dashboard');
+  const navContacts = document.getElementById('nav-contacts');
+  const navOrganizations = document.getElementById('nav-organizations');
+  if (!contactsView || !navDashboard || !navContacts || !navOrganizations) return;
 
   const dummyData = [
     { id: '1f6a4d9c-2b83-4e17-9a52-6c0d8b3f7101', first_name: 'Mara', last_name: 'Ellison', phone: '+1-202-555-0101', email: 'mara.ellison@example.com', organization: 'Aegis Meridian Group', role: 'Security Consultant', region: 'Eastern Europe', country: 'Ukraine', city_sector: 'Kyiv', status: 'Active', days_since_last_contact: 12, image_path: 'C:/App/Data/Images/placeholder.jpg' },
@@ -54,6 +56,14 @@
     { id: '08593ceb-1a78-4d06-8971-5bbc3a286048', first_name: 'Ronan', last_name: 'Bell', phone: '+1-202-555-0148', email: 'ronan.bell@example.com', organization: 'Cobalt Gate Services', role: 'Logistics Coordinator', region: 'East Asia', country: 'Cambodia', city_sector: 'Phnom Penh', status: 'Active', days_since_last_contact: 14, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: '196a4dfc-2b89-4e17-9a82-6ccd4b397149', first_name: 'Maeve', last_name: 'Dunham', phone: '+1-202-555-0149', email: 'maeve.dunham@example.com', organization: 'Redwood Strategic Group', role: 'Operations Advisor', region: 'Central Asia', country: 'Uzbekistan', city_sector: 'Samarkand', status: 'Inactive', days_since_last_contact: 187, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: '2a7b5e0d-3c9a-4f28-8ba3-7d1e9c4a8250', first_name: 'Silas', last_name: 'Quincy', phone: '+1-202-555-0150', email: 'silas.quincy@example.com', organization: 'Bluehaven Operations', role: 'Program Manager', region: 'Middle East', country: 'Jordan', city_sector: 'Zarqa', status: 'Active', days_since_last_contact: 31, image_path: 'C:/App/Data/Images/placeholder.jpg' },
+  ];
+
+  const organizations = [
+    { name: 'Aegis Meridian Group', region: 'Eastern Europe', logoPath: 'assets/logos/aegis-meridian-group.svg', initials: 'AM' },
+    { name: 'Northstar Risk Partners', region: 'Sub-Saharan Africa', logoPath: 'assets/logos/northstar-risk-partners.svg', initials: 'NR' },
+    { name: 'Cobalt Gate Services', region: 'East Asia', logoPath: 'assets/logos/cobalt-gate-services.svg', initials: 'CG' },
+    { name: 'Redwood Strategic Group', region: 'Central Asia', logoPath: 'assets/logos/redwood-strategic-group.svg', initials: 'RS' },
+    { name: 'Bluehaven Operations', region: 'Middle East', logoPath: 'assets/logos/bluehaven-operations.svg', initials: 'BO' },
   ];
 
   const contactListHtml = `
@@ -111,7 +121,7 @@
   }
 
   function renderContactList() {
-    appContent.innerHTML = contactListHtml;
+    contactsView.innerHTML = contactListHtml;
     renderTable(dummyData);
     document.getElementById('contractor-filter-form').addEventListener('submit', (event) => {
       event.preventDefault();
@@ -127,26 +137,103 @@
     });
   }
 
-  contractorsLink.addEventListener('click', (event) => {
-    event.preventDefault();
-    renderContactList();
-    contractorsLink.classList.add('active');
-    contractorsLink.setAttribute('aria-current', 'page');
-    document.querySelectorAll('.sidebar .nav-link').forEach((link) => {
-      if (link !== contractorsLink) {
-        link.classList.remove('active');
-        link.removeAttribute('aria-current');
-      }
+  function renderOrganizations() {
+    const organizationsGrid = document.getElementById('organizations-grid');
+    if (!organizationsGrid) return;
+    organizationsGrid.replaceChildren();
+
+    organizations.forEach((organization) => {
+      const activeContractors = dummyData.filter((contractor) =>
+        contractor.organization === organization.name && contractor.status === 'Active'
+      ).length;
+
+      const column = document.createElement('div');
+      column.className = 'col';
+      const card = document.createElement('article');
+      card.className = 'card organization-card h-100';
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body d-flex flex-column p-4';
+
+      const logo = document.createElement('div');
+      logo.className = 'org-logo-placeholder mb-3';
+      logo.dataset.logoPath = organization.logoPath;
+      logo.setAttribute('aria-label', `Local LFS logo placeholder for ${organization.name}`);
+      const initials = document.createElement('span');
+      initials.className = 'org-logo-initials';
+      initials.textContent = organization.initials;
+      const logoLabel = document.createElement('span');
+      logoLabel.className = 'org-logo-label';
+      logoLabel.textContent = 'Local LFS logo';
+      logo.append(initials, logoLabel);
+
+      const name = document.createElement('h2');
+      name.className = 'h5 mb-3';
+      name.textContent = organization.name;
+
+      const contractorCount = document.createElement('p');
+      contractorCount.className = 'mb-2';
+      const countLabel = document.createElement('span');
+      countLabel.className = 'text-secondary';
+      countLabel.textContent = 'Active Contractors: ';
+      const countValue = document.createElement('strong');
+      countValue.textContent = String(activeContractors);
+      contractorCount.append(countLabel, countValue);
+
+      const region = document.createElement('p');
+      region.className = 'mb-4';
+      const regionLabel = document.createElement('span');
+      regionLabel.className = 'text-secondary d-block small mb-1';
+      regionLabel.textContent = 'Primary Operating Region';
+      const regionValue = document.createElement('strong');
+      regionValue.textContent = organization.region;
+      region.append(regionLabel, regionValue);
+
+      const rosterButton = document.createElement('button');
+      rosterButton.className = 'btn btn-outline-primary mt-auto';
+      rosterButton.type = 'button';
+      rosterButton.textContent = 'View Roster';
+      rosterButton.addEventListener('click', () => {
+        switchView('view-contacts');
+        renderContactList();
+      });
+
+      cardBody.append(logo, name, contractorCount, region, rosterButton);
+      card.appendChild(cardBody);
+      column.appendChild(card);
+      organizationsGrid.appendChild(column);
     });
+  }
+
+  function switchView(viewId) {
+    const viewIds = ['view-dashboard', 'view-contacts', 'view-organizations'];
+    const navIds = ['nav-dashboard', 'nav-contacts', 'nav-organizations'];
+    const targetView = document.getElementById(viewId);
+    const targetIndex = viewIds.indexOf(viewId);
+    if (!targetView || targetIndex === -1) return;
+
+    viewIds.forEach((id) => document.getElementById(id).classList.add('d-none'));
+    navIds.forEach((id) => {
+      const link = document.getElementById(id);
+      link.classList.remove('active');
+      link.removeAttribute('aria-current');
+    });
+
+    targetView.classList.remove('d-none');
+    document.getElementById(navIds[targetIndex]).classList.add('active');
+    document.getElementById(navIds[targetIndex]).setAttribute('aria-current', 'page');
+  }
+
+  navDashboard.addEventListener('click', () => switchView('view-dashboard'));
+  navContacts.addEventListener('click', () => {
+    switchView('view-contacts');
+    renderContactList();
+  });
+  navOrganizations.addEventListener('click', () => {
+    renderOrganizations();
+    switchView('view-organizations');
   });
 
   renderContactList();
-  contractorsLink.classList.add('active');
-  contractorsLink.setAttribute('aria-current', 'page');
-  document.querySelectorAll('.sidebar .nav-link').forEach((link) => {
-    if (link !== contractorsLink) {
-      link.classList.remove('active');
-      link.removeAttribute('aria-current');
-    }
-  });
+  renderOrganizations();
+  switchView('view-dashboard');
 })();
