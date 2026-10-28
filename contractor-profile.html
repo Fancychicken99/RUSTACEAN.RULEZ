@@ -1,0 +1,104 @@
+<!-- Contractor Profile view fragment: inject this markup into #app-content. -->
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+  <div>
+    <p class="eyebrow mb-1">WORKSPACE / CONTRACTORS</p>
+    <h1 class="h3 mb-1">Contractor Profile</h1>
+    <p class="text-secondary mb-0">Review contact details, contract data, and history.</p>
+  </div>
+  <button class="btn btn-outline-danger d-flex align-items-center gap-2" type="button">
+    <i class="bi bi-archive" aria-hidden="true"></i> Archive Contractor
+  </button>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <section class="card h-100" aria-labelledby="contractor-name">
+      <div class="card-body p-4 text-center">
+        <img
+          src="assets/contractor-profile.jpg"
+          class="img-fluid rounded-3 mb-4"
+          alt="Portrait of Taylor Morgan"
+          width="1200"
+          height="1200"
+          style="width: 100%; max-height: 320px; object-fit: cover;"
+        >
+        <h2 class="h4 mb-1" id="contractor-name">Taylor Morgan</h2>
+        <p class="text-secondary small mb-4">Product Designer</p>
+
+        <div class="text-start border-top pt-3">
+          <div class="mb-3">
+            <div class="small text-secondary mb-1">Phone</div>
+            <a href="tel:5551234567">(555) 123-4567</a>
+          </div>
+          <div>
+            <div class="small text-secondary mb-1">Email</div>
+            <a href="msteams:user@org.com">user@org.com</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-md-8">
+    <div class="d-flex flex-column gap-4">
+      <section class="card" aria-labelledby="active-contract-title">
+        <div class="card-header bg-white px-4 py-3">
+          <h2 class="h5 mb-0" id="active-contract-title">Active Contract Data</h2>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-sm-6">
+              <div class="small text-secondary mb-1">Organization</div>
+              <div class="fw-semibold">Brightline Studio</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="small text-secondary mb-1">Role</div>
+              <div class="fw-semibold">Product Designer</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="small text-secondary mb-1">Contract period</div>
+              <div class="fw-semibold">Oct 1, 2026 – Mar 31, 2027</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="small text-secondary mb-1">Status</div>
+              <span class="badge bg-success">Active</span>
+            </div>
+            <div class="col-sm-6">
+              <div class="small text-secondary mb-1">Region</div>
+              <div class="fw-semibold">North America</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="small text-secondary mb-1">Skill set</div>
+              <div class="fw-semibold">Product design, UX research</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="audit-history-title">
+        <div class="card-header bg-white px-4 py-3">
+          <h2 class="h5 mb-0" id="audit-history-title">Audit &amp; Transience History</h2>
+        </div>
+        <div class="card-body p-4">
+          <ol class="list-unstyled border-start ps-4 mb-0">
+            <li class="position-relative pb-4">
+              <span class="position-absolute top-0 start-0 translate-middle p-1 bg-primary border border-3 border-white rounded-circle" aria-hidden="true"></span>
+              <time class="d-block small text-secondary mb-1" datetime="2026-10-01T09:15:00">Oct 1, 2026 · 9:15 AM</time>
+              <p class="mb-0">Contract started with Brightline Studio.</p>
+            </li>
+            <li class="position-relative pb-4">
+              <span class="position-absolute top-0 start-0 translate-middle p-1 bg-primary border border-3 border-white rounded-circle" aria-hidden="true"></span>
+              <time class="d-block small text-secondary mb-1" datetime="2026-09-28T14:30:00">Sep 28, 2026 · 2:30 PM</time>
+              <p class="mb-0">Moved from Org A to Org B.</p>
+            </li>
+            <li class="position-relative">
+              <span class="position-absolute top-0 start-0 translate-middle p-1 bg-primary border border-3 border-white rounded-circle" aria-hidden="true"></span>
+              <time class="d-block small text-secondary mb-1" datetime="2026-09-15T11:05:00">Sep 15, 2026 · 11:05 AM</time>
+              <p class="mb-0">Contractor profile created.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
