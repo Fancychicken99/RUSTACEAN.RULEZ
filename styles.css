@@ -96,6 +96,9 @@ a { text-decoration: none; }
 .activity-card .table thead th { padding: .85rem 1.4rem; color: #a0a7b8; background: #fcfcfe; border-bottom: 1px solid var(--hope-border); font-size: .63rem; font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
 .activity-card .table tbody td { padding: .9rem 1.4rem; border-color: #f1f2f6; white-space: nowrap; }
 .activity-card .table tbody tr:last-child td { border-bottom: 0; }
+.contractor-row { cursor: pointer; }
+.contractor-row:hover { background: #f7f8ff; }
+.contractor-row:focus-visible { outline: 2px solid rgba(58, 87, 232, .55); outline-offset: -2px; }
 .organization-card { transition: transform .15s ease, box-shadow .15s ease; }
 .organization-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(17, 38, 146, .1); }
 .org-logo-placeholder { display: flex; align-items: center; gap: .75rem; min-height: 76px; padding: .85rem 1rem; color: #7f8aa1; background: #f7f8fc; border: 1px dashed #dce2ef; border-radius: .75rem; }

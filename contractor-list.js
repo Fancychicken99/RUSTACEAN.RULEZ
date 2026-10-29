@@ -1,9 +1,11 @@
-(() => {
+﻿(() => {
+  const appContent = document.getElementById('app-content');
   const contactsView = document.getElementById('view-contacts');
   const navDashboard = document.getElementById('nav-dashboard');
   const navContacts = document.getElementById('nav-contacts');
   const navOrganizations = document.getElementById('nav-organizations');
-  if (!contactsView || !navDashboard || !navContacts || !navOrganizations) return;
+  if (!appContent || !contactsView || !navDashboard || !navContacts || !navOrganizations) return;
+
 
   const dummyData = [
     { id: '1f6a4d9c-2b83-4e17-9a52-6c0d8b3f7101', first_name: 'Mara', last_name: 'Ellison', phone: '+1-202-555-0101', email: 'mara.ellison@example.com', organization: 'Aegis Meridian Group', role: 'Security Consultant', region: 'Eastern Europe', country: 'Ukraine', city_sector: 'Kyiv', status: 'Active', days_since_last_contact: 12, image_path: 'C:/App/Data/Images/placeholder.jpg' },
@@ -31,7 +33,7 @@
     { id: '7fc0a352-81eb-447d-90c8-c263419fd723', first_name: 'Maya', last_name: 'Sutton', phone: '+1-202-555-0123', email: 'maya.sutton@example.com', organization: 'Cobalt Gate Services', role: 'Logistics Coordinator', region: 'East Asia', country: 'Malaysia', city_sector: 'Kuala Lumpur', status: 'Inactive', days_since_last_contact: 149, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: '80d1b463-92fc-458e-81d9-d37452a0e824', first_name: 'Lucas', last_name: 'Fletcher', phone: '+1-202-555-0124', email: 'lucas.fletcher@example.com', organization: 'Redwood Strategic Group', role: 'Operations Advisor', region: 'Central Asia', country: 'Kazakhstan', city_sector: 'Astana', status: 'Active', days_since_last_contact: 9, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: '91e2c574-a30d-469f-92ea-e48563b1fa25', first_name: 'Zoe', last_name: 'Holt', phone: '+1-202-555-0125', email: 'zoe.holt@example.com', organization: 'Bluehaven Operations', role: 'Program Manager', region: 'Middle East', country: 'Jordan', city_sector: 'Aqaba', status: 'Active', days_since_last_contact: 2, image_path: 'C:/App/Data/Images/placeholder.jpg' },
-    { id: 'a2f3d685-b41e-47a0-83fb-f59674c20a26', first_name: 'Adrian', last_name: 'Cross', phone: '+1-202-555-0126', email: 'adrian.cross@example.com', organization: 'Aegis Meridian Group', role: 'Security Consultant', region: 'Eastern Europe', country: 'Moldova', city_sector: 'Chișinău', status: 'Inactive', days_since_last_contact: 121, image_path: 'C:/App/Data/Images/placeholder.jpg' },
+    { id: 'a2f3d685-b41e-47a0-83fb-f59674c20a26', first_name: 'Adrian', last_name: 'Cross', phone: '+1-202-555-0126', email: 'adrian.cross@example.com', organization: 'Aegis Meridian Group', role: 'Security Consultant', region: 'Eastern Europe', country: 'Moldova', city_sector: 'ChiÈ™inÄƒu', status: 'Inactive', days_since_last_contact: 121, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: 'b304e796-c520-48b1-940c-06a785d31b27', first_name: 'Hana', last_name: 'Ferguson', phone: '+1-202-555-0127', email: 'hana.ferguson@example.com', organization: 'Northstar Risk Partners', role: 'Risk Analyst', region: 'Sub-Saharan Africa', country: 'Rwanda', city_sector: 'Kigali', status: 'Retired', days_since_last_contact: 356, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: 'c415f8a7-d632-49c2-850f-17b896e42c28', first_name: 'Noah', last_name: 'Brennan', phone: '+1-202-555-0128', email: 'noah.brennan@example.com', organization: 'Cobalt Gate Services', role: 'Logistics Coordinator', region: 'East Asia', country: 'Thailand', city_sector: 'Bangkok', status: 'Active', days_since_last_contact: 13, image_path: 'C:/App/Data/Images/placeholder.jpg' },
     { id: 'd52609b8-e743-4ad3-962e-28c907f53d29', first_name: 'Imani', last_name: 'Vaughn', phone: '+1-202-555-0129', email: 'imani.vaughn@example.com', organization: 'Redwood Strategic Group', role: 'Operations Advisor', region: 'Central Asia', country: 'Turkmenistan', city_sector: 'Ashgabat', status: 'Inactive', days_since_last_contact: 196, image_path: 'C:/App/Data/Images/placeholder.jpg' },
@@ -66,30 +68,48 @@
     { name: 'Bluehaven Operations', region: 'Middle East', logoPath: 'assets/logos/bluehaven-operations.svg', initials: 'BO' },
   ];
 
+  function updateDashboardMetricCounts() {
+    const counts = {
+      'Total Contractors': dummyData.length,
+      'Active Deployments': dummyData.filter((contractor) => contractor.status === 'Active').length,
+      'Pending Archive': dummyData.filter((contractor) => contractor.status === 'Inactive').length,
+      'Critical Alerts': dummyData.filter((contractor) => Number(contractor.days_since_last_contact) > 90).length,
+    };
+
+    document.querySelectorAll('.metric-card').forEach((card) => {
+      const label = card.querySelector('.metric-label')?.textContent.trim();
+      const value = card.querySelector('.metric-value');
+      if (value && Object.hasOwn(counts, label)) value.textContent = String(counts[label]);
+    });
+  }
+
   const contactListHtml = `
     <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div><p class="eyebrow mb-1">WORKSPACE</p><h1 class="h3 mb-1">Contact List</h1><p class="text-secondary mb-0">Browse and manage your contractor directory.</p></div>
       <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
     </div>
+    <div id="contact-filter-bar">
     <section class="card mb-4" aria-label="Filter contractors"><div class="card-body p-3 p-lg-4">
       <form id="contractor-filter-form" class="row g-3 align-items-end">
         <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="contractor-region-filter">Region</label><select id="contractor-region-filter" name="region" class="form-select"><option value="">All regions</option><option value="Sub-Saharan Africa">Sub-Saharan Africa</option><option value="Eastern Europe">Eastern Europe</option><option value="Middle East">Middle East</option><option value="East Asia">East Asia</option><option value="Central Asia">Central Asia</option></select></div>
         <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
-        <div class="col-12 col-sm-8 col-xl-3"><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
-        <div class="col-12 col-sm-4 col-xl-2"><label class="form-label small fw-semibold" for="contractor-status-filter">Status</label><select id="contractor-status-filter" name="status" class="form-select"><option value="">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Critical">Critical alerts</option></select></div>
-        <div class="col-12 col-xl-3 d-grid"><button id="contractor-search-button" class="btn btn-primary" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Search</button></div>
+        <div class="col-12 col-sm-8 col-xl-2"><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
+        <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="filter-organization">Organization</label><select id="filter-organization" name="organization" class="form-select"><option value="All">All organizations</option><option value="Aegis Meridian Group">Aegis Meridian Group</option><option value="Northstar Risk Partners">Northstar Risk Partners</option><option value="Cobalt Gate Services">Cobalt Gate Services</option><option value="Redwood Strategic Group">Redwood Strategic Group</option><option value="Bluehaven Operations">Bluehaven Operations</option></select></div>
+        <div class="col-12 col-sm-4 col-xl-2"><label class="form-label small fw-semibold" for="filter-status">Status</label><select id="filter-status" name="status" class="form-select"><option value="All">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Alert">Critical alerts</option></select></div>
+        <div class="col-12 col-xl-2 d-grid"><button id="contractor-search-button" class="btn btn-primary" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Search</button></div>
       </form>
     </div></section>
+    </div>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
-      <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="contractor-list-title">All contractors</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><span class="text-secondary small" id="contractor-result-count"></span></div>
+      <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
       <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
     </section>
-    <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
+    <footer class="page-footer">Â© 2026 Northstar CRM <span>Â·</span> Secure, on-device workspace</footer>
   `;
 
-  function renderTable(data) {
-    const tableBody = document.getElementById('contractor-table-body');
-    const resultCount = document.getElementById('contractor-result-count');
+  function renderTable(data, tableBodyId = 'contractor-table-body', resultCountId = 'contractor-result-count') {
+    const tableBody = document.getElementById(tableBodyId);
+    const resultCount = document.getElementById(resultCountId);
     if (!tableBody) return;
     tableBody.replaceChildren();
 
@@ -115,39 +135,169 @@
       badge.className = `badge ${active ? 'bg-success' : 'bg-secondary'}`;
       badge.textContent = contractor.status ?? '';
       statusCell.appendChild(badge);
+
+      const daysSinceContact = Number(contractor.days_since_last_contact);
+      if (daysSinceContact > 180) {
+        const alertBadge = document.createElement('span');
+        alertBadge.className = 'badge bg-danger ms-1';
+        alertBadge.textContent = 'Critical';
+        alertBadge.setAttribute('aria-label', `${daysSinceContact} days since last contact; critical attention required`);
+        statusCell.appendChild(alertBadge);
+      } else if (daysSinceContact > 90) {
+        const alertBadge = document.createElement('span');
+        alertBadge.className = 'badge bg-warning text-dark ms-1';
+        alertBadge.textContent = 'Needs attention';
+        alertBadge.setAttribute('aria-label', `${daysSinceContact} days since last contact; follow-up needed`);
+        statusCell.appendChild(alertBadge);
+      }
       row.appendChild(statusCell);
+      row.classList.add('contractor-row');
+      row.tabIndex = 0;
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-label', `Open profile for ${cells[0]}`);
+      row.addEventListener('click', () => {
+        renderContractorProfile(contractor);
+        switchView('view-contractor-profile');
+      });
+      row.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          renderContractorProfile(contractor);
+          switchView('view-contractor-profile');
+        }
+      });
       tableBody.appendChild(row);
     });
     if (resultCount) resultCount.textContent = `${data.length} contractor${data.length === 1 ? '' : 's'}`;
   }
 
+  function renderContractorProfile(contractor) {
+    const profile = document.getElementById('contractor-profile-content');
+    profile.replaceChildren();
+    const body = document.createElement('div');
+    body.className = 'card-body p-4';
+    const header = document.createElement('div');
+    header.className = 'd-flex align-items-center gap-3 mb-4';
+    const avatar = document.createElement('span');
+    avatar.className = 'avatar';
+    avatar.textContent = `${contractor.first_name?.[0] ?? ''}${contractor.last_name?.[0] ?? ''}`;
+    const nameBlock = document.createElement('div');
+    const name = document.createElement('h2');
+    name.className = 'h4 mb-1';
+    name.textContent = `${contractor.first_name ?? ''} ${contractor.last_name ?? ''}`.trim();
+    const role = document.createElement('p');
+    role.className = 'text-secondary mb-0';
+    role.textContent = contractor.role ?? '';
+    nameBlock.append(name, role);
+    header.append(avatar, nameBlock);
+    body.appendChild(header);
+
+    const details = document.createElement('div');
+    details.className = 'row g-3';
+    const fields = [
+      ['Organization', contractor.organization], ['Region', contractor.region],
+      ['Country', contractor.country], ['City/Sector', contractor.city_sector],
+      ['Status', contractor.status], ['Internal ID', contractor.id],
+    ];
+    fields.forEach(([label, value]) => {
+      const column = document.createElement('div');
+      column.className = 'col-12 col-sm-6';
+      const caption = document.createElement('div');
+      caption.className = 'small text-secondary mb-1';
+      caption.textContent = label;
+      const content = document.createElement('div');
+      content.className = 'fw-semibold';
+      content.textContent = value ?? 'â€”';
+      column.append(caption, content);
+      details.appendChild(column);
+    });
+    const emailColumn = document.createElement('div');
+    emailColumn.className = 'col-12 col-sm-6';
+    const emailLabel = document.createElement('div');
+    emailLabel.className = 'small text-secondary mb-1';
+    emailLabel.textContent = 'Email';
+    const email = document.createElement('a');
+    email.href = `mailto:${contractor.email ?? ''}`;
+    email.textContent = contractor.email ?? '';
+    emailColumn.append(emailLabel, email);
+    details.appendChild(emailColumn);
+    body.appendChild(details);
+    profile.appendChild(body);
+  }
+
   function renderContactList() {
     contactsView.innerHTML = contactListHtml;
     renderTable(dummyData);
+    document.getElementById('btn-reset-destination').addEventListener('click', () => {
+      document.getElementById('destination-title').innerText = 'Contractor Directory';
+      document.getElementById('contact-filter-bar').classList.remove('d-none');
+      document.getElementById('btn-reset-destination').classList.add('d-none');
+      document.getElementById('contractor-region-filter').value = '';
+      document.getElementById('contractor-country-filter').value = '';
+      document.getElementById('contractor-city-sector-filter').value = '';
+      document.getElementById('filter-status').value = 'All';
+      document.getElementById('filter-organization').value = 'All';
+      renderTable(dummyData);
+    });
     document.getElementById('contractor-filter-form').addEventListener('submit', (event) => {
       event.preventDefault();
-      applyContractorFilters();
+      const filters = {
+        region: document.getElementById('contractor-region-filter').value.trim(),
+        country: document.getElementById('contractor-country-filter').value.trim(),
+        citySector: document.getElementById('contractor-city-sector-filter').value.trim(),
+        status: document.getElementById('filter-status').value,
+        organization: document.getElementById('filter-organization').value,
+      };
+      renderTable(filterContractors(filters));
     });
   }
 
-  function applyContractorFilters(statusOverride = null) {
-    const region = document.getElementById('contractor-region-filter').value.trim().toLowerCase();
-    const country = document.getElementById('contractor-country-filter').value.trim().toLowerCase();
-    const citySector = document.getElementById('contractor-city-sector-filter').value.trim().toLowerCase();
-    const statusSelect = document.getElementById('contractor-status-filter');
-    if (statusOverride !== null) statusSelect.value = statusOverride === 'All' ? '' : statusOverride;
-    const status = statusSelect.value;
+  function renderMetricDestination(viewId, title, description, contractors) {
+    const destination = document.getElementById(viewId);
+    destination.innerHTML = `
+      <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <p class="eyebrow mb-1">DASHBOARD / DESTINATION</p>
+          <h1 class="h3 mb-1">${title}</h1>
+          <p class="text-secondary mb-0">${description}</p>
+        </div>
+        <button class="btn btn-light" type="button" data-return-dashboard><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Dashboard</button>
+      </div>
+      <section class="card activity-card" aria-label="${title} results">
+        <div class="card-header d-flex align-items-center justify-content-between gap-2">
+          <h2 class="h5 mb-0">${title}</h2>
+          <span class="text-secondary small" id="metric-result-count"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th></tr></thead>
+            <tbody id="metric-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    `;
+    destination.querySelector('[data-return-dashboard]').addEventListener('click', () => switchView('view-dashboard'));
+    renderTable(contractors, 'metric-table-body', 'metric-result-count');
+    switchView(viewId);
+  }
 
-    const filtered = dummyData.filter((contractor) => {
-      const matchesStatus = !status || (status === 'Critical'
-        ? contractor.status === 'Critical' || Number(contractor.days_since_last_contact) >= 300
-        : String(contractor.status ?? '').toLowerCase() === status.toLowerCase());
+  function filterContractors({ region = '', country = '', citySector = '', status = 'All', organization = 'All' }) {
+    const normalizedRegion = region.toLowerCase();
+    const normalizedCountry = country.toLowerCase();
+    const normalizedCitySector = citySector.toLowerCase();
+
+    return dummyData.filter((contractor) => {
+      const matchesStatus = status === 'All' ||
+        (status === 'Alert'
+          ? Number(contractor.days_since_last_contact) > 90
+          : contractor.status === status);
+
       return matchesStatus &&
-        (!region || String(contractor.region ?? '').toLowerCase() === region) &&
-        (!country || String(contractor.country ?? '').toLowerCase().includes(country)) &&
-        (!citySector || String(contractor.city_sector ?? '').toLowerCase().includes(citySector));
+        (organization === 'All' || contractor.organization === organization) &&
+        (!normalizedRegion || String(contractor.region ?? '').toLowerCase() === normalizedRegion) &&
+        (!normalizedCountry || String(contractor.country ?? '').toLowerCase().includes(normalizedCountry)) &&
+        (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector));
     });
-    renderTable(filtered);
   }
 
   function renderOrganizations() {
@@ -208,6 +358,10 @@
       rosterButton.addEventListener('click', () => {
         switchView('view-contacts');
         renderContactList();
+        document.getElementById('filter-organization').value = organization.name;
+        document.getElementById('destination-title').innerText = `Roster: ${organization.name}`;
+        document.getElementById('btn-reset-destination').classList.remove('d-none');
+        renderTable(filterContractors({ organization: organization.name }));
       });
 
       cardBody.append(logo, name, contractorCount, region, rosterButton);
@@ -218,22 +372,31 @@
   }
 
   function switchView(viewId) {
-    const viewIds = ['view-dashboard', 'view-contacts', 'view-organizations'];
-    const navIds = ['nav-dashboard', 'nav-contacts', 'nav-organizations'];
+    const views = Array.from(appContent.children);
     const targetView = document.getElementById(viewId);
-    const targetIndex = viewIds.indexOf(viewId);
-    if (!targetView || targetIndex === -1) return;
+    if (!targetView || !views.includes(targetView)) return;
 
-    viewIds.forEach((id) => document.getElementById(id).classList.add('d-none'));
-    navIds.forEach((id) => {
-      const link = document.getElementById(id);
+    views.forEach((view) => view.classList.add('d-none'));
+    const navForView = {
+      'view-dashboard': navDashboard,
+      'view-contacts': navContacts,
+      'view-organizations': navOrganizations,
+      'view-contractor-profile': navContacts,
+      'view-deployments': navDashboard,
+      'view-pending-archive': navDashboard,
+      'view-critical-alerts': navDashboard,
+    };
+    [navDashboard, navContacts, navOrganizations].forEach((link) => {
       link.classList.remove('active');
       link.removeAttribute('aria-current');
     });
 
     targetView.classList.remove('d-none');
-    document.getElementById(navIds[targetIndex]).classList.add('active');
-    document.getElementById(navIds[targetIndex]).setAttribute('aria-current', 'page');
+    const activeNav = navForView[viewId];
+    if (activeNav) {
+      activeNav.classList.add('active');
+      activeNav.setAttribute('aria-current', 'page');
+    }
   }
 
   navDashboard.addEventListener('click', () => switchView('view-dashboard'));
@@ -245,22 +408,51 @@
     renderOrganizations();
     switchView('view-organizations');
   });
-
   document.querySelectorAll('.metric-card').forEach((card) => {
-    const applyMetricFilter = () => {
-      switchView('view-contacts');
-      renderContactList();
-      applyContractorFilters(card.dataset.filterStatus);
+    const applyMetricFilter = (e) => {
+      e.preventDefault();
+      const status = card.dataset.filterStatus;
+      const metricName = card.querySelector('.metric-label').innerText.trim();
+      if (status === 'All') {
+        switchView('view-contacts');
+        renderContactList();
+        return;
+      }
+
+      const destinations = {
+        Active: {
+          viewId: 'view-deployments',
+          title: 'Active Deployments',
+          description: 'Contractors with an active deployment.',
+          matches: (contractor) => contractor.status === 'Active',
+        },
+        Inactive: {
+          viewId: 'view-pending-archive',
+          title: 'Pending Archive',
+          description: 'Inactive contractors awaiting archive review.',
+          matches: (contractor) => contractor.status === 'Inactive',
+        },
+        Alert: {
+          viewId: 'view-critical-alerts',
+          title: 'Critical Alerts',
+          description: 'Contractors with more than 90 days since last contact.',
+          matches: (contractor) => Number(contractor.days_since_last_contact) > 90,
+        },
+      };
+      const destination = destinations[status];
+      if (!destination) return;
+      const matchingContractors = dummyData.filter(destination.matches);
+      renderMetricDestination(destination.viewId, destination.title, destination.description, matchingContractors);
     };
     card.addEventListener('click', applyMetricFilter);
     card.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        applyMetricFilter();
+        applyMetricFilter(event);
       }
     });
   });
 
+  updateDashboardMetricCounts();
   renderContactList();
   renderOrganizations();
   switchView('view-dashboard');
