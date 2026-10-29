@@ -25,6 +25,25 @@ Default to supporting the user's bridge role. Keep SQL and persistence in backen
 
 Do not commit, push, merge, publish, deploy, delete user data, or reset Git history without user authorization. Prepare a concrete, reviewable result before requesting approval for those actions. Do not message teammates or external services without explicit authorization. Do not spawn subagents unless the user explicitly requests delegation or parallel agent work.
 
+## Optional personal workflow (Broughnut only)
+
+For a session explicitly identified as Broughnut's, read
+`docs/broughnut-workflow.md` and follow its personal learning/continuity rules.
+Otherwise skip that file and the personal handoff/learning documents. Connor,
+Josseline, and their agents have no obligation to read, update, or synchronize
+those notes. Do not ask users to identify themselves merely to activate this
+optional workflow. Shared project instructions in this file still apply to all.
+
+## Optional handoffs (any team member)
+
+Anyone may use HANDOFF IN, HANDOFF OUT, or CHECKPOINT as a standalone instruction.
+Read `docs/device-workflow.md` when invoked; these keywords do not activate
+Broughnut's personal teaching workflow for teammates.
+Do not offer, suggest, or prompt for handoffs automatically. Use this system only
+when the current user explicitly requests a handoff/checkpoint or invokes a
+keyword. Do not message or notify teammates about it. HANDOFF OUT explicitly
+authorizes its scoped commit/push as defined in the device workflow.
+
 ## Integration conventions
 
 - Confirm Tauri/Rust scaffolding and database functions exist before depending on them. A JavaScript invoke call does not prove its backend command is implemented.

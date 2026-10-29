@@ -1,8 +1,15 @@
 # Executable end-to-end test plan
 
-Status: planning only. No executable E2E suite has been implemented or run.
+Status: desktop E2E planning only. No desktop E2E suite has been implemented or run.
+The merged `backend-prototype` now contains a Rust/SQLite crate and backend tests.
+`tests/persistence_workflows.rs` adds isolated file-backed database workflows;
+these are backend integration coverage, not UI/IPC or application-restart tests.
+See [Rust development](rust-development.md) for commands.
 
-The current checkout contains a frontend prototype, including fixture-backed contact filtering and an add form that logs its payload. It does not contain Rust/Tauri build configuration or a runnable desktop executable. These screens do not establish database persistence. Confirm the repository state again before implementing tests.
+The checkout contains a frontend prototype and a standalone Rust backend. It has
+no Tauri application build configuration or runnable desktop executable. The
+bridge example is not wired to the frontend. Prototype screens do not establish
+database persistence. Confirm the repository state before desktop testing.
 
 ## Sprint 1 milestone: MVP ready for E2E testing
 
