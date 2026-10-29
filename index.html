@@ -47,9 +47,13 @@
           </button>
           <div class="topbar-search flex-grow-1">
             <i class="bi bi-search" aria-hidden="true"></i>
-            <input type="search" class="form-control" placeholder="Search contractors, organizations..." aria-label="Search CRM">
+            <input id="global-search" type="search" class="form-control" placeholder="Search by name, organization, or location" aria-label="Search by name, organization, or location" autocomplete="off">
+            <button class="search-clear" id="clear-global-search" type="button" aria-label="Clear search" title="Clear search" hidden><i class="bi bi-x-circle-fill" aria-hidden="true"></i></button>
             <kbd class="search-shortcut d-none d-md-inline">Ctrl K</kbd>
           </div>
+          <button class="btn btn-light topbar-filter-button ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#contractor-filter-panel" aria-controls="contractor-filter-panel" aria-label="Open contractor filters" title="Filters">
+            <i class="bi bi-sliders" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Filters</span>
+          </button>
 
           <div class="dropdown ms-3">
             <button class="btn profile-button dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -187,6 +191,21 @@
         </form>
       </div>
     </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end contractor-filter-panel" tabindex="-1" id="contractor-filter-panel" aria-labelledby="contractor-filter-title">
+    <div class="offcanvas-header border-bottom">
+      <div><p class="eyebrow mb-1">CONTRACTOR DIRECTORY</p><h2 class="offcanvas-title h5 mb-0" id="contractor-filter-title">Filters</h2></div>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close filters"></button>
+    </div>
+    <form id="contractor-filter-form" class="offcanvas-body d-flex flex-column gap-3">
+      <div><label class="form-label small fw-semibold" for="contractor-region-filter">Region</label><select id="contractor-region-filter" name="region" class="form-select"><option value="">All regions</option><option value="Sub-Saharan Africa">Sub-Saharan Africa</option><option value="Eastern Europe">Eastern Europe</option><option value="Middle East">Middle East</option><option value="East Asia">East Asia</option><option value="Central Asia">Central Asia</option></select></div>
+      <div><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
+      <div><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
+      <div><label class="form-label small fw-semibold" for="filter-organization">Organization</label><select id="filter-organization" name="organization" class="form-select"><option value="All">All organizations</option><option value="Aegis Meridian Group">Aegis Meridian Group</option><option value="Northstar Risk Partners">Northstar Risk Partners</option><option value="Cobalt Gate Services">Cobalt Gate Services</option><option value="Redwood Strategic Group">Redwood Strategic Group</option><option value="Bluehaven Operations">Bluehaven Operations</option></select></div>
+      <div><label class="form-label small fw-semibold" for="filter-status">Status</label><select id="filter-status" name="status" class="form-select"><option value="All">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Alert">Critical alerts</option></select></div>
+      <div class="mt-auto d-grid gap-2 pt-3"><button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1" aria-hidden="true"></i> Apply filters</button><button class="btn btn-light" id="clear-contractor-filters" type="button">Clear filters</button></div>
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

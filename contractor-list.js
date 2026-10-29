@@ -5,6 +5,7 @@
   const navContacts = document.getElementById('nav-contacts');
   const navOrganizations = document.getElementById('nav-organizations');
   if (!appContent || !contactsView || !navDashboard || !navContacts || !navOrganizations) return;
+  let directoryQuery = '';
 
 
   const dummyData = [
@@ -88,24 +89,33 @@
       <div><p class="eyebrow mb-1">WORKSPACE</p><h1 class="h3 mb-1">Contact List</h1><p class="text-secondary mb-0">Browse and manage your contractor directory.</p></div>
       <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
     </div>
-    <div id="contact-filter-bar">
-    <section class="card mb-4" aria-label="Filter contractors"><div class="card-body p-3 p-lg-4">
-      <form id="contractor-filter-form" class="row g-3 align-items-end">
-        <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="contractor-region-filter">Region</label><select id="contractor-region-filter" name="region" class="form-select"><option value="">All regions</option><option value="Sub-Saharan Africa">Sub-Saharan Africa</option><option value="Eastern Europe">Eastern Europe</option><option value="Middle East">Middle East</option><option value="East Asia">East Asia</option><option value="Central Asia">Central Asia</option></select></div>
-        <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
-        <div class="col-12 col-sm-8 col-xl-2"><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
-        <div class="col-12 col-sm-6 col-xl-2"><label class="form-label small fw-semibold" for="filter-organization">Organization</label><select id="filter-organization" name="organization" class="form-select"><option value="All">All organizations</option><option value="Aegis Meridian Group">Aegis Meridian Group</option><option value="Northstar Risk Partners">Northstar Risk Partners</option><option value="Cobalt Gate Services">Cobalt Gate Services</option><option value="Redwood Strategic Group">Redwood Strategic Group</option><option value="Bluehaven Operations">Bluehaven Operations</option></select></div>
-        <div class="col-12 col-sm-4 col-xl-2"><label class="form-label small fw-semibold" for="filter-status">Status</label><select id="filter-status" name="status" class="form-select"><option value="All">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Alert">Critical alerts</option></select></div>
-        <div class="col-12 col-xl-2 d-grid"><button id="contractor-search-button" class="btn btn-primary" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i> Search</button></div>
-      </form>
-    </div></section>
-    </div>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
-      <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
+      <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
     </section>
     <footer class="page-footer">Â© 2026 Northstar CRM <span>Â·</span> Secure, on-device workspace</footer>
   `;
+
+  function contractorName(contractor) {
+    const firstName = contractor.first_name ?? contractor.firstName ?? '';
+    const lastName = contractor.last_name ?? contractor.lastName ?? '';
+    return `${firstName} ${lastName}`.trim() || contractor.full_name || contractor.fullName || contractor.name || '';
+  }
+
+  function lastContactDate(contractor) {
+    const explicitDate = contractor.last_contact_date ?? contractor.last_contacted_at ?? contractor.lastContactDate;
+    if (explicitDate) {
+      const parsedDate = new Date(explicitDate);
+      if (!Number.isNaN(parsedDate.getTime())) return parsedDate;
+    }
+
+    const daysSinceContact = Number(contractor.days_since_last_contact ?? contractor.daysSinceLastContact);
+    if (!Number.isFinite(daysSinceContact)) return null;
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - daysSinceContact);
+    return date;
+  }
 
   function renderTable(data, tableBodyId = 'contractor-table-body', resultCountId = 'contractor-result-count') {
     const tableBody = document.getElementById(tableBodyId);
@@ -113,10 +123,15 @@
     if (!tableBody) return;
     tableBody.replaceChildren();
 
-    data.forEach((contractor) => {
+    const orderedData = [...data].sort((a, b) => {
+      const dateA = lastContactDate(a)?.getTime() ?? Number.POSITIVE_INFINITY;
+      const dateB = lastContactDate(b)?.getTime() ?? Number.POSITIVE_INFINITY;
+      return dateA - dateB;
+    });
+    orderedData.forEach((contractor) => {
       const row = document.createElement('tr');
       const cells = [
-        `${contractor.first_name ?? ''} ${contractor.last_name ?? ''}`.trim(),
+        contractorName(contractor),
         contractor.organization,
         contractor.role,
         contractor.region,
@@ -151,19 +166,26 @@
         statusCell.appendChild(alertBadge);
       }
       row.appendChild(statusCell);
+      const contactDate = lastContactDate(contractor);
+      const dateCell = document.createElement('td');
+      dateCell.textContent = contactDate
+        ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(contactDate)
+        : 'Date unavailable';
+      dateCell.classList.add('text-secondary');
+      row.appendChild(dateCell);
       row.classList.add('contractor-row');
       row.tabIndex = 0;
       row.setAttribute('role', 'button');
       row.setAttribute('aria-label', `Open profile for ${cells[0]}`);
       row.addEventListener('click', () => {
         renderContractorProfile(contractor);
-        switchView('view-contractor-profile');
+        switchView('view-contractor-profile', { contractorId: contractor.id });
       });
       row.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           renderContractorProfile(contractor);
-          switchView('view-contractor-profile');
+          switchView('view-contractor-profile', { contractorId: contractor.id });
         }
       });
       tableBody.appendChild(row);
@@ -227,28 +249,92 @@
 
   function renderContactList() {
     contactsView.innerHTML = contactListHtml;
-    renderTable(dummyData);
+    if (contactsView.classList.contains('d-none')) switchView('view-contacts');
+    renderTable(filterContractors(readContactFilters()));
     document.getElementById('btn-reset-destination').addEventListener('click', () => {
       document.getElementById('destination-title').innerText = 'Contractor Directory';
-      document.getElementById('contact-filter-bar').classList.remove('d-none');
       document.getElementById('btn-reset-destination').classList.add('d-none');
-      document.getElementById('contractor-region-filter').value = '';
-      document.getElementById('contractor-country-filter').value = '';
-      document.getElementById('contractor-city-sector-filter').value = '';
-      document.getElementById('filter-status').value = 'All';
-      document.getElementById('filter-organization').value = 'All';
-      renderTable(dummyData);
+      clearContactFilters();
+      renderTable(filterContractors(readContactFilters()));
     });
-    document.getElementById('contractor-filter-form').addEventListener('submit', (event) => {
-      event.preventDefault();
-      const filters = {
-        region: document.getElementById('contractor-region-filter').value.trim(),
-        country: document.getElementById('contractor-country-filter').value.trim(),
-        citySector: document.getElementById('contractor-city-sector-filter').value.trim(),
-        status: document.getElementById('filter-status').value,
-        organization: document.getElementById('filter-organization').value,
-      };
-      renderTable(filterContractors(filters));
+  }
+
+  function readContactFilters() {
+    return {
+      region: document.getElementById('contractor-region-filter')?.value.trim() ?? '',
+      country: document.getElementById('contractor-country-filter')?.value.trim() ?? '',
+      citySector: document.getElementById('contractor-city-sector-filter')?.value.trim() ?? '',
+      status: document.getElementById('filter-status')?.value ?? 'All',
+      organization: document.getElementById('filter-organization')?.value ?? 'All',
+      query: directoryQuery,
+    };
+  }
+
+  function clearContactFilters() {
+    document.getElementById('contractor-region-filter').value = '';
+    document.getElementById('contractor-country-filter').value = '';
+    document.getElementById('contractor-city-sector-filter').value = '';
+    document.getElementById('filter-status').value = 'All';
+    document.getElementById('filter-organization').value = 'All';
+    directoryQuery = '';
+    const globalSearch = document.getElementById('global-search');
+    if (globalSearch) globalSearch.value = '';
+    syncSearchChrome();
+  }
+
+  function syncSearchChrome() {
+    const globalSearch = document.getElementById('global-search');
+    const clearButton = document.getElementById('clear-global-search');
+    const shortcut = document.querySelector('.search-shortcut');
+    if (clearButton) clearButton.hidden = !globalSearch?.value;
+    if (shortcut) shortcut.hidden = Boolean(globalSearch?.value);
+  }
+
+  function editDistanceAtMost(left, right, limit) {
+    if (Math.abs(left.length - right.length) > limit) return limit + 1;
+    let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+    for (let i = 1; i <= left.length; i += 1) {
+      const current = [i];
+      let rowMinimum = i;
+      for (let j = 1; j <= right.length; j += 1) {
+        current[j] = Math.min(
+          current[j - 1] + 1,
+          previous[j] + 1,
+          previous[j - 1] + (left[i - 1] === right[j - 1] ? 0 : 1),
+        );
+        rowMinimum = Math.min(rowMinimum, current[j]);
+      }
+      if (rowMinimum > limit) return limit + 1;
+      previous = current;
+    }
+    return previous[right.length];
+  }
+
+  function hasSingleAdjacentTransposition(left, right) {
+    if (left.length !== right.length) return false;
+    const differences = [];
+    for (let index = 0; index < left.length; index += 1) {
+      if (left[index] !== right[index]) differences.push(index);
+    }
+    return differences.length === 2 && differences[1] === differences[0] + 1 &&
+      left[differences[0]] === right[differences[1]] && left[differences[1]] === right[differences[0]];
+  }
+
+  function matchesSearchWithTypos(contractor, query) {
+    if (!query) return true;
+    const searchableText = [contractorName(contractor), contractor.organization, contractor.role,
+      contractor.region, contractor.country, contractor.city_sector, contractor.email]
+      .filter(Boolean).join(' ').toLowerCase();
+    if (searchableText.includes(query)) return true;
+
+    const words = searchableText.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    const queryWords = query.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    return queryWords.every((queryWord) => {
+      if (queryWord.length < 3) return words.some((word) => word.includes(queryWord));
+      const maxDistance = queryWord.length < 5 ? 1 : 2;
+      return words.some((word) => word.includes(queryWord) ||
+        hasSingleAdjacentTransposition(queryWord, word) ||
+        (Math.abs(word.length - queryWord.length) <= maxDistance && editDistanceAtMost(queryWord, word, maxDistance) <= maxDistance));
     });
   }
 
@@ -268,23 +354,72 @@
           <h2 class="h5 mb-0">${title}</h2>
           <span class="text-secondary small" id="metric-result-count"></span>
         </div>
-        <div class="table-responsive">
-          <table class="table align-middle mb-0">
-            <thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th></tr></thead>
-            <tbody id="metric-table-body"></tbody>
-          </table>
-        </div>
+        <div class="card-body" id="metric-date-groups"></div>
       </section>
     `;
     destination.querySelector('[data-return-dashboard]').addEventListener('click', () => switchView('view-dashboard'));
-    renderTable(contractors, 'metric-table-body', 'metric-result-count');
+    const groups = new Map();
+    contractors.forEach((contractor) => {
+      const date = lastContactDate(contractor);
+      const key = date
+        ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+        : 'unknown';
+      if (!groups.has(key)) groups.set(key, { date, contractors: [] });
+      groups.get(key).contractors.push(contractor);
+    });
+
+    const groupContainer = destination.querySelector('#metric-date-groups');
+    [...groups.entries()]
+      .sort(([keyA, groupA], [keyB, groupB]) => {
+        if (!groupA.date) return 1;
+        if (!groupB.date) return -1;
+        return keyA.localeCompare(keyB);
+      })
+      .forEach(([, group]) => {
+        const groupSection = document.createElement('section');
+        groupSection.className = 'mb-4';
+        const heading = document.createElement('h3');
+        heading.className = 'h6 text-secondary mb-2';
+        heading.textContent = group.date
+          ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(group.date)
+          : 'Date unavailable';
+        const list = document.createElement('ul');
+        list.className = 'list-group list-group-flush';
+
+        group.contractors
+          .sort((a, b) => contractorName(a).localeCompare(contractorName(b)))
+          .forEach((contractor) => {
+            const item = document.createElement('li');
+            item.className = 'list-group-item px-0 d-flex flex-wrap align-items-center justify-content-between gap-2';
+            const details = document.createElement('div');
+            const name = document.createElement('strong');
+            name.className = 'd-block';
+            name.textContent = contractorName(contractor) || `Name unavailable (${contractor.id ?? 'unknown record'})`;
+            const organization = document.createElement('span');
+            organization.className = 'small text-secondary';
+            organization.textContent = [contractor.organization, contractor.role].filter(Boolean).join(' · ');
+            details.append(name, organization);
+
+            const status = document.createElement('span');
+            status.className = `badge ${contractor.status === 'Inactive' ? 'bg-secondary' : 'bg-danger'}`;
+            status.textContent = contractor.status || title;
+            item.append(details, status);
+            list.appendChild(item);
+          });
+
+        groupSection.append(heading, list);
+        groupContainer.appendChild(groupSection);
+      });
+    const resultCount = destination.querySelector('#metric-result-count');
+    resultCount.textContent = `${contractors.length} contractor${contractors.length === 1 ? '' : 's'}`;
     switchView(viewId);
   }
 
-  function filterContractors({ region = '', country = '', citySector = '', status = 'All', organization = 'All' }) {
+  function filterContractors({ region = '', country = '', citySector = '', status = 'All', organization = 'All', query = '' }) {
     const normalizedRegion = region.toLowerCase();
     const normalizedCountry = country.toLowerCase();
     const normalizedCitySector = citySector.toLowerCase();
+    const normalizedQuery = query.trim().toLowerCase();
 
     return dummyData.filter((contractor) => {
       const matchesStatus = status === 'All' ||
@@ -296,7 +431,8 @@
         (organization === 'All' || contractor.organization === organization) &&
         (!normalizedRegion || String(contractor.region ?? '').toLowerCase() === normalizedRegion) &&
         (!normalizedCountry || String(contractor.country ?? '').toLowerCase().includes(normalizedCountry)) &&
-        (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector));
+        (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector)) &&
+        matchesSearchWithTypos(contractor, normalizedQuery);
     });
   }
 
@@ -356,12 +492,12 @@
       rosterButton.type = 'button';
       rosterButton.textContent = 'View Roster';
       rosterButton.addEventListener('click', () => {
+        clearContactFilters();
+        document.getElementById('filter-organization').value = organization.name;
         switchView('view-contacts');
         renderContactList();
-        document.getElementById('filter-organization').value = organization.name;
         document.getElementById('destination-title').innerText = `Roster: ${organization.name}`;
         document.getElementById('btn-reset-destination').classList.remove('d-none');
-        renderTable(filterContractors({ organization: organization.name }));
       });
 
       cardBody.append(logo, name, contractorCount, region, rosterButton);
@@ -371,10 +507,36 @@
     });
   }
 
-  function switchView(viewId) {
+  function switchView(viewId, { contractorId = '', skipHistory = false, replaceHistory = false } = {}) {
     const views = Array.from(appContent.children);
     const targetView = document.getElementById(viewId);
     if (!targetView || !views.includes(targetView)) return;
+
+    if (!skipHistory) {
+      const routeNames = {
+        'view-dashboard': 'dashboard',
+        'view-contacts': 'contacts',
+        'view-organizations': 'organizations',
+        'view-contractor-profile': contractorId ? `contractors/${encodeURIComponent(contractorId)}` : 'contractors',
+      };
+      let route = routeNames[viewId] ?? viewId.replace(/^view-/, '');
+      if (viewId === 'view-contacts') {
+        const filters = readContactFilters();
+        const routeParams = new URLSearchParams();
+        if (filters.status !== 'All') routeParams.set('status', filters.status);
+        if (filters.query) routeParams.set('q', filters.query);
+        if (filters.region) routeParams.set('region', filters.region);
+        if (filters.country) routeParams.set('country', filters.country);
+        if (filters.citySector) routeParams.set('citySector', filters.citySector);
+        if (filters.organization !== 'All') routeParams.set('organization', filters.organization);
+        if (routeParams.size) route += `?${routeParams.toString()}`;
+      }
+      const nextHash = `#/${route}`;
+      if (window.location.hash !== nextHash) {
+        if (replaceHistory) window.history.replaceState(null, '', nextHash);
+        else window.history.pushState(null, '', nextHash);
+      }
+    }
 
     views.forEach((view) => view.classList.add('d-none'));
     const navForView = {
@@ -399,6 +561,47 @@
     }
   }
 
+  function restoreRouteFromUrl() {
+    const route = window.location.hash.replace(/^#\/?/, '');
+    const [path, query = ''] = route.split('?');
+    const params = new URLSearchParams(query);
+
+    if (path.startsWith('contractors/')) {
+      const contractorId = decodeURIComponent(path.slice('contractors/'.length));
+      const contractor = dummyData.find((item) => item.id === contractorId);
+      if (contractor) {
+        renderContractorProfile(contractor);
+        switchView('view-contractor-profile', { contractorId, skipHistory: true });
+        return;
+      }
+    }
+
+    if (path === 'contacts') {
+      clearContactFilters();
+      document.getElementById('filter-status').value = params.get('status') || 'All';
+      document.getElementById('contractor-region-filter').value = params.get('region') || '';
+      document.getElementById('contractor-country-filter').value = params.get('country') || '';
+      document.getElementById('contractor-city-sector-filter').value = params.get('citySector') || '';
+      document.getElementById('filter-organization').value = params.get('organization') || 'All';
+      directoryQuery = params.get('q') || '';
+      document.getElementById('global-search').value = directoryQuery;
+      syncSearchChrome();
+      switchView('view-contacts', { skipHistory: true });
+      renderContactList();
+      return;
+    }
+
+    if (path === 'organizations') {
+      renderOrganizations();
+      switchView('view-organizations', { skipHistory: true });
+      return;
+    }
+
+    switchView('view-dashboard', { skipHistory: true });
+  }
+
+  window.addEventListener('popstate', restoreRouteFromUrl);
+
   navDashboard.addEventListener('click', () => switchView('view-dashboard'));
   navContacts.addEventListener('click', () => {
     switchView('view-contacts');
@@ -412,37 +615,11 @@
     const applyMetricFilter = (e) => {
       e.preventDefault();
       const status = card.dataset.filterStatus;
-      const metricName = card.querySelector('.metric-label').innerText.trim();
-      if (status === 'All') {
-        switchView('view-contacts');
-        renderContactList();
-        return;
-      }
-
-      const destinations = {
-        Active: {
-          viewId: 'view-deployments',
-          title: 'Active Deployments',
-          description: 'Contractors with an active deployment.',
-          matches: (contractor) => contractor.status === 'Active',
-        },
-        Inactive: {
-          viewId: 'view-pending-archive',
-          title: 'Pending Archive',
-          description: 'Inactive contractors awaiting archive review.',
-          matches: (contractor) => contractor.status === 'Inactive',
-        },
-        Alert: {
-          viewId: 'view-critical-alerts',
-          title: 'Critical Alerts',
-          description: 'Contractors with more than 90 days since last contact.',
-          matches: (contractor) => Number(contractor.days_since_last_contact) > 90,
-        },
-      };
-      const destination = destinations[status];
-      if (!destination) return;
-      const matchingContractors = dummyData.filter(destination.matches);
-      renderMetricDestination(destination.viewId, destination.title, destination.description, matchingContractors);
+      clearContactFilters();
+      document.getElementById('filter-status').value = status;
+      renderContactList();
+      const titles = { All: 'Contractor Directory', Active: 'Active Deployments', Inactive: 'Pending Archive', Alert: 'Critical Alerts' };
+      document.getElementById('destination-title').textContent = titles[status] || 'Contractor Directory';
     };
     card.addEventListener('click', applyMetricFilter);
     card.addEventListener('keydown', (event) => {
@@ -452,8 +629,54 @@
     });
   });
 
+  const globalSearch = document.getElementById('global-search');
+  const filterForm = document.getElementById('contractor-filter-form');
+  const filterPanel = document.getElementById('contractor-filter-panel');
+  const showFilteredDirectory = () => {
+    if (contactsView.classList.contains('d-none')) renderContactList();
+    else {
+      renderTable(filterContractors(readContactFilters()));
+      switchView('view-contacts', { replaceHistory: true });
+    }
+  };
+
+  globalSearch?.addEventListener('input', () => {
+    directoryQuery = globalSearch.value;
+    syncSearchChrome();
+    if (directoryQuery.trim() || !contactsView.classList.contains('d-none')) showFilteredDirectory();
+  });
+  document.getElementById('clear-global-search')?.addEventListener('click', () => {
+    if (!globalSearch) return;
+    globalSearch.value = '';
+    globalSearch.dispatchEvent(new Event('input', { bubbles: true }));
+    globalSearch.focus();
+  });
+  filterForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    showFilteredDirectory();
+    bootstrap.Offcanvas.getOrCreateInstance(filterPanel).hide();
+  });
+  filterForm?.querySelectorAll('select, input').forEach((control) => {
+    control.addEventListener(control.tagName === 'SELECT' ? 'change' : 'input', () => {
+      if (!contactsView.classList.contains('d-none')) showFilteredDirectory();
+    });
+  });
+  document.getElementById('clear-contractor-filters')?.addEventListener('click', () => {
+    clearContactFilters();
+    showFilteredDirectory();
+  });
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      globalSearch?.focus();
+    }
+    if (event.key === 'Escape' && filterPanel?.classList.contains('show')) {
+      bootstrap.Offcanvas.getOrCreateInstance(filterPanel).hide();
+    }
+  });
+  syncSearchChrome();
+
   updateDashboardMetricCounts();
-  renderContactList();
   renderOrganizations();
-  switchView('view-dashboard');
+  restoreRouteFromUrl();
 })();
