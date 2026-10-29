@@ -1,0 +1,11 @@
+[package]
+name = "secure_crm_backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rusqlite = { version = "0.41.0", features = ["bundled"] }
+serde = { version = "1.0.229", features = ["derive"] }
+argon2 = "0.6"
+[dev-dependencies]
+tempfile = "3"
