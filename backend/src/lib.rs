@@ -9,6 +9,7 @@ pub mod images;
 pub mod profiles;
 pub mod protected;
 pub mod search;
+pub mod seed;
 pub mod session;
 pub mod setup;
 pub mod skills;

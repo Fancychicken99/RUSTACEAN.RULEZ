@@ -14,6 +14,9 @@
   let loading = false;
   let loadError = null;
   let loadGeneration = 0;
+  let filterGeneration = 0;
+  let filterLoading = false;
+  let filterError = null;
 
   function updateDashboardMetricCounts() {
     const counts = {
@@ -38,6 +41,7 @@
       <div><p class="eyebrow mb-1">WORKSPACE</p><h1 class="h3 mb-1">Contact List</h1><p class="text-secondary mb-0">Browse and manage your contractor directory.</p></div>
       <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
     </div>
+    <p id="directory-message" class="text-secondary" role="status" aria-live="polite"></p>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
       <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
@@ -71,12 +75,15 @@
     const resultCount = document.getElementById(resultCountId);
     if (!tableBody) return;
     tableBody.replaceChildren();
+    tableBody.dataset.loading = String(loading || filterLoading);
     if (data.length === 0) {
       const row = document.createElement('tr');
       const cell = document.createElement('td');
       cell.colSpan = 8;
       cell.className = 'text-secondary p-4';
-      cell.textContent = loading ? 'Loading saved contractors…' : loadError
+      cell.textContent = filterLoading ? 'Filtering saved contractors…' : filterError
+        ? 'Could not filter records. Apply filters or Refresh to try again.'
+        : loading ? 'Loading saved contractors…' : loadError
         ? 'Could not load records. Use Refresh to try again.'
         : !loaded ? 'Log in to load saved contractors.'
         : contractors.length === 0 ? 'No contractors have been saved yet.' : 'No contractors match these filters.';
@@ -223,13 +230,13 @@
   function renderContactList() {
     contactsView.innerHTML = contactListHtml;
     if (contactsView.classList.contains('d-none')) switchView('view-contacts');
-    renderTable(filterContractors(readContactFilters()));
     document.getElementById('btn-reset-destination').addEventListener('click', () => {
       document.getElementById('destination-title').innerText = 'Contractor Directory';
       document.getElementById('btn-reset-destination').classList.add('d-none');
       clearContactFilters();
-      renderTable(filterContractors(readContactFilters()));
+      loadFilteredDirectory();
     });
+    return loadFilteredDirectory();
   }
 
   function readContactFilters() {
@@ -388,13 +395,12 @@
     switchView(viewId);
   }
 
-  function filterContractors({ region = '', country = '', citySector = '', status = 'All', organization = 'All', query = '' }) {
-    const normalizedRegion = region.toLowerCase();
+  function filterContractors({ country = '', citySector = '', status = 'All', organization = 'All', query = '' }, records) {
     const normalizedCountry = country.toLowerCase();
     const normalizedCitySector = citySector.toLowerCase();
     const normalizedQuery = query.trim().toLowerCase();
 
-    return contractors.filter((contractor) => {
+    return records.filter((contractor) => {
       const matchesStatus = status === 'All' ||
         (status === 'Alert'
           ? Number(contractor.days_since_last_contact) > 90
@@ -402,7 +408,6 @@
 
       return matchesStatus &&
         (organization === 'All' || String(contractor.organization_id) === organization) &&
-        (!normalizedRegion || String(contractor.region ?? '').toLowerCase() === normalizedRegion) &&
         (!normalizedCountry || String(contractor.country ?? '').toLowerCase().includes(normalizedCountry)) &&
         (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector)) &&
         matchesSearchWithTypos(contractor, normalizedQuery);
@@ -561,7 +566,13 @@
     if (path === 'contacts') {
       clearContactFilters();
       document.getElementById('filter-status').value = params.get('status') || 'All';
-      document.getElementById('contractor-region-filter').value = params.get('region') || '';
+      const regionFilter = document.getElementById('contractor-region-filter');
+      const requestedRegion = params.get('region') || '';
+      // Preserve saved/stale region links as actual queries, not an All fallback.
+      if (requestedRegion && ![...regionFilter.options].some(option => option.value === requestedRegion)) {
+        regionFilter.add(new Option(requestedRegion, requestedRegion));
+      }
+      regionFilter.value = requestedRegion;
       document.getElementById('contractor-country-filter').value = params.get('country') || '';
       document.getElementById('contractor-city-sector-filter').value = params.get('citySector') || '';
       document.getElementById('filter-organization').value = params.get('organization') || 'All';
@@ -569,8 +580,7 @@
       document.getElementById('global-search').value = directoryQuery;
       syncSearchChrome();
       switchView('view-contacts', { skipHistory: true });
-      renderContactList();
-      return;
+      return renderContactList();
     }
 
     if (path === 'organizations') {
@@ -618,7 +628,7 @@
   const showFilteredDirectory = () => {
     if (contactsView.classList.contains('d-none')) renderContactList();
     else {
-      renderTable(filterContractors(readContactFilters()));
+      loadFilteredDirectory();
       switchView('view-contacts', { replaceHistory: true });
     }
   };
@@ -705,6 +715,9 @@
 
   function clearSavedData() {
     ++loadGeneration; // Ignore responses from requests started before locking.
+    ++filterGeneration;
+    filterLoading = false;
+    filterError = null;
     contractors = [];
     organizations = [];
     loaded = false;
@@ -725,6 +738,9 @@
   async function refreshSavedData() {
     if (!window.crmSession?.authenticated) return;
     const generation = ++loadGeneration;
+    ++filterGeneration;
+    filterLoading = false;
+    filterError = null;
     loading = true;
     loaded = false;
     loadError = null;
@@ -763,8 +779,42 @@
     updateDashboardMetricCounts();
     renderRegions();
     renderOrganizations();
-    restoreRouteFromUrl();
-    return loaded;
+    const directoryLoaded = await restoreRouteFromUrl();
+    return generation === loadGeneration && loaded && directoryLoaded !== false;
+  }
+
+  async function loadFilteredDirectory() {
+    if (!loaded || !window.crmSession?.authenticated) {
+      renderTable([]);
+      return false;
+    }
+    const generation = ++filterGeneration;
+    const directoryGeneration = loadGeneration;
+    const region = readContactFilters().region || null;
+    const current = () => generation === filterGeneration && directoryGeneration === loadGeneration && window.crmSession?.authenticated;
+    filterLoading = true;
+    filterError = null;
+    renderTable([]);
+    const count = document.getElementById('contractor-result-count');
+    if (count) count.textContent = 'Filtering…';
+    try {
+      const records = await window.crmApi.filterContractors({ region });
+      if (!current()) return false;
+      filterLoading = false;
+      // Region is enforced by SQLite; remaining search/status/org filters are local.
+      renderTable(filterContractors(readContactFilters(), records));
+      return true;
+    } catch (error) {
+      if (!current()) return false;
+      filterLoading = false;
+      filterError = error.message;
+      renderTable([]);
+      const message = document.getElementById('directory-message');
+      if (message) message.textContent = error.message;
+      if (count) count.textContent = 'Unavailable';
+      if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
+      return false;
+    }
   }
 
   window.crmDirectory = Object.freeze({

@@ -1,127 +1,156 @@
 # Session handoff
 
 Personal to Broughnut. Updated October 30, 2026.
-Branch: dev. Base before this milestone: 2e36c00. User explicitly authorized
-committing and pushing the reviewed create/edit/archive implementation. This
-checkpoint accompanies that commit; verify origin/dev before retrieving it.
+Branch: dev. HANDOFF OUT explicitly requested. This checkpoint accompanies the
+reviewed region-filter/sample-import milestone following 3c027d8. Verify
+origin/dev contains this checkpoint before relying on another device.
 
-## Standing instructions and scope
+## Standing instructions and learning workflow
 
 Broughnut owns ALL remaining MVP work across frontend/backend/bridge. Do not
-leave required edits for teammates. Record files/what/why/checks/limitations in
-docs/integration-changes.md and update docs/ipc-contract.md for interfaces. Keep
-this checkpoint current. Commit/push or HANDOFF OUT only on explicit instruction;
-previous authorization was scoped and fulfilled. Explain Rust/file placement in
-small steps. See broughnut-workflow.md and learning-log.md; no new teach-back this
-slice. Target is a native desktop executable, not just a browser preview.
+leave necessary implementation for teammates. Log affected files, what/why,
+checks and limitations in docs/integration-changes.md, interfaces in ipc-contract.
+Keep this checkpoint current. Commit/push or HANDOFF OUT only on explicit request;
+prior publication authorization was scoped and fulfilled.
 
-Revised docs/statement-of-work.md remains a DRAFT, not approved scope/compliance.
-Proposed Sprint 1: Windows offline executable; local auth/inactivity; persisted
-browse/detail/create/edit/archive; organization association; region filter;
-useful errors; restart persistence; 50+ fictional profiles. Final platforms and
-other final features remain in SOW. Do not promise timing/compliance without proof.
+User is comfortable with Python, new to Rust. Learn DURING development and review
+deeper afterward: short goal/files/concept preview, complete working slice, tests,
+focused excerpt/Python comparison, continuity updates. NO routine quizzes or
+comprehension checks; don't make learning an approval gate. Full-file Rust dumps
+were overwhelming. Main.rs reviewed through setup; Option/HashMap introduced in
+this slice. No independent coding exercise or advanced proficiency confirmed.
+See broughnut-workflow.md and learning-log.md for the recorded agreement.
 
-## HANDOFF IN and baseline
+## Scope and environment
 
-Fetched/pulled clean dev October 30: already current at 2e36c00. Read instructions,
-checkpoint and learning log. Rust/Cargo 1.99.1 MSVC, C++ tools, Node 24.22.1 and
-Windows/WebView2 work here. Reverified original 27 backend tests, two bridge tests,
-debug build and real-window smoke before implementation. No branch switch.
+Revised statement-of-work.md is a DRAFT, not client-approved scope/compliance.
+Proposed Sprint 1: runnable offline Windows executable; local auth/inactivity;
+persisted browse/create/edit/archive; organization association; region filtering;
+useful errors; restart persistence; 50+ fictional profiles. See mvp-checklist.md
+for actual evidence versus remaining acceptance. Final SOW platforms/features
+remain separate; do not claim complete MVP/security/platform acceptance yet.
 
-Layout: frontend/ HTML/css/js/vendor/fixtures; backend/ reusable crate
-secure_crm_backend; src-tauri/ startup/commands; docs/; scripts/.
-Source at 2e36c00 connected original Northstar layout to auth/lists/profiles,
-vendored existing Bootstrap assets, and cleared loaded records on lock.
+Rust/Cargo 1.99.1 MSVC, C++ Build Tools, Node 24.22.1, Windows/WebView2 verified
+here. HANDOFF IN earlier today fetched/pulled clean dev at 2e36c00, then the
+create/edit/archive milestone was committed/pushed as 3c027d8.
 
-## Current implementation
+Layout: frontend/ HTML/css/js/vendor; backend/ secure_crm_backend library;
+src-tauri/ native startup/state/commands; data/ reusable JSON samples; docs/;
+scripts/. Initial 50 JS fixture records remain unused; no fixture fallback.
 
-- NOW connected contractor create/edit/archive and organization creation.
-- Added backend/src/profiles.rs for trim/length/control/email/ID validation,
-  optional blank -> null normalization, active-organization checks, transactional
-  create/update and soft archive. Keeps SQL/persistence in backend modules.
-- Contractor responses now include organization_id (nullable for legacy records).
-  Updated list/single/search/region/skill/follow-up row maps. No schema migration;
-  column already existed. Added get_contractor by ID. Duplicate organization names
-  stay distinct in selectors, filters, rosters and counts.
-- Eleven registered commands: auth status/setup/login/logout/list contractors/list
-  organizations/activity plus create_contractor/update_contractor/archive_contractor/
-  create_organization. New typed requests all use {request:...}; deny unknown
-  fields, enforce live session, and map database errors safely. See IPC contract.
-- Create form uses full_name + active organization ID; role/email/phone optional.
-  Edit updates name/contact fields and PRESERVES organization, status, media.
-  Organization transfers/status changes need separate audited workflows and are
-  not silently performed. Region belongs to organization. Unsupported country/
-  city/photo inputs removed from this form rather than discarded on save.
-- Fresh DB users can add organizations, then contractors. No fixture fallback or
-  auto-seeding. Existing 50 frontend fixtures are NOT imported database records.
-- Profile Edit/Archive actions, retained-record confirmation/cancel, useful error
-  messages, duplicate-submit guards, save-after-refresh distinction, and dialog
-  cleanup/inert/close on lock (including show transitions). Late saves/lists cannot
-  reopen locked UI. A transaction already authorized is not cancelled by UI lock.
-- Session behavior unchanged: 15-minute frontend/backend inactivity, trusted
-  activity renewal at most every 30 seconds, five-second nonrenewing status poll.
-  Page reload starts locked. Real timeout/sleep behavior still unverified.
-- Local vendor assets/CSP maintained; no remote resources/fixture loader in entry.
+## Current application behavior
 
-## Verification on this device
+- Original Northstar layout is the default native window, with real local
+  password setup/login/lock, lists, profiles, organization creation and contractor
+  create/edit/archive. Edits cover full_name, role, email, phone; preserve org,
+  status and media. Organization/status transfers need separate audited flows.
+- Atomic backend profile workflows validate inputs and safe IDs. Archive hides
+  but retains rows/status. organization_id is included consistently in query
+  results, rosters/filters/forms use IDs even for duplicate names.
+- NOW region dropdown changes AND clear invoke filter_contractors in Rust, calling
+  existing search_contractors SQLite query. Null/blank = all; trimmed/case-insensitive
+  exact region match; unknown region = successful empty list. Saved unknown-region
+  URLs remain actual queries, not silent All fallbacks.
+- Full-list cache stays separate for global dashboard totals and profiles. Local
+  organization/status/search filters narrow SQL region results. Separate request
+  generations discard old/out-of-order/locked responses. Loading, no-match and
+  error states are distinct; failed filter never shows cached rows as success.
+- NOW explicit Import fictional samples action with confirmation imports the
+  embedded data/synthetic-contractors-v1.json. No automatic startup import/reset.
+- Dataset fictional-crm-v1 (as of 2026-10-30): 60 fictional contractors, six
+  organizations/regions, four statuses, six skills, 48 stored UTC contact dates,
+  12 never-contacted. example.com emails, fictional reserved phones, no media,
+  credentials or real contractor records. Dates persist; elapsed days aren't stored.
+- Backend seed.rs validates JSON/profile/keys/references/status/dates and imports
+  all in one transaction. Two additive synthetic_* provenance tables map stable
+  dataset/key pairs to DB IDs. Repeats skip mapped records, preserve edits/archives,
+  don't duplicate contacts/links and don't merge manual records by name/email.
+  Existing skill dictionary names may be reused. No core table/user_version change.
+- Thirteen registered commands: prior 11 plus filter_contractors and
+  import_sample_data. Both authenticated, all frontend calls in tauri-api.js.
+  Import has no arbitrary file/path/JSON IPC input; Rust embeds the fixed dataset.
+- Declared serde_json directly in backend for JSON parsing; both Cargo lockfiles
+  updated from cached crates. It was already in the desktop dependency graph.
+- Sample dialog follows mutation lock/busy/clear rules. Desktop sidebar sticks
+  in view so navigation/import remains reachable beside the 60-row directory.
+- Existing local Bootstrap/CSP maintained. Missing media/history/contact fields
+  remain visibly unavailable; imported dates/skills are stored but not yet wired
+  to contact/skill/decay UI. Country/city inputs still unsupported.
 
-- ALL 29 backend tests passed (27 baseline plus two new profile workflow tests).
-  Covers duplicate-name identity, profile/edit/archive reopen persistence,
-  validation, invalid/archived organizations and rollback on second-write failure.
-- ALL three desktop bridge tests passed (including new authenticated mutations).
-- Locked debug build passed. Non-fatal OneDrive incremental hard-link warnings
-  copy files instead; no build/test failure remains.
-- FINAL real CRM smoke passed: UI organization+contractor creation, backend field
-  validation with preserved input, double-submit protection, edit and process
-  restart, organization-ID rosters, safe literal text/numeric profile route,
-  auth/lock, open-editor lock clearing, archive cancel/confirm and restart.
-- Read-only SQLite inspection after UI archive verifies row/name/archived_at
-  retained. No direct SQL seed writes in current smoke. No normal app data touched.
-- Simulated UI failure/retry and late-list-response checks remain separately
-  labelled; mutation flows use real commands and database writes.
-- Zero unexpected browser errors/CSP violations/page overflow/external HTTP(S)
-  requests with original CDN hosts blocked. Not OS network-disconnected proof.
-- Final directory screenshot inspected. Artifacts retained:
-  C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-yoM1zR
-  Test child processes closed. First compile's missing skills query field was
-  fixed before the passing backend suite. No unresolved check failures.
+## Checks passed on this device
 
-## Next step
+- 31 backend tests (29 previous + two sample import tests): repeat/reopen preserves
+  manual records, edits/archives, contacts/skills; bad late record and controlled
+  SQL failure roll back ALL import writes. Database error details stay private.
+- Four bridge tests (three previous + filter/import protection/repeat/region/
+  archive-exclusion). Backend/bridge dependency updates tested offline. Both
+  manifests subsequently verified against lockfiles with --locked --offline.
+- Locked debug executable build passed. Non-fatal incremental hard-link warning
+  copies cache files; no unresolved build/test failures.
+- FINAL real-window smoke PASSED against disposable SQLite: prior setup/login/
+  CRUD/edit/archive/restart flows plus import cancel/import/repeat/restart,
+  preservation of edited/archived sample, 60 rows initially and 59 after archiving
+  one sample, match/no-match/clear/stale saved region URL and full dashboard totals.
+- Region arguments/raw results observed while calling real backend; remaining
+  status filter verified. Filter failure/retry and delayed region response ordering
+  are explicitly simulated UI transport conditions, separate from real SQL flows.
+- UI action reachable in viewport on a long directory. No unexpected browser
+  errors/CSP violations or external HTTP(S) requests with original CDN hosts
+  blocked. This does NOT prove launch with OS networking disabled.
+- Source syntax/static IDs/dataset fictional identity checks, Rust formatting,
+  whitespace checks and lockfile metadata checks passed. Imported screenshot
+  inspected (sticky sidebar/import button included).
+- Latest final artifacts (not transferred through Git):
+  C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-7Prsqq
+  Read-only SQLite inspection confirms provenance/contact counts and retained
+  edited/archived sample. No normal application database was imported or reset.
+  All test child processes closed.
 
-1. Wire the existing backend region filter through a typed command and verify
-   filter/no-match/clear behavior through the real UI. Current filters act on
-   loaded records, so don't claim backend-filter acceptance yet.
-2. Add deterministic reusable synthetic dataset/import under data/ with 50+
-   clearly fictional records, varied regions/statuses/contact dates/orgs and
-   repeatable nonduplicating behavior. Don't treat prototype elapsed-day fixtures
-   or hardcoded image paths as proper seed data. Test repeated import/persistence.
-3. Review remaining proposed MVP acceptance: actual inactivity duration,
-   OS-disconnected launch, demo/build instructions and requirement evidence.
+## Next step toward MVP acceptance
 
-Organization update/archive; contractor transfer/status/history; contact/skill/
-decay UI; media/quick actions; restore UI; formal Hope UI alignment; release/
-installer/macOS/Linux verification remain pending final work. Keep ownership
-with Broughnut and document required changes; do not defer to teammates.
+Core proposed MVP data flows are now implemented and tested. Before calling the
+MVP accepted, verify actual inactivity duration and sleep/wake behavior; launch
+with OS networking disconnected; manually review client demo scenarios; document
+build/runtime prerequisites and agreed scope/timeout. See mvp-checklist.md.
+Consider targeted testability for timeout only if needed, without production
+bypasses or claiming accelerated tests prove full-duration behavior.
 
-## Included milestone and commands
+Remaining final-scope implementation: organization update/archive; contractor
+transfer/status/history; contact/skill/decay UI/commands; media/native quick actions;
+restore UI; formal Hope UI alignment; release/installer/fresh-machine and macOS/
+Linux verification. User owns this work; don't defer to teammates. No automatic
+publish or handoff. Learning review next can use a short Option-to-filter call
+or stable-key lookup with Python comparisons, no quiz.
 
-Commit scope: backend profile module/tests, database response/getter and query
-mappers/lib export; Rust bridge requests/commands/registration/tests; frontend
-forms/editor/controller/lock/wrapper; expanded real-window smoke; README and
-contract/development/E2E/change-log/learning/checkpoint notes. No new dependencies,
-schema migration or branch switch. This scoped commit/push is user-authorized.
-Build/data remain ignored and are excluded.
+## Included handoff and run commands
 
-From root:
+README; backend manifest/lock/module export and crate-private validator access;
+new seed module/tests; data JSON/notes; Rust commands/main and desktop lock;
+frontend directory/filter/import markup/module/sidebar style/wrappers; expanded
+smoke; workflow/learning/checkpoint and contract/development/E2E/change-log/MVP
+checklist docs. User authorized committing and pushing this reviewed scope.
+No branch switch; build output and application/test data are excluded.
+
+From repository root:
   .\scripts\test-backend.ps1
   .\scripts\desktop.ps1 -Action Test
   .\scripts\desktop.ps1 -Action Build
   .\scripts\desktop.ps1 -Action Run
   node scripts/test-desktop-smoke.cjs
 
-Executable: src-tauri/target/debug/rustacean_crm.exe. Needs WebView2; not a verified
-release installer. Debug-only absolute RUSTACEAN_TEST_DATA_DIR isolates tests;
-release ignores override. Node smoke uses localhost CDP only for its own child.
-Build output/databases/screenshots/tools do not travel through Git; rebuild and
-verify on a receiving device. Check push outcome before relying on remote
-availability. Full MVP acceptance is still pending.
+Executable: src-tauri/target/debug/rustacean_crm.exe. Requires Windows WebView2;
+no release installer verified. Debug-only absolute RUSTACEAN_TEST_DATA_DIR isolates
+smoke storage, release ignores it. Node smoke uses localhost CDP for its own child.
+Generated schemas/build outputs/databases remain ignored. Rebuild and verify on
+another device rather than copying target/ or ordinary application data.
+
+## Receiving-device resume
+
+Use HANDOFF IN to safely synchronize dev and reread this checkpoint and learning
+workflow. Verify toolchain/WebView2/Node locally, rebuild and run the documented
+checks before treating this device's results as locally verified. Do not copy
+Cargo target/ or ordinary app databases to synchronize devices. This commit
+contains the source/dataset/docs; tools, executable and temporary screenshots
+do not travel through Git. Next is MVP acceptance evidence, not recreating the
+completed data flows. Wait for the user before substantial development. Push
+outcome is reported separately; a failed push would block retrieval elsewhere.

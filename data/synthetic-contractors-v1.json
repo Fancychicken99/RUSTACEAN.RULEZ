@@ -1,0 +1,998 @@
+{
+  "dataset_id": "fictional-crm-v1",
+  "as_of": "2026-10-30",
+  "organizations": [
+    {
+      "key": "org-1",
+      "name": "Fictional Aurora Workshop",
+      "region": "East Nairobi"
+    },
+    {
+      "key": "org-2",
+      "name": "Fictional Cobalt Studio",
+      "region": "North America"
+    },
+    {
+      "key": "org-3",
+      "name": "Fictional Juniper Services",
+      "region": "Eastern Europe"
+    },
+    {
+      "key": "org-4",
+      "name": "Fictional Meridian Lab",
+      "region": "Middle East"
+    },
+    {
+      "key": "org-5",
+      "name": "Fictional Redwood Group",
+      "region": "East Asia"
+    },
+    {
+      "key": "org-6",
+      "name": "Fictional Willow Partners",
+      "region": "Central Asia"
+    }
+  ],
+  "contractors": [
+    {
+      "key": "contractor-001",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Rowan Finch",
+        "role": "Engineering specialist",
+        "email": "contractor001@example.com",
+        "phone": "202-555-0100"
+      },
+      "status": "Active",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-002",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Avery Finch",
+        "role": "Planning specialist",
+        "email": "contractor002@example.com",
+        "phone": "202-555-0101"
+      },
+      "status": "Active",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-003",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Morgan Finch",
+        "role": "Training specialist",
+        "email": "contractor003@example.com",
+        "phone": "202-555-0102"
+      },
+      "status": "Active",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-004",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Quinn Finch",
+        "role": "Medical Support specialist",
+        "email": "contractor004@example.com",
+        "phone": "202-555-0103"
+      },
+      "status": "Active",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-005",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Taylor Finch",
+        "role": "Logistics specialist",
+        "email": "contractor005@example.com",
+        "phone": "202-555-0104"
+      },
+      "status": "Active",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-006",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Skyler Finch",
+        "role": "Communications specialist",
+        "email": "contractor006@example.com",
+        "phone": "202-555-0105"
+      },
+      "status": "Active",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-007",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Emery Finch",
+        "role": "Engineering specialist",
+        "email": "contractor007@example.com",
+        "phone": "202-555-0106"
+      },
+      "status": "Active",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-008",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Finley Finch",
+        "role": "Planning specialist",
+        "email": "contractor008@example.com",
+        "phone": "202-555-0107"
+      },
+      "status": "Active",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-009",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Jordan Finch",
+        "role": "Training specialist",
+        "email": "contractor009@example.com",
+        "phone": "202-555-0108"
+      },
+      "status": "Active",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-010",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Reese Finch",
+        "role": "Medical Support specialist",
+        "email": "contractor010@example.com",
+        "phone": "202-555-0109"
+      },
+      "status": "Active",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-011",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Rowan Vale",
+        "role": "Logistics specialist",
+        "email": "contractor011@example.com",
+        "phone": "202-555-0110"
+      },
+      "status": "Active",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-012",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Avery Vale",
+        "role": "Communications specialist",
+        "email": "contractor012@example.com",
+        "phone": "202-555-0111"
+      },
+      "status": "Active",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-013",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Morgan Vale",
+        "role": "Engineering specialist",
+        "email": "contractor013@example.com",
+        "phone": "202-555-0112"
+      },
+      "status": "Active",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-014",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Quinn Vale",
+        "role": "Planning specialist",
+        "email": "contractor014@example.com",
+        "phone": "202-555-0113"
+      },
+      "status": "Active",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-015",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Taylor Vale",
+        "role": "Training specialist",
+        "email": "contractor015@example.com",
+        "phone": "202-555-0114"
+      },
+      "status": "Active",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-016",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Skyler Vale",
+        "role": "Medical Support specialist",
+        "email": "contractor016@example.com",
+        "phone": "202-555-0115"
+      },
+      "status": "Active",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-017",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Emery Vale",
+        "role": "Logistics specialist",
+        "email": "contractor017@example.com",
+        "phone": "202-555-0116"
+      },
+      "status": "Active",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-018",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Finley Vale",
+        "role": "Communications specialist",
+        "email": "contractor018@example.com",
+        "phone": "202-555-0117"
+      },
+      "status": "Active",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-019",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Jordan Vale",
+        "role": "Engineering specialist",
+        "email": "contractor019@example.com",
+        "phone": "202-555-0118"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-020",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Reese Vale",
+        "role": "Planning specialist",
+        "email": "contractor020@example.com",
+        "phone": "202-555-0119"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-021",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Rowan Brook",
+        "role": "Training specialist",
+        "email": "contractor021@example.com",
+        "phone": "202-555-0120"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-022",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Avery Brook",
+        "role": "Medical Support specialist",
+        "email": "contractor022@example.com",
+        "phone": "202-555-0121"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-023",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Morgan Brook",
+        "role": "Logistics specialist",
+        "email": "contractor023@example.com",
+        "phone": "202-555-0122"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-024",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Quinn Brook",
+        "role": "Communications specialist",
+        "email": "contractor024@example.com",
+        "phone": "202-555-0123"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-025",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Taylor Brook",
+        "role": "Engineering specialist",
+        "email": "contractor025@example.com",
+        "phone": "202-555-0124"
+      },
+      "status": "Retired",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-026",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Skyler Brook",
+        "role": "Planning specialist",
+        "email": "contractor026@example.com",
+        "phone": "202-555-0125"
+      },
+      "status": "Retired",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-027",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Emery Brook",
+        "role": "Training specialist",
+        "email": "contractor027@example.com",
+        "phone": "202-555-0126"
+      },
+      "status": "Retired",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-028",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Finley Brook",
+        "role": "Medical Support specialist",
+        "email": "contractor028@example.com",
+        "phone": "202-555-0127"
+      },
+      "status": "Retired",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-029",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Jordan Brook",
+        "role": "Logistics specialist",
+        "email": "contractor029@example.com",
+        "phone": "202-555-0128"
+      },
+      "status": "Retired",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-030",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Reese Brook",
+        "role": "Communications specialist",
+        "email": "contractor030@example.com",
+        "phone": "202-555-0129"
+      },
+      "status": "Retired",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-031",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Rowan Reed",
+        "role": "Engineering specialist",
+        "email": "contractor031@example.com",
+        "phone": "202-555-0130"
+      },
+      "status": "Deceased",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-032",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Avery Reed",
+        "role": "Planning specialist",
+        "email": "contractor032@example.com",
+        "phone": "202-555-0131"
+      },
+      "status": "Deceased",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-033",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Morgan Reed",
+        "role": "Training specialist",
+        "email": "contractor033@example.com",
+        "phone": "202-555-0132"
+      },
+      "status": "Deceased",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-034",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Quinn Reed",
+        "role": "Medical Support specialist",
+        "email": "contractor034@example.com",
+        "phone": "202-555-0133"
+      },
+      "status": "Deceased",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-035",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Taylor Reed",
+        "role": "Logistics specialist",
+        "email": "contractor035@example.com",
+        "phone": "202-555-0134"
+      },
+      "status": "Deceased",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-036",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Skyler Reed",
+        "role": "Communications specialist",
+        "email": "contractor036@example.com",
+        "phone": "202-555-0135"
+      },
+      "status": "Deceased",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-037",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Emery Reed",
+        "role": "Engineering specialist",
+        "email": "contractor037@example.com",
+        "phone": "202-555-0136"
+      },
+      "status": "Active",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-038",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Finley Reed",
+        "role": "Planning specialist",
+        "email": "contractor038@example.com",
+        "phone": "202-555-0137"
+      },
+      "status": "Active",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-039",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Jordan Reed",
+        "role": "Training specialist",
+        "email": "contractor039@example.com",
+        "phone": "202-555-0138"
+      },
+      "status": "Active",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-040",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Reese Reed",
+        "role": "Medical Support specialist",
+        "email": "contractor040@example.com",
+        "phone": "202-555-0139"
+      },
+      "status": "Active",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-041",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Rowan Harbor",
+        "role": "Logistics specialist",
+        "email": "contractor041@example.com",
+        "phone": "202-555-0140"
+      },
+      "status": "Active",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-042",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Avery Harbor",
+        "role": "Communications specialist",
+        "email": "contractor042@example.com",
+        "phone": "202-555-0141"
+      },
+      "status": "Active",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-043",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Morgan Harbor",
+        "role": "Engineering specialist",
+        "email": "contractor043@example.com",
+        "phone": "202-555-0142"
+      },
+      "status": "Active",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-044",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Quinn Harbor",
+        "role": "Planning specialist",
+        "email": "contractor044@example.com",
+        "phone": "202-555-0143"
+      },
+      "status": "Active",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-045",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Taylor Harbor",
+        "role": "Training specialist",
+        "email": "contractor045@example.com",
+        "phone": "202-555-0144"
+      },
+      "status": "Active",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-046",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Skyler Harbor",
+        "role": "Medical Support specialist",
+        "email": "contractor046@example.com",
+        "phone": "202-555-0145"
+      },
+      "status": "Active",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-047",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Emery Harbor",
+        "role": "Logistics specialist",
+        "email": "contractor047@example.com",
+        "phone": "202-555-0146"
+      },
+      "status": "Active",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-048",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Finley Harbor",
+        "role": "Communications specialist",
+        "email": "contractor048@example.com",
+        "phone": "202-555-0147"
+      },
+      "status": "Active",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-049",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Jordan Harbor",
+        "role": "Engineering specialist",
+        "email": "contractor049@example.com",
+        "phone": "202-555-0148"
+      },
+      "status": "Active",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-050",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Reese Harbor",
+        "role": "Planning specialist",
+        "email": "contractor050@example.com",
+        "phone": "202-555-0149"
+      },
+      "status": "Active",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-051",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Rowan Glen",
+        "role": "Training specialist",
+        "email": "contractor051@example.com",
+        "phone": "202-555-0150"
+      },
+      "status": "Active",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-052",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Avery Glen",
+        "role": "Medical Support specialist",
+        "email": "contractor052@example.com",
+        "phone": "202-555-0151"
+      },
+      "status": "Active",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-053",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Morgan Glen",
+        "role": "Logistics specialist",
+        "email": "contractor053@example.com",
+        "phone": "202-555-0152"
+      },
+      "status": "Active",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-054",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Quinn Glen",
+        "role": "Communications specialist",
+        "email": "contractor054@example.com",
+        "phone": "202-555-0153"
+      },
+      "status": "Active",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-055",
+      "organization_key": "org-1",
+      "profile": {
+        "full_name": "Fictional Taylor Glen",
+        "role": "Engineering specialist",
+        "email": "contractor055@example.com",
+        "phone": "202-555-0154"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Logistics",
+        "Communications"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    },
+    {
+      "key": "contractor-056",
+      "organization_key": "org-2",
+      "profile": {
+        "full_name": "Fictional Skyler Glen",
+        "role": "Planning specialist",
+        "email": "contractor056@example.com",
+        "phone": "202-555-0155"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Communications",
+        "Engineering"
+      ],
+      "last_contact_at": null
+    },
+    {
+      "key": "contractor-057",
+      "organization_key": "org-3",
+      "profile": {
+        "full_name": "Fictional Emery Glen",
+        "role": "Training specialist",
+        "email": "contractor057@example.com",
+        "phone": "202-555-0156"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Engineering",
+        "Planning"
+      ],
+      "last_contact_at": "2026-10-25 09:00:00"
+    },
+    {
+      "key": "contractor-058",
+      "organization_key": "org-4",
+      "profile": {
+        "full_name": "Fictional Finley Glen",
+        "role": "Medical Support specialist",
+        "email": "contractor058@example.com",
+        "phone": "202-555-0157"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Planning",
+        "Training"
+      ],
+      "last_contact_at": "2026-09-01 14:30:00"
+    },
+    {
+      "key": "contractor-059",
+      "organization_key": "org-5",
+      "profile": {
+        "full_name": "Fictional Jordan Glen",
+        "role": "Logistics specialist",
+        "email": "contractor059@example.com",
+        "phone": "202-555-0158"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Training",
+        "Medical Support"
+      ],
+      "last_contact_at": "2026-06-01 10:15:00"
+    },
+    {
+      "key": "contractor-060",
+      "organization_key": "org-6",
+      "profile": {
+        "full_name": "Fictional Reese Glen",
+        "role": "Communications specialist",
+        "email": "contractor060@example.com",
+        "phone": "202-555-0159"
+      },
+      "status": "Inactive",
+      "skills": [
+        "Medical Support",
+        "Logistics"
+      ],
+      "last_contact_at": "2025-12-01 12:00:00"
+    }
+  ]
+}

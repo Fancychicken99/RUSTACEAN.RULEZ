@@ -78,7 +78,7 @@ fn text(
 }
 
 impl ProfileFields {
-    fn validated(self) -> Result<Self, ProfileError> {
+    pub(crate) fn validated(self) -> Result<Self, ProfileError> {
         let full_name = text(self.full_name, "Full name", 200, true)?.unwrap();
         let role = text(self.role.unwrap_or_default(), "Role", 120, false)?;
         let email = text(self.email.unwrap_or_default(), "Email", 254, false)?;

@@ -7,7 +7,8 @@ safe text rendering, lock/data clearing, and persisted login after restart.
 It uses a fresh debug-only data directory for real IPC; explicitly simulated
 UI failures test retry and late-response handling separately. Actual organization/
 contractor creation, edit/restart, archive/cancel/restart and retained-row checks
-are now included; broader acceptance scenarios remain pending. See desktop-development.md for commands and limitations.
+are now included; region/filter and repeatable import checks are now covered too; final acceptance
+checks remain pending. See desktop-development.md for commands and limitations.
 The `backend` contains a Rust/SQLite crate and backend tests.
 `tests/persistence_workflows.rs` adds isolated file-backed database workflows;
 these are backend integration coverage, not UI/IPC or application-restart tests.
@@ -23,7 +24,8 @@ The smoke test blocks the original remote CDN hosts and asserts no external
 HTTP(S) requests were observed. That is not a test with OS networking disabled.
 Current smoke records are created through real UI forms/commands, edited, and
 archived with restart checks. A read-only SQLite inspection proves archive
-retention. Backend-filter acceptance remains pending.
+retention. Real backend region filtering (match/no-match/clear) and explicit sample import
+(cancel/repeat/restart, preserve edits/archives) are now checked.
 
 ## Sprint 1 milestone: MVP ready for E2E testing
 

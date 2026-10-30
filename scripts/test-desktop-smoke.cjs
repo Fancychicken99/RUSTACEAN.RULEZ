@@ -96,6 +96,20 @@ async function launch() {
 }
 async function waitForRecords() {
   await until(() => evaluate("document.getElementById('workspace-message').textContent.startsWith('Loaded ')") , 'saved records');
+  if (await evaluate("!document.getElementById('view-contacts').classList.contains('d-none')")) await directoryReady();
+}
+async function directoryReady() {
+  await until(() => evaluate("document.getElementById('contractor-table-body')?.dataset.loading === 'false'"), 'backend directory filter');
+}
+async function chooseRegion(region) {
+  await evaluate(`document.getElementById('contractor-region-filter').value = ${JSON.stringify(region)}; document.getElementById('contractor-region-filter').dispatchEvent(new Event('change', { bubbles: true }))`);
+  await directoryReady();
+}
+async function importSamples(added, skipped) {
+  await evaluate("document.getElementById('sample-import-button').click()"); await modalShown('sample-import-modal');
+  await fillForm('sample-import-form', {});
+  await savedMessage(`Sample import complete: ${added} contractors and ${added ? 6 : 0} organizations added; ${skipped} contractors and ${skipped ? 6 : 0} organizations skipped.`);
+  await modalClosed('sample-import-modal');
 }
 async function submit(password) {
   await evaluate(`document.getElementById('password').value = ${JSON.stringify(password)}; document.getElementById('auth-form').requestSubmit();`);
@@ -144,6 +158,8 @@ async function stop() {
   assert.equal(await evaluate("window.crmApi.createContractor({organization_id:1,profile:{full_name:'Fictional denied'}}).catch(error => error.message)"), 'Login required');
   assert.equal(await evaluate("window.crmApi.updateContractor({id:1,profile:{full_name:'Fictional denied'}}).catch(error => error.message)"), 'Login required');
   assert.equal(await evaluate("window.crmApi.archiveContractor({id:1}).catch(error => error.message)"), 'Login required');
+  assert.equal(await evaluate("window.crmApi.filterContractors({region:null}).catch(error => error.message)"), 'Login required');
+  assert.equal(await evaluate("window.crmApi.importSampleData().catch(error => error.message)"), 'Login required');
   await submit('short');
   assert.match(await evaluate("document.getElementById('message').textContent"), /at least 12/);
   await submit('fictional smoke password');
@@ -153,7 +169,7 @@ async function stop() {
   await submit('fictional smoke password');
   await waitForRecords();
   assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '0');
-  await evaluate("document.getElementById('nav-contacts').click()");
+  await evaluate("document.getElementById('nav-contacts').click()"); await directoryReady();
   assert.match(await evaluate("document.getElementById('contractor-table-body').textContent"), /No contractors have been saved/);
   assert.equal(await evaluate("document.getElementById('password').value"), '');
   assert.equal(await evaluate("window.crmApi.setupAdmin('replacement password').catch(error => error.message)"), 'Administrator already configured');
@@ -197,7 +213,7 @@ async function stop() {
   await waitForRecords();
   assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '1');
   assert.equal(await evaluate("document.getElementById('region-overview').textContent.includes('Test Region')"), true);
-  await evaluate("document.getElementById('nav-contacts').click()");
+  await evaluate("document.getElementById('nav-contacts').click()"); await directoryReady();
   assert.equal(await evaluate("document.querySelector('.contractor-row td').textContent"), syntheticName);
   assert.equal(await evaluate("document.querySelector('.contractor-row td em') === null"), true);
   assert.equal(await evaluate("document.querySelector('.contractor-row td:nth-child(2)').textContent"), syntheticOrganization);
@@ -224,9 +240,11 @@ async function stop() {
   assert.equal(await evaluate("document.querySelector('#organizations-grid h2').textContent"), syntheticOrganization);
   const otherOrganizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Other Region').id)");
   await evaluate(`document.querySelector('[data-organization-id="${otherOrganizationId}"] button').click()`);
+  await directoryReady();
   assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 0, 'Duplicate names must not merge distinct organization rosters.');
   await evaluate("document.getElementById('nav-organizations').click()");
   await evaluate(`document.querySelector('[data-organization-id="${organizationId}"] button').click()`);
+  await directoryReady();
   assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 1);
   // Exercise UI error handling and delayed-response protection, explicitly simulated.
   await evaluate("window.savedApi = window.crmApi; window.crmApi = { ...window.savedApi, listContractors: async () => { throw new Error('Controlled UI test failure'); } }; document.getElementById('refresh-contractors').click()");
@@ -245,13 +263,15 @@ async function stop() {
   assert.equal(await evaluate("document.getElementById('workspace').hidden"), true);
   assert.equal(await evaluate(`document.getElementById('workspace').textContent.includes(${JSON.stringify(editedName)})`), false);
   await submit('fictional smoke password'); await waitForRecords();
-  await evaluate("document.getElementById('nav-contacts').click(); document.querySelector('.contractor-row').click(); document.getElementById('edit-contractor').click(); window.crmSession.lock('Test lock with editor open.')");
+  await evaluate("document.getElementById('nav-contacts').click()"); await directoryReady();
+  await evaluate("document.querySelector('.contractor-row').click(); document.getElementById('edit-contractor').click(); window.crmSession.lock('Test lock with editor open.')");
   await until(() => evaluate("window.crmApi.getAuthStatus().then(status => !status.authenticated)"), 'lock with editor open');
   await modalClosed('add-contractor-modal');
   assert.equal(await evaluate("document.getElementById('contractor-full-name').value"), '');
   assert.equal(await evaluate("document.getElementById('contractor-organization').options.length"), 0);
   await submit('fictional smoke password'); await waitForRecords();
-  await evaluate("document.getElementById('nav-contacts').click(); document.querySelector('.contractor-row').click(); document.getElementById('archive-contractor').click()");
+  await evaluate("document.getElementById('nav-contacts').click()"); await directoryReady();
+  await evaluate("document.querySelector('.contractor-row').click(); document.getElementById('archive-contractor').click()");
   await modalShown('archive-modal');
   assert.equal(await evaluate("document.getElementById('archive-name').textContent"), editedName);
   await evaluate("document.querySelector('#archive-modal [data-bs-dismiss]').click()"); await modalClosed('archive-modal');
@@ -269,10 +289,75 @@ async function stop() {
   const retained = database.prepare('SELECT full_name, archived_at FROM contractors WHERE id = ?').get(createdId);
   database.close();
   assert.equal(retained.full_name, editedName); assert.ok(retained.archived_at);
+  await launch(); await submit('fictional smoke password'); await waitForRecords();
+  await evaluate("document.getElementById('sample-import-button').click()"); await modalShown('sample-import-modal');
+  await evaluate("document.querySelector('#sample-import-modal [data-bs-dismiss]').click()"); await modalClosed('sample-import-modal');
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 0, 'Cancel import must not write records.');
+  await importSamples(60, 0);
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 60);
+  assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '60');
+  await evaluate("window.realFilter = window.crmApi.filterContractors; window.crmApi = { ...window.crmApi, filterContractors: async request => { window.lastRegion = request.region; const records = await window.realFilter(request); window.lastRegionResult = records.length; return records; } }; window.observedApi = window.crmApi; document.getElementById('nav-contacts').click()");
+  await directoryReady();
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 60);
+  await chooseRegion('East Nairobi');
+  assert.equal(await evaluate("window.lastRegion"), 'East Nairobi');
+  assert.equal(await evaluate("window.lastRegionResult"), 10);
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 10);
+  assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '60', 'Filter must not change dashboard total.');
+  await chooseRegion('Other Region');
+  assert.equal(await evaluate("window.lastRegionResult"), 0);
+  assert.match(await evaluate("document.getElementById('contractor-table-body').textContent"), /No contractors match/);
+  await evaluate("history.replaceState(null, '', '#/contacts?region=Unmatched%20Region'); window.dispatchEvent(new PopStateEvent('popstate'))"); await directoryReady();
+  assert.equal(await evaluate("window.lastRegion"), 'Unmatched Region');
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 0, 'A stale region link must not silently become All regions.');
+  await evaluate("document.getElementById('clear-contractor-filters').click()"); await directoryReady();
+  assert.equal(await evaluate("window.lastRegion"), null);
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 60);
+  await evaluate("document.getElementById('filter-status').value = 'Deceased'; document.getElementById('filter-status').dispatchEvent(new Event('change', { bubbles: true }))"); await directoryReady();
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 6);
+  await evaluate("document.getElementById('clear-contractor-filters').click()"); await directoryReady();
+  assert.equal(await evaluate("(() => { const bounds = document.getElementById('sample-import-button').getBoundingClientRect(); return bounds.top >= 0 && bounds.bottom <= innerHeight; })()"), true, 'Import action must remain reachable alongside a long directory.');
+  const sampleScreenshot = await cdp('Page.captureScreenshot', { format: 'png' });
+  fs.writeFileSync(path.join(testDirectory, 'imported-directory.png'), Buffer.from(sampleScreenshot.data, 'base64'));
+  // Simulated filter failure must not display cached data as a successful result.
+  await evaluate("window.crmApi = { ...window.observedApi, filterContractors: async () => { throw new Error('Controlled filter failure'); } }");
+  await chooseRegion('East Nairobi');
+  assert.equal(await evaluate("document.getElementById('directory-message').textContent"), 'Controlled filter failure');
+  assert.equal(await evaluate("document.getElementById('contractor-result-count').textContent"), 'Unavailable');
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 0);
+  await evaluate("window.crmApi = window.observedApi; document.getElementById('clear-contractor-filters').click()"); await directoryReady();
+  // Delay an actual region query, then let a newer query finish first.
+  await evaluate("window.crmApi = { ...window.observedApi, filterContractors: request => request.region === 'East Nairobi' ? new Promise(resolve => { window.releaseFilter = () => window.realFilter(request).then(resolve); }) : window.observedApi.filterContractors(request) }; document.getElementById('contractor-region-filter').value = 'East Nairobi'; document.getElementById('contractor-region-filter').dispatchEvent(new Event('change', { bubbles: true }))");
+  await chooseRegion('North America');
+  await evaluate("window.releaseFilter()"); await delay(100);
+  assert.equal(await evaluate("[...document.querySelectorAll('.contractor-row td:nth-child(4)')].every(cell => cell.textContent === 'North America')"), true);
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 10);
+  await evaluate("window.crmApi = window.observedApi; document.getElementById('clear-contractor-filters').click()"); await directoryReady();
+  const sampleId = await evaluate("window.crmApi.listContractors().then(records => records.find(record => record.email === 'contractor001@example.com').id)");
+  await evaluate(`document.querySelector('[data-contractor-id="${sampleId}"]').click(); document.getElementById('edit-contractor').click()`); await modalShown('add-contractor-modal');
+  await fillForm('add-contractor-form', { 'contractor-full-name': 'Fictional User Edited Import' });
+  await savedMessage('Contractor saved.'); await modalClosed('add-contractor-modal');
+  await evaluate("document.getElementById('archive-contractor').click()"); await modalShown('archive-modal');
+  await fillForm('archive-form', {}); await savedMessage('Contractor archived. The record is retained.'); await modalClosed('archive-modal');
+  await importSamples(0, 60);
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 59);
+  await restartLogin();
+  assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '59');
+  await evaluate("document.getElementById('nav-contacts').click()"); await directoryReady();
+  await chooseRegion('East Nairobi');
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 9);
+  await stop();
+  const importedDatabase = new DatabaseSync(path.join(testDirectory, 'crm.db'), { readOnly: true });
+  const editedSample = importedDatabase.prepare('SELECT full_name, archived_at FROM contractors WHERE id = ?').get(sampleId);
+  assert.equal(editedSample.full_name, 'Fictional User Edited Import'); assert.ok(editedSample.archived_at);
+  assert.equal(importedDatabase.prepare('SELECT COUNT(*) AS n FROM synthetic_contractors').get().n, 60);
+  assert.equal(importedDatabase.prepare('SELECT COUNT(*) AS n FROM contact_events').get().n, 48);
+  importedDatabase.close();
   assert.equal(externalRequests.size, 0, 'CRM must not attempt external HTTP(S) requests.');
   assert.deepEqual(browserErrors, [], 'Unexpected browser errors or CSP violations.');
   console.log('PASS: real UI organization/contractor create, field validation, double-submit protection, edit/restart, archive confirmation/cancel/restart and retained row; duplicate-name organization IDs; setup/login/lock, safe rendering and local assets.');
   console.log('PASS: simulated UI failure/retry and delayed response after lock.');
+  console.log('PASS: explicit sample import/cancel/repeat preserves edits/archives after restart; real SQLite region filtering/no-match/clear with full dashboard totals; simulated filter failure and response ordering.');
   console.log('Retained test data and screenshot:', testDirectory);
 })().catch(async error => {
   console.error(error);

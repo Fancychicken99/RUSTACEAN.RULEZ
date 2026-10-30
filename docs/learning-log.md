@@ -1,5 +1,45 @@
 # Rust learning log
 
+## Develop and learn agreement — October 30, 2026
+
+User requests learning Rust during development and deeper review afterward,
+rather than pausing development for a full source/course walkthrough. Python is
+the reference language. Follow the develop/learn cycle in broughnut-workflow.md:
+short goal/concept preview, complete feature work, tests, focused code review,
+then continuity updates. No routine quizzes or comprehension checks; user says
+they slow progress. Do not make learning an approval gate.
+
+Latest source review covered main.rs module/use/entry point, builder/setup
+closure, mutable paths, debug-only test-directory override, Option matching,
+directory creation, managed state, and Ok(()). User explained mod/use distinction
+at introductory level; clarified module membership and case-sensitive AppState.
+Other details remain introduced, not independently practiced. Next development
+is still region-filter IPC and repeatable fictional-data import; use those as
+the next teaching examples. Deeper traits/lifetimes/transactions can be revisited
+as needed, without blocking implementation.
+
+## Teaching reset: Python baseline — October 30, 2026
+
+User explicitly reports Python is their most comfortable language and that Rust/
+compiled-language syntax is still confusing. The full profiles.rs walkthrough
+was too dense. Use short sequential lessons grounded in actual code, comparing
+with Python and introducing one unfamiliar concept at a time. User correctly
+predicted add(10, 4) = 14 and restated the final-expression return idea; clarified
+that -> i32 declares the return type while return selects a returned value.
+Begin actual source walkthrough in startup order: src-tauri/src/main.rs, then
+AppState::open/commands, JavaScript wrappers/callers, and backend profiles.
+Current lesson starts at main.rs imports and entry point; advanced traits,
+lifetimes, borrowing, and macros remain unconfirmed. No independent coding yet.
+
+## profiles.rs walkthrough — October 30, 2026
+
+Prepared a complete source walkthrough: imports, custom error enum, Display/Error/
+From traits, Deserialize and unknown-field rejection, unit success values,
+normalization, consuming self, Option helpers, email iterator/short-circuit logic,
+transaction borrowing, row closures, parameterized SQL, ok_or, commit/rollback,
+and archive retention. Explanation is introductory; understanding of these new
+details has not been confirmed by teach-back or independent coding.
+
 Personal to Broughnut. Updated October 29, 2026.
 Goal: understand Rust and explain project decisions in the final defense.
 Explain purpose/file placement, introduce syntax as it appears, and keep steps
@@ -99,3 +139,24 @@ operations. Optional blank values normalize to None/null rather than stale text.
 checks passed. No new user teach-back or independent coding exercise confirmed.
 Resume learning through filter/import code, especially borrowing &mut Connection
 for transaction creation and propagating typed domain/database errors.
+
+## Develop-and-learn: region and sample import — October 30, 2026
+
+Applied the requested cycle while implementing real backend region queries and a
+repeatable JSON sample import. Introduced Option<String> (similar to Python str
+or None): trim blank values to None for All regions. Existing search_contractors
+receives region.as_deref() as an optional borrowed string and None for skill.
+Introduced HashMap as analogous to Python dict: dataset organization keys map to
+actual saved IDs. Persisted stable keys let repeat import skip previously added
+records without overwriting edits/archives. These concepts were explained briefly
+during work; no quiz, user exercise or independent proficiency claim.
+
+31 backend tests and four bridge tests passed; real UI import/filter/CRUD checks
+passed. SQL remains in backend modules; new frontend calls stay in tauri-api.js.
+Next learning review can use a small Option/filter or key-lookup excerpt. Deeper
+traits/lifetimes/import parsing are deferred unless needed or requested.
+
+HANDOFF OUT requested at the end of this session. Development/learning agreement,
+Option/HashMap introduction, verified filter/import behavior and acceptance
+backlog captured in checkpoint. Continue brief Python-grounded lessons during
+work; no routine quizzes or inference of independent proficiency from tests.

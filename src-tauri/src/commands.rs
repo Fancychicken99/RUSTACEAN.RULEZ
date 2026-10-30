@@ -4,6 +4,8 @@ use secure_crm_backend::{
     database::{Contractor, Organization, get_organizations},
     profiles::{self, ProfileError, ProfileFields},
     protected::list_contractors_if_authenticated,
+    search::search_contractors,
+    seed::{self, ImportReport},
     session::SessionManager,
     setup::initialize_database,
 };
@@ -51,6 +53,12 @@ pub struct OrganizationRequest {
 #[serde(deny_unknown_fields)]
 pub struct RecordRequest {
     id: i64,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContractorFilter {
+    region: Option<String>,
 }
 
 fn profile_error(error: ProfileError, fallback: &str) -> String {
@@ -116,6 +124,31 @@ impl AppState {
     fn contractors(&self) -> Result<Vec<Contractor>, String> {
         let state = self.lock()?;
         list_contractors_if_authenticated(&state.conn, &state.session)
+    }
+
+    fn filter(&self, request: ContractorFilter) -> Result<Vec<Contractor>, String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        let region = request
+            .region
+            .as_deref()
+            .map(str::trim)
+            .filter(|r| !r.is_empty());
+        if region.is_some_and(|r| r.chars().count() > 120 || r.chars().any(char::is_control)) {
+            return Err("Region must be at most 120 characters with no control characters".into());
+        }
+        search_contractors(&state.conn, region, None)
+            .map_err(|_| "Unable to filter contractors".into())
+    }
+
+    fn import_samples(&self) -> Result<ImportReport, String> {
+        let mut state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        seed::import_sample_data(&mut state.conn).map_err(|error| error.to_string())
     }
 
     fn organizations(&self) -> Result<Vec<Organization>, String> {
@@ -196,6 +229,19 @@ pub fn list_contractors(state: tauri::State<'_, AppState>) -> Result<Vec<Contrac
 }
 
 #[tauri::command]
+pub fn filter_contractors(
+    request: ContractorFilter,
+    state: tauri::State<'_, AppState>,
+) -> Result<Vec<Contractor>, String> {
+    state.filter(request)
+}
+
+#[tauri::command]
+pub fn import_sample_data(state: tauri::State<'_, AppState>) -> Result<ImportReport, String> {
+    state.import_samples()
+}
+
+#[tauri::command]
 pub fn list_organizations(state: tauri::State<'_, AppState>) -> Result<Vec<Organization>, String> {
     state.organizations()
 }
@@ -237,6 +283,68 @@ pub fn create_organization(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sample_import_and_region_filter_are_protected_repeatable_and_exclude_archives() {
+        let directory = tempfile::tempdir().unwrap();
+        let app = AppState::open(&directory.path().join("samples.db")).unwrap();
+        assert_eq!(app.import_samples().unwrap_err(), "Login required");
+        assert_eq!(
+            app.filter(ContractorFilter { region: None }).unwrap_err(),
+            "Login required"
+        );
+        app.configure_admin("fictional test password").unwrap();
+        app.sign_in("fictional test password").unwrap();
+        assert_eq!(app.import_samples().unwrap().contractors_added, 60);
+        let records = app
+            .filter(ContractorFilter {
+                region: Some("  east nairobi  ".into()),
+            })
+            .unwrap();
+        assert_eq!(records.len(), 10);
+        assert!(
+            records
+                .iter()
+                .all(|r| r.region.as_deref() == Some("East Nairobi"))
+        );
+        assert!(
+            app.filter(ContractorFilter {
+                region: Some("Unmatched Region".into())
+            })
+            .unwrap()
+            .is_empty()
+        );
+        assert!(
+            app.filter(ContractorFilter {
+                region: Some("Bad\nRegion".into())
+            })
+            .is_err()
+        );
+        assert_eq!(
+            app.filter(ContractorFilter {
+                region: Some("  ".into())
+            })
+            .unwrap()
+            .len(),
+            60
+        );
+        app.archive(RecordRequest { id: records[0].id }).unwrap();
+        let report = app.import_samples().unwrap();
+        assert_eq!(report.contractors_added, 0);
+        assert_eq!(report.contractors_skipped, 60);
+        assert_eq!(
+            app.filter(ContractorFilter {
+                region: Some("East Nairobi".into())
+            })
+            .unwrap()
+            .len(),
+            9
+        );
+        assert_eq!(
+            app.filter(ContractorFilter { region: None }).unwrap().len(),
+            59
+        );
+    }
 
     fn profile() -> ProfileFields {
         ProfileFields {

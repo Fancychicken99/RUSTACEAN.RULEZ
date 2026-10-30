@@ -1,7 +1,7 @@
 # Initial IPC contract
 
 Updated October 30, 2026. Implemented read/auth and contractor mutation contract.
-JavaScript wrappers exist in frontend/js/tauri-api.js. All eleven commands below
+JavaScript wrappers exist in frontend/js/tauri-api.js. All thirteen commands below
 are implemented in src-tauri/src/commands.rs and registered in main.rs.
 frontend/index.html now uses them in the original CRM layout, without fixtures.
 The Windows debug executable has real UI/IPC smoke coverage for authentication,
@@ -32,6 +32,8 @@ An empty array is success. Option fields serialize to explicit nulls.
 | logout / logout | {} | null | session::logout. Safe when already locked; database-state lock failures reject. |
 | list_contractors / listContractors | {} | Contractor[] | protected::list_contractors_if_authenticated. Requires active session. |
 | list_organizations / listOrganizations | {} | Organization[] | Requires active session; database::get_organizations. |
+| filter_contractors / filterContractors | { request: { region: string or null } } | Contractor[] | Authenticated; existing search::search_contractors SQLite region query. |
+| import_sample_data / importSampleData | {} | ImportReport | Authenticated; embedded fictional-crm-v1 dataset only, explicit UI confirmation. |
 | record_activity / recordActivity | {} | null | Requires active session; session::authorize_action renews only an unexpired session; otherwise Login required. |
 
 Setup requires at least 12 Unicode scalar values, matching the backend's Rust
@@ -99,10 +101,11 @@ The directory reads full_name and organization_name directly; profile routes
 compare numeric IDs as URL strings. Country/city fields and contact dates are
 shown as unavailable rather than inferred. Dashboard totals/regions derive from
 loaded contractor records. History/follow-up metrics are unavailable. Current
-search/status/region/organization filters are frontend filters of the loaded
-records, not verified backend filtering. No fixtures are loaded.
+search/status/organization filters operate locally on the backend region-query
+results. Region selection and clearing both query SQLite. Dashboard totals and
+region distribution remain based on the full list. No fixtures are loaded.
 
-Region/skill/decay command filtering, organization update/archive, contact/history,
+Skill/decay command filtering, organization update/archive, contact/history,
 media, and native quick actions need later contracts and registered commands.
 Both index.html and the earlier integration.html use the same IPC wrapper.
 
@@ -149,3 +152,39 @@ status/fields. Existing SQLite CURRENT_TIMESTAMP supplies archived_at in UTC
 editing an archived/missing ID rejects. No restore UI or permanent deletion is
 introduced. If saving succeeds but directory refresh fails, UI reports the save
 separately and asks for Refresh rather than resubmitting a duplicate create.
+
+## Region filter and fictional-data import
+
+filter_contractors accepts a request with an optional region. Missing/null/blank
+means all unarchived contractors. Nonempty values are trimmed, limited to 120
+Unicode scalar values, rejected for control characters, and compared by the
+existing SQLite NOCASE region query. Unknown regions return [] successfully.
+Unknown request fields reject. Internal errors use Unable to filter contractors.
+This is exact region equality, not fuzzy geography or country/city filtering.
+
+Frontend directory requests use separate generations from full-list refreshes;
+old/out-of-order/locked-session responses are ignored. Pending queries show a
+loading state. Failure shows a visible error and Unavailable count, never cached
+rows presented as a successful result. Clearing sends region:null to the backend.
+
+ImportReport fields: dataset_id (string), organizations_added, contractors_added,
+organizations_skipped, contractors_skipped (nonnegative integers). The embedded
+JSON version fictional-crm-v1 contains 6 organizations, 60 contractors, 6 skills,
+4 statuses, 48 contact events and 12 never-contacted profiles. Last-contact values
+are UTC YYYY-MM-DD HH:MM:SS; as_of is YYYY-MM-DD. Dates persist; elapsed days are
+not stored. Display/follow-up UI wiring is separate from this import contract.
+
+The command accepts no user file/path/JSON payload. It validates the dataset and
+imports in one transaction, including provenance rows keyed by dataset_id and
+record_key in synthetic_organizations/synthetic_contractors. Repeats skip mapped
+records, preserving user edits/archives and avoiding duplicate contacts/links.
+Manual records are not merged or overwritten by matching names/emails. Existing
+case-insensitive skill names can be reused as dictionary entries. No reset, bulk
+delete, automatic startup import, or restore is exposed. Parsing/internal SQL
+errors return Unable to import sample data; invalid records/reference/date/keys
+return safe validation messages. Entire import rolls back on failure.
+
+The JSON is embedded by Rust include_str! at build time, outside frontend assets.
+serde_json is now declared in the backend; both Cargo lockfiles were updated.
+Preserve stable keys; updating a dataset version requires an explicit migration/
+import decision rather than silently replacing existing imported records.

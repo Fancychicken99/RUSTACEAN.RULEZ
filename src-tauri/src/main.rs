@@ -33,7 +33,9 @@ fn main() {
             commands::create_contractor,
             commands::update_contractor,
             commands::archive_contractor,
-            commands::create_organization
+            commands::create_organization,
+            commands::filter_contractors,
+            commands::import_sample_data
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start Rustacean CRM");

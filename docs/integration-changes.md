@@ -146,3 +146,41 @@ UI are not added. Country/city/photo inputs are not accepted or silently dropped
 Next: backend-filter wiring and deterministic persisted synthetic import, followed
 by remaining MVP acceptance evidence. No completion/security/offline guarantees
 beyond the recorded checks.
+
+## Region filtering and repeatable fictional import — October 30, 2026
+
+Status: reviewed and verified; included in the explicitly requested HANDOFF OUT
+commit following 3c027d8. Push outcome reported separately. Includes the
+user-requested develop-and-learn workflow updates in personal docs.
+
+| Files | What changed and why |
+| --- | --- |
+| src-tauri/src/commands.rs, main.rs; frontend/js/tauri-api.js | Added authenticated filter_contractors and import_sample_data commands/wrappers. Region is optional, trimmed/validated, and passed to the existing SQLite search function. No arbitrary import file/path payload. Added protected filter/import bridge test. |
+| frontend/js/contractor-list.js | Directory region changes and clear now await backend results. Full-list data stays separate for totals/profiles. Added query generations, loading/error/no-match states and explicit unavailable counts on failure; stale responses ignored. Saved unknown region links remain actual queries rather than falling back to All. Local search/status/organization filters narrow SQL results only. |
+| backend/src/seed.rs; backend/src/profiles.rs; backend/src/lib.rs | New additive import validates embedded JSON, uses a single transaction, and records stable provenance keys in two synthetic_* tables. Reuses crate-private profile normalization and existing skill helpers. Repeated imports skip records, preserving edits/archives/contacts/links. SQL stays backend-side. No changes to existing core table columns or user_version. |
+| data/synthetic-contractors-v1.json; data/README.md | Generated reusable fictional-crm-v1 dataset: 60 contractors, six organizations/regions, four statuses, six skills, 48 UTC contact dates and 12 never-contacted records. Clearly fictional identities/example emails/reserved phones; no images, credentials, real records or elapsed-day counters. |
+| backend/Cargo.toml, backend/Cargo.lock, src-tauri/Cargo.lock | Declared serde_json directly in backend for the JSON dataset; resolved from locally cached crates. Lockfiles updated; no new runtime service. |
+| backend/tests/sample_import.rs | Tests repeat import after reopen, preservation of existing manual records and edited/archived samples, no duplicate contacts/skills, and complete rollback for invalid late records or controlled SQL failure. |
+| frontend/index.html; frontend/js/sample-data.js; frontend/css/styles.css | Added explicit import confirmation/action/report and Deceased status option. No auto-import/reset. Lock clears/closes/inerts import dialog. Sticky desktop sidebar keeps action reachable beside long directories. |
+| scripts/test-desktop-smoke.cjs | Real UI import cancel/60/repeat/restart, edit/archive preservation; observes real filter arguments/results, no-match/clear/stale saved URL, unchanged dashboard totals and status subsets. Simulated filter failure/response ordering is labelled separately. Existing CRUD checks remain; SQLite inspection is read-only. |
+| README; data/contract/development/E2E/MVP-checklist docs; personal notes | Records interfaces, provenance/dependency/retention rules, exact evidence, learning, remaining acceptance and next step. |
+
+Checks: 31 backend tests, four bridge tests, and the real-window CRUD/filter/import
+smoke passed before the final saved-region-link check. Final result/artifact path
+is recorded in session-handoff.md. Backend dependency update tested offline;
+locked debug build passed. The earlier sidebar placement issue was resolved and
+its viewport reachability is now asserted. Screenshot inspected. Only disposable
+test databases were changed; no ordinary app data was imported or reset.
+
+These changes implement the remaining proposed MVP region/data flows, not final
+acceptance. Full inactivity/sleep timing, OS-network-disconnected launch, client
+scope/timeout agreement, release/fresh-machine packaging, Hope UI alignment and
+final macOS/Linux/features still need their own evidence. Contact timestamps and
+skills are persisted but their display/decay/skill UI is not connected yet.
+
+Final verification: all 31 backend and four bridge tests passed; locked build
+and final real-window smoke passed, including the stale unknown-region URL check.
+Artifacts: C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-7Prsqq.
+Formatting, syntax, dataset/DOM checks, lock metadata and diff checks passed.
+Source is included in this handoff commit. No normal app database touched. MVP evidence
+and remaining acceptance are mapped in docs/mvp-checklist.md.

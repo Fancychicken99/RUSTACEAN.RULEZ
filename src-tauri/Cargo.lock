@@ -2769,6 +2769,7 @@ dependencies = [
  "argon2",
  "rusqlite",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

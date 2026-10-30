@@ -85,12 +85,11 @@ and archive/edit persistence; response queries include organization_id.
 ## Still pending
 
 Organization update/archive, contractor transfer/status workflows; backend
-region-filter command wiring;
-repeatable persisted synthetic import; country/city/media/history/quick actions;
+skill/decay command/UI wiring; country/city/media/history/quick actions;
 full timeout/offline/release/platform testing. The directory response currently
 includes organization_id; duplicate organization names remain distinct in
-rosters, counts, filters, and form selections. Filters in the current
-UI act on loaded records and do not establish backend-filter acceptance.
+rosters, counts, filters, and form selections. Region filtering now uses the real SQLite query; local organization/status/
+search filters narrow those results. The smoke test checks match/no-match/clear.
 
 API references:
 - https://v2.tauri.app/develop/calling-rust/
@@ -111,3 +110,25 @@ retains values on validation failures, and refreshes records after committed
 changes. Errors remain visible in the dialog. Lock clears/inerts/closes editors;
 late save completions cannot reopen them. Closing an editor during an active
 request is blocked; this does not cancel a transaction already authorized.
+
+## Explicit fictional samples and region filtering
+
+Use Import fictional samples in the sidebar, review the retention notice, and
+confirm. This imports data/synthetic-contractors-v1.json into the current app
+database. It adds six fictional organizations and 60 contractors; records include
+varied status, region, skills, and stored UTC contact dates. It is additive, never
+a reset. Repeating skips previously imported keys without overwriting edits or
+restoring archives. No existing manual records are merged. See data/README.md.
+
+Region dropdown changes query filter_contractors in Rust/SQLite. Clearing also
+queries the backend. Dashboard counts remain global. Unknown/no-match regions
+show empty results; failed requests show an error rather than cached records.
+Other search/status/org criteria remain frontend filters of the region results.
+Separate request generations prevent old filter completions replacing new ones
+or displaying data after lock. The desktop sidebar stays in view on long lists.
+
+Expanded tests: 31 backend tests, four bridge workflows, and real-window checks
+for import cancel/import/repeat/restart, edited/archived sample preservation,
+region-match/no-match/clear, local status filtering and full dashboard totals.
+Filter failure/response-order conditions are explicitly simulated. No OS-level
+network disconnect or full-duration inactivity evidence is claimed.

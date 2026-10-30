@@ -233,3 +233,8 @@ a { text-decoration: none; }
 
 .topbar > .container-fluid { flex-wrap: wrap; gap: .5rem 0; }
 .topbar-search { min-width: 160px; flex-basis: 160px; }
+
+/* Keep navigation and explicit sample import reachable beside long directories. */
+@media (min-width: 992px) {
+  .sidebar { position: sticky; top: 0; height: 100vh; align-self: flex-start; overflow-y: auto; }
+}
