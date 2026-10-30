@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rustacean CRM — integration</title>
+  <link rel="stylesheet" href="css/integration.css">
+  <script defer src="js/tauri-api.js"></script>
+  <script defer src="js/integration.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Rustacean CRM</h1>
+    <p>First connected executable: local authentication and contractor retrieval.</p>
+    <p id="message" role="status" aria-live="polite">Connecting to the local database…</p>
+    <section id="auth" hidden>
+      <h2 id="auth-heading">Log in</h2>
+      <form id="auth-form">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password">
+        <p id="setup-help" hidden>Create a password with at least 12 characters. Setup does not log you in automatically.</p>
+        <button id="submit-auth" type="submit">Log in</button>
+      </form>
+    </section>
+    <section id="directory" hidden>
+      <div class="actions"><h2>Contractors</h2><button id="refresh" type="button">Refresh</button><button id="lock" type="button">Lock</button></div>
+      <p>The session expires after 15 minutes without an authorized backend action. Reopening the executable requires login.</p>
+      <p id="empty" hidden>No contractors have been saved yet.</p>
+      <table id="contractors" hidden>
+        <thead><tr><th>Name</th><th>Organization</th><th>Region</th><th>Status</th></tr></thead>
+        <tbody id="records"></tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

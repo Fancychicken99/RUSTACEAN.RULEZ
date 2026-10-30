@@ -17,7 +17,7 @@ Backend & Data Lead: Josseline
 Function:
 initialize_database(&conn)
 
-Location:
+Location (relative to backend/):
 src/setup.rs
 
 This prepares the CRM database, runs existing
@@ -94,3 +94,11 @@ cargo run
 The current crm_demo.db is a local demonstration
 database. Production data should be stored in
 the OS-specific application data directory.
+
+## Repository layout update — October 29, 2026
+
+The reusable crate now lives in backend/. Run Cargo commands from that directory
+or use scripts/test-backend.ps1 from the repository root. The uncompiled bridge
+reference moved to docs/reference/tauri-bridge-example.rs. Earlier work-remaining
+notes are historical: authentication/session and image helpers now exist; verify
+current code and integration evidence rather than treating this list as status.

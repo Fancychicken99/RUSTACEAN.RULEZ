@@ -40,3 +40,27 @@ mutex guards, startup, and command registration. No hands-on exercise completed.
 
 No claim of independent implementation proficiency yet; teach-back confirms only
 these introductory concepts. User has asked to proceed toward implementation.
+
+## First implementation slice
+
+Created docs/ipc-contract.md and pure promise wrappers in frontend/js/tauri-api.js. Explained
+separation of IPC from rendering, preservation of backend field names, and
+explicit distinction between intended commands and registered implementations.
+Simulated IPC checks passed; no connected executable exists yet. Frontend wrappers
+are implemented but not loaded by pages. Next: Tauri workspace and Rust commands.
+
+## Repository organization
+
+Separated frontend pages/styles/scripts/fixtures from the reusable backend crate.
+Crate directory is now backend/; package name secure_crm_backend is unchanged.
+Planned src-tauri/ owns startup/commands and will depend on backend/. Reference
+code is under docs/reference/. All 27 backend tests passed after the move.
+Fixture preservation is not real persisted seed-data integration.
+
+## First real executable bridge
+
+Introduced how src-tauri/main.rs owns startup/shared state and registration,
+commands.rs calls existing backend modules, and a page consumes serialized
+results. Built the Windows executable and verified real UI/IPC setup/login/list/
+lock/restart against isolated SQLite. Original dashboard wiring is still next.
+No additional user teach-back or independent coding proficiency confirmed.

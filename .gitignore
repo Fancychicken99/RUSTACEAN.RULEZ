@@ -1,0 +1,14 @@
+# Build products and local application data are not source assets.
+**/target/
+/src-tauri/gen/schemas/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+node_modules/
+.env
+.env.local
+.DS_Store
+Thumbs.db

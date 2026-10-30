@@ -8,6 +8,13 @@ these notes, use the keywords, or follow this teaching workflow.
 
 ## Learning and cross-device continuity
 
+Broughnut owns all remaining MVP implementation, including authorized edits to
+Connor's frontend and Josseline's backend. Do not leave necessary work for a
+teammate. Record meaningful changes to their code in `integration-changes.md`,
+including files, what changed, why, verification, and limitations. Update
+`ipc-contract.md` for shared interface changes and keep the checkpoint current.
+Publishing and handoff out still require explicit user instruction.
+
 The user is new to Rust and wants to explain its syntax, file structure,
 compilation, and project decisions intelligently. Learning is part of delivery.
 Before meaningful code changes, explain the purpose and file placement. Introduce

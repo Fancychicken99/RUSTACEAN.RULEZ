@@ -1,15 +1,20 @@
 # Executable end-to-end test plan
 
-Status: desktop E2E planning only. No desktop E2E suite has been implemented or run.
-The merged `backend-prototype` now contains a Rust/SQLite crate and backend tests.
+Status: initial Windows executable smoke test implemented and passed on October
+29, 2026. scripts/test-desktop-smoke.cjs launches the real debug executable and
+drives its WebView2 via local CDP. It covers setup validation, wrong/correct login,
+protected empty list, one-time setup, lock, and persisted login after restart.
+It uses a fresh debug-only data directory, not mocks. Full CRM scenarios below
+remain pending. See desktop-development.md for commands and limitations.
+The `backend` contains a Rust/SQLite crate and backend tests.
 `tests/persistence_workflows.rs` adds isolated file-backed database workflows;
 these are backend integration coverage, not UI/IPC or application-restart tests.
 See [Rust development](rust-development.md) for commands.
 
-The checkout contains a frontend prototype and a standalone Rust backend. It has
-no Tauri application build configuration or runnable desktop executable. The
-bridge example is not wired to the frontend. Prototype screens do not establish
-database persistence. Confirm the repository state before desktop testing.
+The checkout now contains a src-tauri/ executable with an initial connected
+integration.html screen. The original index.html dashboard remains fixture-based.
+The reference bridge example is not the registered implementation. Confirm the
+exact screen/build before treating a result as database persistence evidence.
 
 ## Sprint 1 milestone: MVP ready for E2E testing
 
@@ -19,7 +24,10 @@ The exact MVP feature scope must be agreed by the team against the Statement of 
 
 At the Sprint 1 handoff, record the build/commit, launch instructions, completed user flows, known issues, and available test-data isolation. Start with launch/navigation and one real create/read/restart flow if supported by the agreed MVP. Record unsupported scenarios as blocked or deferred. After Sprint 1, add coverage for the remaining MVP flows, regressions, errors, and newly developed features.
 
-Use Windows WebDriver automation against the built application, with real Tauri commands and a disposable SQLite database. Do not substitute a browser preview or mocked IPC and call it executable E2E coverage.
+The initial Windows smoke test uses WebView2 CDP against the built executable.
+For broader native-dialog scenarios, evaluate Windows WebDriver tooling with
+real Tauri commands and a disposable SQLite database. Do not substitute a browser
+preview or mocked IPC and call it executable E2E coverage.
 
 Tauri documents WebdriverIO with its Tauri service as the recommended starting point. Select and pin versions after the application's Tauri version and build process are known. The embedded driver requires a test-build plugin; the external tauri-driver route requires a compatible Edge WebDriver on Windows. Keep any test-only backend access out of production builds.
 
@@ -38,7 +46,7 @@ References:
 - Stable element IDs or accessible labels for navigation, fields, save actions, errors, and profile selection. Use record IDs to distinguish contractors with similar names.
 - A way to wait for completion through visible UI states rather than fixed sleeps.
 
-Connor owns UI selectors and visible loading/error states. Josseline owns database/image isolation and deterministic seeding. Broughnut owns test orchestration, IPC integration, and evidence of results. Coordinate shared decisions in docs/ipc-contract.md when integration begins.
+Broughnut owns all remaining MVP implementation and verification, including UI selectors/loading/errors, database isolation, seed integration, IPC, and test evidence. Record edits to existing frontend/backend code in docs/integration-changes.md and interface decisions in docs/ipc-contract.md.
 
 ## Scenario backlog
 

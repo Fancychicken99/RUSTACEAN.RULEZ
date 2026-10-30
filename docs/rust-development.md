@@ -1,8 +1,9 @@
 # Rust development on Windows
 
-The Rust crate is `backend-prototype`, using edition 2024 and bundled SQLite.
-There is no Tauri application scaffold yet. The bridge example is reference code,
-not a compiled or registered IPC implementation.
+The Rust crate is `backend`, using edition 2024 and bundled SQLite.
+The src-tauri/ crate now provides the first Windows executable and registered
+setup/login/list/lock commands. See desktop-development.md. The older bridge
+example under docs/reference/ remains reference code.
 
 ## Setup
 
@@ -23,7 +24,7 @@ Official prerequisites: https://rust-lang.github.io/rustup/installation/windows-
 ```powershell
 .\scripts\test-backend.ps1
 .\scripts\test-backend.ps1 -WorkflowsOnly
-cargo fmt --manifest-path backend-prototype/Cargo.toml -- --check
+cargo fmt --manifest-path backend/Cargo.toml -- --check
 ```
 
 The script finds Cargo in the default user installation even before this shell's
@@ -46,5 +47,7 @@ the demonstration program has a separate database and is not an isolated runner.
 
 On Windows with Rust/Cargo 1.99.1 (MSVC), the full locked backend suite passed:
 27 tests, including the three new persistence workflows. `cargo fmt -- --check`
-and the PowerShell runner's syntax check also passed. Desktop E2E remains blocked
-by the missing Tauri application, registered commands, and connected UI.
+and the PowerShell runner's syntax check also passed on the earlier device.
+On this device the backend's 27 tests also passed after repository organization.
+An initial Windows executable authentication/list smoke test is now verified;
+full CRM E2E remains pending. See desktop-development.md for the exact scope.
