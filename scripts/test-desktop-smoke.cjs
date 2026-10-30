@@ -18,6 +18,9 @@ const externalRequests = new Set();
 const browserErrors = [];
 const syntheticName = "Fictional Rowan O'Vale <em>Test</em>";
 const syntheticOrganization = 'Fictional Aurora & Sons <Test>';
+const editedName = 'Fictional Rowan Updated <em>Test</em>';
+let createdId;
+let organizationId;
 
 async function freePort() {
   const server = net.createServer();
@@ -98,6 +101,29 @@ async function submit(password) {
   await evaluate(`document.getElementById('password').value = ${JSON.stringify(password)}; document.getElementById('auth-form').requestSubmit();`);
   await until(() => evaluate("!document.getElementById('submit-auth').disabled"), 'authentication completion');
 }
+async function fillForm(formId, values, twice = false) {
+  await evaluate(`(() => {
+    const values = ${JSON.stringify(values)};
+    for (const [id, value] of Object.entries(values)) document.getElementById(id).value = value;
+    const form = document.getElementById(${JSON.stringify(formId)});
+    form.requestSubmit();
+    ${twice ? 'form.requestSubmit();' : ''}
+  })()`);
+}
+async function modalShown(id) {
+  await until(() => evaluate(`document.getElementById(${JSON.stringify(id)}).classList.contains('show')`), 'modal ' + id);
+  // Bootstrap transitions must finish before a subsequent hide/show.
+  await until(() => evaluate(`!bootstrap.Modal.getInstance(document.getElementById(${JSON.stringify(id)}))._isTransitioning`), 'modal transition');
+}
+async function modalClosed(id) {
+  await until(() => evaluate(`getComputedStyle(document.getElementById(${JSON.stringify(id)})).display === 'none'`), 'closed modal ' + id);
+}
+async function savedMessage(text) {
+  await until(() => evaluate(`document.getElementById('workspace-message').textContent === ${JSON.stringify(text)}`), text);
+}
+async function restartLogin() {
+  await stop(); await launch(); await submit('fictional smoke password'); await waitForRecords();
+}
 async function stop() {
   socket?.close();
   if (child && child.exitCode === null) {
@@ -114,6 +140,10 @@ async function stop() {
   assert.equal(await evaluate("window.crmApi.listContractors().catch(error => error.message)"), 'Login required');
   assert.equal(await evaluate("window.crmApi.listOrganizations().catch(error => error.message)"), 'Login required');
   assert.equal(await evaluate("window.crmApi.recordActivity().catch(error => error.message)"), 'Login required');
+  assert.equal(await evaluate("window.crmApi.createOrganization({name:'Fictional denied',region:null}).catch(error => error.message)"), 'Login required');
+  assert.equal(await evaluate("window.crmApi.createContractor({organization_id:1,profile:{full_name:'Fictional denied'}}).catch(error => error.message)"), 'Login required');
+  assert.equal(await evaluate("window.crmApi.updateContractor({id:1,profile:{full_name:'Fictional denied'}}).catch(error => error.message)"), 'Login required');
+  assert.equal(await evaluate("window.crmApi.archiveContractor({id:1}).catch(error => error.message)"), 'Login required');
   await submit('short');
   assert.match(await evaluate("document.getElementById('message').textContent"), /at least 12/);
   await submit('fictional smoke password');
@@ -129,18 +159,37 @@ async function stop() {
   assert.equal(await evaluate("window.crmApi.setupAdmin('replacement password').catch(error => error.message)"), 'Administrator already configured');
   const screenshot = await cdp('Page.captureScreenshot', { format: 'png' });
   fs.writeFileSync(path.join(testDirectory, 'empty-directory.png'), Buffer.from(screenshot.data, 'base64'));
+  await evaluate("document.querySelector('#view-contacts [data-bs-target=\"#add-contractor-modal\"]').click()");
+  await modalShown('add-contractor-modal');
+  assert.equal(await evaluate("document.getElementById('save-contractor').disabled"), true);
+  assert.match(await evaluate("document.getElementById('contractor-form-message').textContent"), /Create an organization/);
+  await evaluate("document.querySelector('#add-contractor-modal [data-bs-dismiss]').click()");
+  await modalClosed('add-contractor-modal');
+  // Create two organizations with the SAME name through actual UI commands.
+  for (const region of ['Other Region', 'Test Region']) {
+    await evaluate("document.getElementById('nav-organizations').click(); document.getElementById('add-organization').click()");
+    await modalShown('organization-modal');
+    await fillForm('organization-form', { 'organization-name': syntheticOrganization, 'organization-region': region });
+    await savedMessage('Organization saved.'); await modalClosed('organization-modal');
+  }
+  organizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Test Region').id)");
+  await evaluate("document.getElementById('nav-contacts').click(); document.querySelector('#view-contacts [data-bs-target=\"#add-contractor-modal\"]').click()");
+  await modalShown('add-contractor-modal');
+  await fillForm('add-contractor-form', { 'contractor-full-name': '   ', 'contractor-organization': String(organizationId) });
+  await until(() => evaluate("document.getElementById('contractor-form-message').textContent === 'Full name is required'"), 'backend field validation');
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 0);
+  assert.equal(await evaluate("document.getElementById('contractor-full-name').value"), '   ');
+  await fillForm('add-contractor-form', { 'contractor-full-name': syntheticName, 'contractor-organization': String(organizationId), 'contractor-role': 'Integration engineer', 'contractor-email': 'rowan@example.com', 'contractor-phone': '202-555-0105' }, true);
+  await savedMessage('Contractor saved.'); await modalClosed('add-contractor-modal');
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 1, 'Double submit must not create duplicates.');
+  createdId = await evaluate("window.crmApi.listContractors().then(records => records[0].id)");
+  assert.equal(await evaluate("document.querySelector('#contractor-profile-content h2').textContent"), syntheticName);
   await evaluate("document.getElementById('lock').click()");
   await until(() => evaluate("window.crmApi.getAuthStatus().then(status => !status.authenticated)"), 'logout');
   assert.equal(await evaluate("window.crmApi.listContractors().catch(error => error.message)"), 'Login required');
   assert.equal(await evaluate("document.getElementById('workspace').hidden"), true);
   assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 0);
   await stop();
-  // Test setup only: seed an isolated database through SQLite, not the UI.
-  // Contractor creation through the UI is outside this smoke test's scope.
-  const database = new DatabaseSync(path.join(testDirectory, 'crm.db'));
-  const organization = database.prepare('INSERT INTO organizations (name, region) VALUES (?, ?)').run(syntheticOrganization, 'Test Region');
-  const contractor = database.prepare('INSERT INTO contractors (full_name, organization_id) VALUES (?, ?)').run(syntheticName, organization.lastInsertRowid);
-  database.close();
   await launch();
   assert.equal(await evaluate("document.getElementById('auth-heading').textContent"), 'Log in');
   assert.equal(await evaluate("window.crmApi.listContractors().catch(error => error.message)"), 'Login required');
@@ -155,15 +204,29 @@ async function stop() {
   assert.match(await evaluate("document.querySelector('.contractor-row td:last-child').textContent"), /Date unavailable/);
   await evaluate("document.querySelector('.contractor-row').click()");
   assert.equal(await evaluate("document.querySelector('#contractor-profile-content h2').textContent"), syntheticName);
-  assert.equal(await evaluate("window.location.hash"), `#/contractors/${contractor.lastInsertRowid}`);
+  assert.equal(await evaluate("window.location.hash"), `#/contractors/${createdId}`);
   await cdp('Page.reload');
   await until(() => evaluate("Boolean(document.getElementById('auth-form')) && !document.getElementById('auth').hidden && !document.getElementById('auth-form').hidden"), 'reloaded locked page');
   await submit('fictional smoke password');
   await waitForRecords();
   assert.equal(await evaluate("document.querySelector('#contractor-profile-content h2').textContent"), syntheticName);
+  await evaluate("document.getElementById('edit-contractor').click()"); await modalShown('add-contractor-modal');
+  assert.equal(await evaluate("document.getElementById('contractor-organization').disabled"), true);
+  assert.equal(await evaluate("document.getElementById('contractor-organization').value"), String(organizationId));
+  await fillForm('add-contractor-form', { 'contractor-full-name': editedName, 'contractor-role': '', 'contractor-email': 'updated@example.com', 'contractor-phone': '202-555-0106' });
+  await savedMessage('Contractor saved.'); await modalClosed('add-contractor-modal');
+  await restartLogin();
+  const updated = await evaluate("window.crmApi.listContractors().then(records => records[0])");
+  assert.equal(updated.full_name, editedName); assert.equal(updated.organization_id, organizationId);
+  assert.equal(updated.role, null); assert.equal(updated.email, 'updated@example.com'); assert.equal(updated.phone, '202-555-0106');
+  assert.equal(updated.status, 'Active');
   await evaluate("document.getElementById('nav-organizations').click()");
   assert.equal(await evaluate("document.querySelector('#organizations-grid h2').textContent"), syntheticOrganization);
-  await evaluate("document.querySelector('#organizations-grid button').click()");
+  const otherOrganizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Other Region').id)");
+  await evaluate(`document.querySelector('[data-organization-id="${otherOrganizationId}"] button').click()`);
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 0, 'Duplicate names must not merge distinct organization rosters.');
+  await evaluate("document.getElementById('nav-organizations').click()");
+  await evaluate(`document.querySelector('[data-organization-id="${organizationId}"] button').click()`);
   assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 1);
   // Exercise UI error handling and delayed-response protection, explicitly simulated.
   await evaluate("window.savedApi = window.crmApi; window.crmApi = { ...window.savedApi, listContractors: async () => { throw new Error('Controlled UI test failure'); } }; document.getElementById('refresh-contractors').click()");
@@ -180,10 +243,35 @@ async function stop() {
   await evaluate("(async () => { window.releaseRecords(await window.pendingRecords); window.crmApi = window.savedApi; })()");
   await delay(100);
   assert.equal(await evaluate("document.getElementById('workspace').hidden"), true);
-  assert.equal(await evaluate(`document.getElementById('workspace').textContent.includes(${JSON.stringify(syntheticName)})`), false);
+  assert.equal(await evaluate(`document.getElementById('workspace').textContent.includes(${JSON.stringify(editedName)})`), false);
+  await submit('fictional smoke password'); await waitForRecords();
+  await evaluate("document.getElementById('nav-contacts').click(); document.querySelector('.contractor-row').click(); document.getElementById('edit-contractor').click(); window.crmSession.lock('Test lock with editor open.')");
+  await until(() => evaluate("window.crmApi.getAuthStatus().then(status => !status.authenticated)"), 'lock with editor open');
+  await modalClosed('add-contractor-modal');
+  assert.equal(await evaluate("document.getElementById('contractor-full-name').value"), '');
+  assert.equal(await evaluate("document.getElementById('contractor-organization').options.length"), 0);
+  await submit('fictional smoke password'); await waitForRecords();
+  await evaluate("document.getElementById('nav-contacts').click(); document.querySelector('.contractor-row').click(); document.getElementById('archive-contractor').click()");
+  await modalShown('archive-modal');
+  assert.equal(await evaluate("document.getElementById('archive-name').textContent"), editedName);
+  await evaluate("document.querySelector('#archive-modal [data-bs-dismiss]').click()"); await modalClosed('archive-modal');
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 1);
+  await evaluate("document.getElementById('archive-contractor').click()"); await modalShown('archive-modal');
+  await fillForm('archive-form', {});
+  await savedMessage('Contractor archived. The record is retained.'); await modalClosed('archive-modal');
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 0);
+  await restartLogin();
+  assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '0');
+  assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 0);
+  await stop();
+  // Read-only inspection proves UI archive retained the stored row.
+  const database = new DatabaseSync(path.join(testDirectory, 'crm.db'), { readOnly: true });
+  const retained = database.prepare('SELECT full_name, archived_at FROM contractors WHERE id = ?').get(createdId);
+  database.close();
+  assert.equal(retained.full_name, editedName); assert.ok(retained.archived_at);
   assert.equal(externalRequests.size, 0, 'CRM must not attempt external HTTP(S) requests.');
   assert.deepEqual(browserErrors, [], 'Unexpected browser errors or CSP violations.');
-  console.log('PASS: real CRM executable setup/login/lock/restart; empty and persisted records; numeric profile route; organizations; safe text rendering; local assets with original CDN hosts blocked.');
+  console.log('PASS: real UI organization/contractor create, field validation, double-submit protection, edit/restart, archive confirmation/cancel/restart and retained row; duplicate-name organization IDs; setup/login/lock, safe rendering and local assets.');
   console.log('PASS: simulated UI failure/retry and delayed response after lock.');
   console.log('Retained test data and screenshot:', testDirectory);
 })().catch(async error => {

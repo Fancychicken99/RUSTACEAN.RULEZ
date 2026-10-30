@@ -1,13 +1,13 @@
 # Executable end-to-end test plan
 
-Status: initial Windows executable smoke test implemented and passed on October
-29, 2026. scripts/test-desktop-smoke.cjs launches the real debug executable and
+Status: Windows executable smoke coverage expanded October 30, 2026. scripts/test-desktop-smoke.cjs launches the real debug executable and
 drives its WebView2 via local CDP. It covers setup validation, wrong/correct login,
 protected empty and persisted lists, numeric profile routes/reload, organizations,
 safe text rendering, lock/data clearing, and persisted login after restart.
 It uses a fresh debug-only data directory for real IPC; explicitly simulated
-UI failures test retry and late-response handling separately. Full CRUD scenarios
-remain pending. See desktop-development.md for commands and limitations.
+UI failures test retry and late-response handling separately. Actual organization/
+contractor creation, edit/restart, archive/cancel/restart and retained-row checks
+are now included; broader acceptance scenarios remain pending. See desktop-development.md for commands and limitations.
 The `backend` contains a Rust/SQLite crate and backend tests.
 `tests/persistence_workflows.rs` adds isolated file-backed database workflows;
 these are backend integration coverage, not UI/IPC or application-restart tests.
@@ -21,9 +21,9 @@ exact screen/build before treating a result as database persistence evidence.
 
 The smoke test blocks the original remote CDN hosts and asserts no external
 HTTP(S) requests were observed. That is not a test with OS networking disabled.
-UI create/edit/archive and backend-filter acceptance remain pending. Test data
-for populated-list checks is inserted directly into a disposable database after
-initial empty-database checks; it is not evidence of UI creation.
+Current smoke records are created through real UI forms/commands, edited, and
+archived with restart checks. A read-only SQLite inspection proves archive
+retention. Backend-filter acceptance remains pending.
 
 ## Sprint 1 milestone: MVP ready for E2E testing
 
@@ -66,11 +66,11 @@ Broughnut owns all remaining MVP implementation and verification, including UI s
 | P0 | Filter contacts | Combined region/country/city filters return matching records; clearing restores results; no-match state is visible | Backend filtering wired to UI |
 | P0 | Create and restart | Submit a unique fictional record; find it; close and relaunch; reopen and verify stored fields | Create, profile, and persistence wired |
 | P0 | Edit and restart | Change that record; relaunch; verify new values | Update wired |
-| P0 | Delete and restart | Delete a test record using the normal confirmation flow; relaunch; verify absence | Delete wired |
+| P0 | Archive and restart | Archive through confirmation; relaunch; verify hidden from active lists and retained in SQLite | Covered by Windows smoke for contractor archive |
 | P1 | Image persistence | Attach a known image; verify it renders; relaunch and verify it still renders | Image handoff, storage, and display wired |
 | P1 | Invalid input | Required fields/invalid email produce a useful message; no record is inserted | Validation and error UI wired |
 | P1 | Backend failure | Controlled test failure produces visible error, no false success or mock fallback; recovery permits retry | Safe failure injection and error handling |
-| P1 | Dashboard totals | Create/change/delete a test record and verify relevant totals reflect saved data | Real statistics command wired |
+| P1 | Dashboard totals | Create/change/archive a test record and verify relevant totals reflect saved data | Real statistics command wired |
 | P1 | Profile selection | Selecting a specific record opens that record's details | Profile navigation wired |
 | P2 | Offline launch | Packaged app opens and core flows work without internet, if required by the Statement of Work | Assets packaged and offline requirement confirmed |
 

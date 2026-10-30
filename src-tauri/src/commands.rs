@@ -2,6 +2,7 @@ use rusqlite::Connection;
 use secure_crm_backend::{
     admin::{admin_exists, create_first_admin},
     database::{Contractor, Organization, get_organizations},
+    profiles::{self, ProfileError, ProfileFields},
     protected::list_contractors_if_authenticated,
     session::SessionManager,
     setup::initialize_database,
@@ -26,6 +27,37 @@ struct BackendState {
 pub struct AuthStatus {
     admin_exists: bool,
     authenticated: bool,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CreateContractorRequest {
+    organization_id: i64,
+    profile: ProfileFields,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UpdateContractorRequest {
+    id: i64,
+    profile: ProfileFields,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OrganizationRequest {
+    name: String,
+    region: Option<String>,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RecordRequest {
+    id: i64,
+}
+
+fn profile_error(error: ProfileError, fallback: &str) -> String {
+    match error {
+        ProfileError::Database(_) => fallback.into(),
+        other => other.to_string(),
+    }
 }
 
 impl AppState {
@@ -100,6 +132,42 @@ impl AppState {
         }
         Ok(())
     }
+
+    fn create(&self, request: CreateContractorRequest) -> Result<Contractor, String> {
+        let mut state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::create_profile(&mut state.conn, request.organization_id, request.profile)
+            .map_err(|e| profile_error(e, "Unable to save contractor"))
+    }
+
+    fn update(&self, request: UpdateContractorRequest) -> Result<Contractor, String> {
+        let mut state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::update_profile(&mut state.conn, request.id, request.profile)
+            .map_err(|e| profile_error(e, "Unable to save contractor"))
+    }
+
+    fn archive(&self, request: RecordRequest) -> Result<(), String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::archive_profile(&state.conn, request.id)
+            .map_err(|e| profile_error(e, "Unable to archive contractor"))
+    }
+
+    fn create_org(&self, request: OrganizationRequest) -> Result<Organization, String> {
+        let mut state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::create_organization(&mut state.conn, request.name, request.region)
+            .map_err(|e| profile_error(e, "Unable to save organization"))
+    }
 }
 
 #[tauri::command]
@@ -137,9 +205,121 @@ pub fn record_activity(state: tauri::State<'_, AppState>) -> Result<(), String> 
     state.activity()
 }
 
+#[tauri::command]
+pub fn create_contractor(
+    request: CreateContractorRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Contractor, String> {
+    state.create(request)
+}
+#[tauri::command]
+pub fn update_contractor(
+    request: UpdateContractorRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Contractor, String> {
+    state.update(request)
+}
+#[tauri::command]
+pub fn archive_contractor(
+    request: RecordRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    state.archive(request)
+}
+#[tauri::command]
+pub fn create_organization(
+    request: OrganizationRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Organization, String> {
+    state.create_org(request)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn profile() -> ProfileFields {
+        ProfileFields {
+            full_name: "Fictional Bridge Test".into(),
+            role: None,
+            email: Some("bridge@example.com".into()),
+            phone: None,
+        }
+    }
+
+    #[test]
+    fn profile_mutations_require_login_and_return_persisted_records() {
+        let directory = tempfile::tempdir().unwrap();
+        let app = AppState::open(&directory.path().join("mutations.db")).unwrap();
+        assert_eq!(
+            app.create_org(OrganizationRequest {
+                name: "Fictional Org".into(),
+                region: None
+            })
+            .unwrap_err(),
+            "Login required"
+        );
+        assert_eq!(
+            app.create(CreateContractorRequest {
+                organization_id: 1,
+                profile: profile()
+            })
+            .unwrap_err(),
+            "Login required"
+        );
+        assert_eq!(
+            app.update(UpdateContractorRequest {
+                id: 1,
+                profile: profile()
+            })
+            .unwrap_err(),
+            "Login required"
+        );
+        assert_eq!(
+            app.archive(RecordRequest { id: 1 }).unwrap_err(),
+            "Login required"
+        );
+        app.configure_admin("fictional test password").unwrap();
+        app.sign_in("fictional test password").unwrap();
+        let org = app
+            .create_org(OrganizationRequest {
+                name: "Fictional Org".into(),
+                region: Some("Test Region".into()),
+            })
+            .unwrap();
+        let saved = app
+            .create(CreateContractorRequest {
+                organization_id: org.id,
+                profile: profile(),
+            })
+            .unwrap();
+        assert_eq!(saved.organization_id, Some(org.id));
+        let mut edited = profile();
+        edited.full_name = "Fictional Edited".into();
+        assert_eq!(
+            app.update(UpdateContractorRequest {
+                id: saved.id,
+                profile: edited
+            })
+            .unwrap()
+            .full_name,
+            "Fictional Edited"
+        );
+        app.archive(RecordRequest { id: saved.id }).unwrap();
+        assert!(app.contractors().unwrap().is_empty());
+        assert!(
+            app.update(UpdateContractorRequest {
+                id: saved.id,
+                profile: profile()
+            })
+            .is_err()
+        );
+        app.sign_out().unwrap();
+        assert_eq!(
+            app.archive(RecordRequest { id: saved.id }).unwrap_err(),
+            "Login required"
+        );
+    }
 
     #[test]
     fn fresh_database_requires_setup_and_login_and_relocks_on_reopen() {

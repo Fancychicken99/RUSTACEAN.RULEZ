@@ -6,6 +6,7 @@ pub mod decay;
 pub mod filtering;
 pub mod history;
 pub mod images;
+pub mod profiles;
 pub mod protected;
 pub mod search;
 pub mod session;

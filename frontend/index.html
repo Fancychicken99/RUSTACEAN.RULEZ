@@ -100,7 +100,7 @@
               <h1 class="h3 mb-1">Dashboard</h1>
               <p class="text-secondary mb-0">Executive summary of your contractor workspace.</p>
             </div>
-            <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" disabled title="Unavailable in this build" data-bs-target="#add-contractor-modal">
+            <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal">
               <i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor
             </button>
           </div>
@@ -140,7 +140,7 @@
               <h1 class="h3 mb-1">Organizations</h1>
               <p class="text-secondary mb-0">Organizations and their active contractor rosters.</p>
             </div>
-            <button class="btn btn-primary d-flex align-items-center gap-2" type="button" disabled title="Unavailable in this build"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add organization</button>
+            <button class="btn btn-primary d-flex align-items-center gap-2" type="button" id="add-organization" data-bs-toggle="modal" data-bs-target="#organization-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add organization</button>
           </div>
           <div id="organizations-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 g-xl-4"></div>
         </div>
@@ -155,54 +155,48 @@
     </div>
   </div>
 
-  <div class="modal fade" id="add-contractor-modal" tabindex="-1" aria-labelledby="add-contractor-title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <form id="add-contractor-form">
-          <div class="modal-header">
-            <div>
-              <p class="eyebrow mb-1">CONTRACTOR DIRECTORY</p>
-              <h2 class="modal-title h5" id="add-contractor-title">Add New Contractor</h2>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-4">
-            <div class="row g-3">
-              <div class="col-md-6"><label class="form-label" for="contractor-first-name">First Name</label><input class="form-control" id="contractor-first-name" name="firstName" type="text" autocomplete="given-name" required></div>
-              <div class="col-md-6"><label class="form-label" for="contractor-last-name">Last Name</label><input class="form-control" id="contractor-last-name" name="lastName" type="text" autocomplete="family-name" required></div>
-              <div class="col-md-6"><label class="form-label" for="contractor-phone">Phone</label><input class="form-control" id="contractor-phone" name="phone" type="tel" autocomplete="tel" placeholder="(555) 123-4567"></div>
-              <div class="col-md-6"><label class="form-label" for="contractor-email">Email</label><input class="form-control" id="contractor-email" name="email" type="email" autocomplete="email" required></div>
-              <div class="col-md-6">
-                <label class="form-label" for="contractor-organization">Organization</label>
-                <select class="form-select" id="contractor-organization" name="organization" required>
-                  <option value="" selected disabled>Select an organization</option>
-                  <option value="Brightline Studio">Brightline Studio</option><option value="Northstar Partners">Northstar Partners</option><option value="Summit Creative">Summit Creative</option>
-                </select>
-              </div>
-              <div class="col-12"><h3 class="h6 mb-0 mt-2">Location</h3></div>
-              <div class="col-md-4">
-                <label class="form-label" for="contractor-region">Region</label>
-                <select class="form-select" id="contractor-region" name="region" required>
-                  <option value="" selected disabled>Select a region</option>
-                  <option value="North America">North America</option><option value="Europe">Europe</option><option value="Asia Pacific">Asia Pacific</option><option value="Latin America">Latin America</option>
-                </select>
-              </div>
-              <div class="col-md-4"><label class="form-label" for="contractor-country">Country</label><input class="form-control" id="contractor-country" name="country" type="text" autocomplete="country-name" required></div>
-              <div class="col-md-4"><label class="form-label" for="contractor-city-sector">City/Sector</label><input class="form-control" id="contractor-city-sector" name="citySector" type="text" required></div>
-              <div class="col-12">
-                <label class="form-label" for="contractor-photo">Upload Photo</label>
-                <input class="form-control" id="contractor-photo" name="photo" type="file" accept="image/*">
-                <div class="form-text">Choose an image from this device.</div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Contractor</button>
-          </div>
-        </form>
-      </div>
-    </div>
+  <div class="modal fade" id="add-contractor-modal" tabindex="-1" aria-labelledby="add-contractor-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+      <form id="add-contractor-form">
+        <div class="modal-header"><h2 class="modal-title h5" id="add-contractor-title">Add contractor</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body p-4">
+          <p id="contractor-form-message" role="status" aria-live="polite" class="text-secondary"></p>
+          <fieldset id="contractor-fields"><legend class="visually-hidden">Contractor details</legend><div class="row g-3">
+            <div class="col-12"><label class="form-label" for="contractor-full-name">Full name</label><input class="form-control" id="contractor-full-name" name="full_name" type="text" maxlength="200" required autocomplete="name"></div>
+            <div class="col-12"><label class="form-label" for="contractor-organization">Organization</label><select class="form-select" id="contractor-organization" name="organization_id" required></select><p id="organization-help" class="form-text mb-0">Region comes from the selected organization.</p></div>
+            <div class="col-12"><label class="form-label" for="contractor-role">Role (optional)</label><input class="form-control" id="contractor-role" name="role" type="text" maxlength="120"></div>
+            <div class="col-md-6"><label class="form-label" for="contractor-email">Email (optional)</label><input class="form-control" id="contractor-email" name="email" type="email" maxlength="254" autocomplete="email"></div>
+            <div class="col-md-6"><label class="form-label" for="contractor-phone">Phone (optional)</label><input class="form-control" id="contractor-phone" name="phone" type="tel" maxlength="80" autocomplete="tel"></div>
+          </div></fieldset>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" id="save-contractor" class="btn btn-primary">Save contractor</button></div>
+      </form>
+    </div></div>
+  </div>
+
+  <div class="modal fade" id="organization-modal" tabindex="-1" aria-labelledby="organization-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+      <form id="organization-form">
+        <div class="modal-header"><h2 id="organization-title" class="modal-title h5">Add organization</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body p-4"><p id="organization-form-message" role="status" aria-live="polite" class="text-secondary"></p>
+          <fieldset id="organization-fields"><legend class="visually-hidden">Organization details</legend>
+            <label class="form-label" for="organization-name">Name</label><input class="form-control mb-3" id="organization-name" name="name" type="text" maxlength="200" required>
+            <label class="form-label" for="organization-region">Region (optional)</label><input class="form-control" id="organization-region" name="region" type="text" maxlength="120">
+          </fieldset>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" id="save-organization" class="btn btn-primary">Save organization</button></div>
+      </form>
+    </div></div>
+  </div>
+
+  <div class="modal fade" id="archive-modal" tabindex="-1" aria-labelledby="archive-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+      <form id="archive-form">
+        <div class="modal-header"><h2 class="modal-title h5" id="archive-title">Archive contractor?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body p-4"><p id="archive-name" class="fw-semibold"></p><p>The record will be hidden from the directory and retained in the local database. It will not be permanently deleted.</p><p id="archive-form-message" role="status" aria-live="polite" class="text-secondary"></p></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" id="confirm-archive" class="btn btn-danger">Archive</button></div>
+      </form>
+    </div></div>
   </div>
 
   <div class="offcanvas offcanvas-end contractor-filter-panel" tabindex="-1" id="contractor-filter-panel" aria-labelledby="contractor-filter-title">
@@ -224,6 +218,7 @@
   <script src="js/theme-toggle.js"></script>
   <script src="js/tauri-api.js"></script>
   <script src="js/contractor-list.js"></script>
+  <script src="js/add-contractor.js"></script>
   <script src="js/security-lock.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-use rusqlite::{Connection, Result, params};
+use rusqlite::{Connection, OptionalExtension, Result, params};
 
 pub fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute_batch(
@@ -51,6 +51,7 @@ pub fn add_contractor(conn: &Connection, full_name: &str, organization_id: i64) 
 pub struct Contractor {
     pub id: i64,
     pub full_name: String,
+    pub organization_id: Option<i64>,
     pub organization_name: Option<String>,
     pub region: Option<String>,
     pub status: String,
@@ -71,7 +72,8 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
             c.role,
             c.email,
             c.phone,
-            c.photo_path
+            c.photo_path,
+            c.organization_id
          FROM contractors c
          LEFT JOIN organizations o
          ON c.organization_id = o.id
@@ -90,6 +92,7 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
             email: row.get(6)?,
             phone: row.get(7)?,
             photo_path: row.get(8)?,
+            organization_id: row.get(9)?,
         })
     })?;
 
@@ -110,6 +113,33 @@ pub fn update_contractor_name(
     )?;
 
     Ok(rows_updated > 0)
+}
+
+// Fetch the exact saved record after a workflow; no full-directory scan.
+pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> {
+    conn.query_row(
+        "SELECT c.id, c.full_name, o.name, o.region, c.status,
+                c.role, c.email, c.phone, c.photo_path, c.organization_id
+         FROM contractors c
+         LEFT JOIN organizations o ON c.organization_id = o.id
+         WHERE c.id = ?1 AND c.archived_at IS NULL",
+        [id],
+        |row| {
+            Ok(Contractor {
+                id: row.get(0)?,
+                full_name: row.get(1)?,
+                organization_name: row.get(2)?,
+                region: row.get(3)?,
+                status: row.get(4)?,
+                role: row.get(5)?,
+                email: row.get(6)?,
+                phone: row.get(7)?,
+                photo_path: row.get(8)?,
+                organization_id: row.get(9)?,
+            })
+        },
+    )
+    .optional()
 }
 
 pub fn archive_contractor(conn: &Connection, contractor_id: i64) -> Result<bool> {

@@ -84,3 +84,18 @@ those as real database failures. Snapshot and detailed checks are in checkpoint.
 HANDOFF OUT requested: learning state and next implementation step captured in
 session-handoff.md. Resume through actual create/edit/archive code; do not treat
 tool-driven test success as proof of independent user coding proficiency.
+
+## Atomic profile save workflow — October 30, 2026
+
+Explained transactions as an all-or-nothing save: name/contact writes commit
+together, and a later write failure rolls back the initial insert. Backend
+profiles.rs owns those transactions/validation; Tauri commands deserialize typed
+requests, check session access, call workflows, and return actual committed
+records. organization_id is now serialized so same-name organizations remain
+distinct. Edit preserves organization/status; transfers require history-aware
+operations. Optional blank values normalize to None/null rather than stale text.
+
+29 backend tests, three bridge tests, and real UI create/edit/archive/restart
+checks passed. No new user teach-back or independent coding exercise confirmed.
+Resume learning through filter/import code, especially borrowing &mut Connection
+for transaction creation and propagating typed domain/database errors.

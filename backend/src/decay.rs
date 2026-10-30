@@ -15,7 +15,8 @@ pub fn get_contractors_needing_followup(
             c.role,
             c.email,
             c.phone,
-            c.photo_path
+            c.photo_path,
+            c.organization_id
          FROM contractors c
 
          LEFT JOIN organizations o
@@ -51,6 +52,7 @@ pub fn get_contractors_needing_followup(
             email: row.get(6)?,
             phone: row.get(7)?,
             photo_path: row.get(8)?,
+            organization_id: row.get(9)?,
         })
     })?;
 

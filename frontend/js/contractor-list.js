@@ -36,7 +36,7 @@
   const contactListHtml = `
     <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div><p class="eyebrow mb-1">WORKSPACE</p><h1 class="h3 mb-1">Contact List</h1><p class="text-secondary mb-0">Browse and manage your contractor directory.</p></div>
-      <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" disabled title="Unavailable in this build" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
+      <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
     </div>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
@@ -135,6 +135,7 @@
       dateCell.classList.add('text-secondary');
       row.appendChild(dateCell);
       row.classList.add('contractor-row');
+      row.dataset.contractorId = String(contractor.id);
       row.tabIndex = 0;
       row.setAttribute('role', 'button');
       row.setAttribute('aria-label', `Open profile for ${cells[0]}`);
@@ -204,6 +205,18 @@
     emailColumn.append(emailLabel, email);
     details.appendChild(emailColumn);
     body.appendChild(details);
+    const actions = document.createElement('div');
+    actions.className = 'd-flex gap-2 mt-4';
+    const edit = document.createElement('button');
+    edit.type = 'button'; edit.id = 'edit-contractor'; edit.className = 'btn btn-primary';
+    edit.textContent = 'Edit contractor';
+    edit.addEventListener('click', () => window.dispatchEvent(new CustomEvent('crm:edit-contractor', { detail: contractor })));
+    const archive = document.createElement('button');
+    archive.type = 'button'; archive.id = 'archive-contractor'; archive.className = 'btn btn-outline-danger';
+    archive.textContent = 'Archive contractor';
+    archive.addEventListener('click', () => window.dispatchEvent(new CustomEvent('crm:archive-contractor', { detail: contractor })));
+    actions.append(edit, archive);
+    body.appendChild(actions);
     profile.appendChild(body);
   }
 
@@ -388,7 +401,7 @@
           : contractor.status === status);
 
       return matchesStatus &&
-        (organization === 'All' || contractor.organization_name === organization) &&
+        (organization === 'All' || String(contractor.organization_id) === organization) &&
         (!normalizedRegion || String(contractor.region ?? '').toLowerCase() === normalizedRegion) &&
         (!normalizedCountry || String(contractor.country ?? '').toLowerCase().includes(normalizedCountry)) &&
         (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector)) &&
@@ -410,16 +423,15 @@
     }
 
     organizations.forEach((organization) => {
-      // The current contractor response has the organization name, not its ID.
-      const ambiguousName = organizations.filter(item => item.name === organization.name).length > 1;
       const activeContractors = contractors.filter((contractor) =>
-        contractor.organization_name === organization.name && contractor.status === 'Active'
+        contractor.organization_id === organization.id && contractor.status === 'Active'
       ).length;
 
       const column = document.createElement('div');
       column.className = 'col';
       const card = document.createElement('article');
       card.className = 'card organization-card h-100';
+      card.dataset.organizationId = String(organization.id);
       const cardBody = document.createElement('div');
       cardBody.className = 'card-body d-flex flex-column p-4';
 
@@ -445,7 +457,7 @@
       countLabel.className = 'text-secondary';
       countLabel.textContent = 'Active Contractors: ';
       const countValue = document.createElement('strong');
-      countValue.textContent = ambiguousName ? 'Unavailable' : String(activeContractors);
+      countValue.textContent = String(activeContractors);
       contractorCount.append(countLabel, countValue);
 
       const region = document.createElement('p');
@@ -461,11 +473,9 @@
       rosterButton.className = 'btn btn-outline-primary mt-auto';
       rosterButton.type = 'button';
       rosterButton.textContent = 'View Roster';
-      rosterButton.disabled = ambiguousName;
-      if (ambiguousName) rosterButton.title = 'Roster unavailable for organizations with duplicate names.';
       rosterButton.addEventListener('click', () => {
         clearContactFilters();
-        document.getElementById('filter-organization').value = organization.name;
+        document.getElementById('filter-organization').value = String(organization.id);
         switchView('view-contacts');
         renderContactList();
         document.getElementById('destination-title').innerText = `Roster: ${organization.name}`;
@@ -658,9 +668,9 @@
     organizationFilter.replaceChildren(new Option('All organizations', 'All'));
     const regions = [...new Set([...contractors, ...organizations].map(record => record.region).filter(Boolean))].sort();
     regions.forEach(region => regionFilter.add(new Option(region, region)));
-    organizations.forEach(organization => organizationFilter.add(new Option(organization.name, organization.name)));
+    organizations.forEach(organization => organizationFilter.add(new Option(`${organization.name} · ${organization.region ?? 'No region'} (#${organization.id})`, String(organization.id))));
     if (regions.includes(selectedRegion)) regionFilter.value = selectedRegion;
-    if (organizations.some(organization => organization.name === selectedOrganization)) organizationFilter.value = selectedOrganization;
+    if (organizations.some(organization => String(organization.id) === selectedOrganization)) organizationFilter.value = selectedOrganization;
   }
 
   function renderRegions() {
@@ -754,7 +764,20 @@
     renderRegions();
     renderOrganizations();
     restoreRouteFromUrl();
+    return loaded;
   }
+
+  window.crmDirectory = Object.freeze({
+    refresh: refreshSavedData,
+    get organizations() { return organizations.map(organization => ({ ...organization })); },
+    showProfile(id) {
+      const record = contractors.find(contractor => contractor.id === id);
+      if (!record || !window.crmSession?.authenticated) return false;
+      renderContractorProfile(record);
+      switchView('view-contractor-profile', { contractorId: record.id });
+      return true;
+    },
+  });
 
   window.addEventListener('crm:unlocked', refreshSavedData);
   window.addEventListener('crm:locked', clearSavedData);

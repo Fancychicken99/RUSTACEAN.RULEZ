@@ -56,8 +56,9 @@ Requires Windows/WebView2 and Node 24; no extra Node packages. The runner create
 a fresh temporary directory and launches only its own debug process with a
 localhost WebView2 debugging port. It drives the real UI/IPC using CDP. It
 restarts the executable to verify persisted credentials and relocking. Test-only
-setup inserts synthetic records directly into that disposable SQLite database
-using node:sqlite after the empty-database checks. This does not test UI creation.
+setup now creates organizations/contractors through actual forms and registered
+commands. node:sqlite performs only a read-only inspection after archive to prove
+the row remains stored. No direct SQL seed writes are used by the current test.
 
 Debug builds only honor absolute RUSTACEAN_TEST_DATA_DIR. Release builds always
 use app_data_dir. No reset/seed command is exposed to the production frontend.
@@ -67,25 +68,46 @@ ordinary use. Build products, databases, and generated schemas are ignored.
 
 The smoke test checks empty and persisted lists, dashboard counts, numeric profile
 routes and reload, organizations/roster, literal rendering of markup-like names,
-lock clearing, and restart. CDN hosts used by the original page are blocked and
+lock clearing (including an open editor), and restart. It saves two same-name
+organizations, creates a contractor in the selected one, checks validation and
+double-submit protection, edits fields, restarts and verifies persistence, then
+cancels/confirms archive and restarts again. CDN hosts used by the original page are blocked and
 external HTTP(S) requests are tracked. This is not an OS network-disconnected
 launch test. Controlled failure/retry and delayed responses after lock are
 explicitly simulated UI conditions, separate from the real IPC checks.
 
 Rust bridge tests cover actual saved record reopening, setup/login/logout,
 organizations/activity authorization, and rejection of activity after expiry.
-They are not UI tests. The backend source itself was not changed in this slice.
+They are not UI tests. Backend profiles.rs now owns validated atomic save
+workflows. New backend tests verify rollback on a controlled second-write failure
+and archive/edit persistence; response queries include organization_id.
 
 ## Still pending
 
-Create/edit/archive/organization creation; backend region-filter command wiring;
+Organization update/archive, contractor transfer/status workflows; backend
+region-filter command wiring;
 repeatable persisted synthetic import; country/city/media/history/quick actions;
 full timeout/offline/release/platform testing. The directory response currently
-includes organization name without ID: duplicate organization names disable
-ambiguous rosters/counts until that contract is extended. Filters in the current
+includes organization_id; duplicate organization names remain distinct in
+rosters, counts, filters, and form selections. Filters in the current
 UI act on loaded records and do not establish backend-filter acceptance.
 
 API references:
 - https://v2.tauri.app/develop/calling-rust/
 - https://v2.tauri.app/reference/config/
 - https://v2.tauri.app/security/capabilities/
+
+## Saved profile workflow
+
+From Organizations, add an organization (name required, region optional). Add a
+contractor with full name and an organization; role/email/phone are optional.
+Country/city/photo inputs are not offered until their storage/display contracts
+exist. Region is inherited from organization. Profile Edit updates name/contact
+fields and preserves organization/status. Archive asks for confirmation and keeps
+the row in SQLite while hiding it from the directory. No permanent deletion.
+
+The frontend waits for command completion, disables duplicate submissions,
+retains values on validation failures, and refreshes records after committed
+changes. Errors remain visible in the dialog. Lock clears/inerts/closes editors;
+late save completions cannot reopen them. Closing an editor during an active
+request is blocked; this does not cancel a transaction already authorized.

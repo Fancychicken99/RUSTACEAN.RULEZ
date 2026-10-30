@@ -10,6 +10,10 @@ window.crmApi = Object.freeze({
   listContractors: () => invokeCrm('list_contractors'),
   listOrganizations: () => invokeCrm('list_organizations'),
   recordActivity: () => invokeCrm('record_activity'),
+  createContractor: (request) => invokeCrm('create_contractor', { request }),
+  updateContractor: (request) => invokeCrm('update_contractor', { request }),
+  archiveContractor: (request) => invokeCrm('archive_contractor', { request }),
+  createOrganization: (request) => invokeCrm('create_organization', { request }),
 });
 
 async function invokeCrm(command, args = {}) {

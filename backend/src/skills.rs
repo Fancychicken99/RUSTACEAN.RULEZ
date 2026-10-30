@@ -69,7 +69,8 @@ pub fn get_contractors_by_skill(conn: &Connection, skill_name: &str) -> Result<V
             c.role,
             c.email,
             c.phone,
-            c.photo_path
+            c.photo_path,
+            c.organization_id
          FROM contractors c
          JOIN contractor_skills cs
            ON c.id = cs.contractor_id
@@ -93,6 +94,7 @@ pub fn get_contractors_by_skill(conn: &Connection, skill_name: &str) -> Result<V
             email: row.get(6)?,
             phone: row.get(7)?,
             photo_path: row.get(8)?,
+            organization_id: row.get(9)?,
         })
     })?;
 

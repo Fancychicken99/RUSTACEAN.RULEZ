@@ -26,6 +26,7 @@
     byId('retry-auth').hidden = true;
   }
   function showLocked() {
+    document.activeElement?.blur();
     authenticated = false;
     clearTimeout(idleTimer);
     workspace.hidden = true;

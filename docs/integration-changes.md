@@ -109,3 +109,40 @@ external HTTP(S) requests, browser errors/CSP violations, or page overflow.
 Final directory screenshot inspected. Artifacts retained at the path recorded
 in session-handoff.md. Source is included in this handoff commit; no backend
 source/schema changed. Node syntax, local asset/font resolution, cargo fmt and diff checks pass.
+
+## Contractor save/edit/archive and organization creation — October 30, 2026
+
+Status: implemented and verified; included in the explicitly authorized
+create/edit/archive milestone commit after 2e36c00. Push outcome reported separately.
+
+| Files | What changed and why |
+| --- | --- |
+| backend/src/database.rs | Added nullable organization_id to Contractor and a single-record get_contractor query. Stable IDs allow correct editing/rosters when organization names repeat. No schema migration: the column already existed. |
+| backend/src/search.rs, filtering.rs, skills.rs, decay.rs | Included organization_id in SELECTs and row mappings so every Contractor response has the same serializable shape. |
+| backend/src/profiles.rs; backend/src/lib.rs | Added a registered backend module for validation/normalization and atomic create/update transactions. Reuses existing contractor creation/archive functions; keeps SQL and transaction ownership out of the bridge. Added organization creation with nullable region and useful domain errors. |
+| backend/tests/profile_workflows.rs | Tests complete profile/edit/archive persistence, duplicate-name organization identity, invalid/archived organizations, validation, and rollback when the second create write fails. |
+| src-tauri/src/commands.rs and main.rs; frontend/js/tauri-api.js | Added four typed authenticated commands and wrappers: create_contractor, update_contractor, archive_contractor, create_organization. Reject unknown request fields, unsafe IDs and bad inputs; map internal errors without SQL details. Added authorization/mutation bridge test. |
+| frontend/index.html; frontend/js/add-contractor.js | Replaced console-only form behavior with actual add/edit, organization creation, and archive confirmation dialogs. Uses a full-name field and only persisted fields. Region comes from organization. Await completion, guard duplicate submissions, preserve failed inputs, distinguish successful save from failed refresh, and clear/inert/close dialogs on lock. |
+| frontend/js/contractor-list.js | Enabled create actions, added profile Edit/Archive actions and stable record selectors, exported small rendering/refresh interface, and changed organization filters/counts/rosters from names to IDs. Removed duplicate-name ambiguity workaround. |
+| frontend/js/security-lock.js | Blur active controls before hiding; works with editor lock cleanup. A transitioning dialog is closed after its shown event if the session locked meanwhile. |
+| scripts/test-desktop-smoke.cjs | Creates organizations and contractor through the actual UI (no SQL seeding), validates errors/double submit, edits and restarts, checks duplicate-name roster separation, locks an open editor, cancels/confirms archive, restarts again. Read-only SQLite inspection confirms the archived row remains. |
+| README; contract/development/E2E docs; personal notes | Updated exact request fields, supported edits, validation/nullability/errors, evidence, remaining work and resume context. E2E archive scenario now matches the SOW rather than implying permanent delete. |
+
+Verification: all 29 backend tests and three bridge tests passed; locked debug
+executable rebuilt. Final real-executable smoke run passed UI create/edit/archive
+and restart checks, editor lock clearing, duplicate-name IDs, safe rendering,
+no unexpected browser errors/CSP violations/page overflow, and no external HTTP(S)
+requests while original CDN hosts were blocked. Failure/retry and delayed list
+response checks are explicitly simulated; the mutation flows are real IPC.
+Final screenshot inspected. Tests only touch fresh test-owned temporary databases;
+latest artifacts are recorded in session-handoff.md. Normal application data is
+untouched. Existing non-fatal incremental hard-link warnings remain.
+
+Current editor supports full name, role, email, phone, with organization selected
+at creation. Updating organization/status is intentionally not part of this
+request: transfers/status changes need their separate history workflows. Archive
+retains row/status and sets archived_at. Organization update/archive and restore
+UI are not added. Country/city/photo inputs are not accepted or silently dropped.
+Next: backend-filter wiring and deterministic persisted synthetic import, followed
+by remaining MVP acceptance evidence. No completion/security/offline guarantees
+beyond the recorded checks.

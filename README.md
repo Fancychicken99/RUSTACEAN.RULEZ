@@ -3,7 +3,8 @@
 Student contractor CRM for Dr. Burchfield. The Windows Tauri executable now
 opens the original Northstar layout with real local authentication, saved
 contractor/organization lists, profile selection, and dashboard counts. Full
-MVP create/edit/archive/filter/import workflows are still in progress.
+MVP contractor create/edit/archive and organization creation are connected;
+backend filtering and repeatable seed import remain in progress.
 
 ## Repository layout
 
@@ -58,16 +59,17 @@ node scripts/test-desktop-smoke.cjs
 ```
 
 The Windows smoke test drives the real executable with isolated SQLite and
-checks setup/login/lock/restart, empty and persisted records, organizations,
-numeric profile routes, and text-safe rendering. It also checks local assets
+checks setup/login/lock/restart, organization and contractor creation, edit and
+archive across process restarts, duplicate-name organization identity, backend
+validation, double-submit protection, and text-safe rendering. It also checks local assets
 with the original CDN hosts blocked and no external HTTP(S) requests observed.
 Failure/retry and stale-response handling use explicitly simulated UI failures.
 See [the E2E plan](docs/e2e-test-plan.md) for remaining acceptance scenarios.
 
 ## Current limits
 
-Create/edit/archive and organization creation are not connected yet; creation
-buttons are disabled rather than reporting false success. Region/organization/
+Editing currently covers full name, role, email and phone; organization transfers
+and status changes are separate pending workflows. Region/organization/
 status/search filters currently operate on the loaded list, not dedicated backend
 filter commands. Country/city filters are unavailable because the response lacks
 those fields. Contact-history metrics and activity are marked unavailable rather

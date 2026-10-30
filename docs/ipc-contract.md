@@ -1,7 +1,7 @@
 # Initial IPC contract
 
-Updated October 29, 2026. Target for the first integration slice.
-JavaScript wrappers exist in frontend/js/tauri-api.js. All seven commands below
+Updated October 30, 2026. Implemented read/auth and contractor mutation contract.
+JavaScript wrappers exist in frontend/js/tauri-api.js. All eleven commands below
 are implemented in src-tauri/src/commands.rs and registered in main.rs.
 frontend/index.html now uses them in the original CRM layout, without fixtures.
 The Windows debug executable has real UI/IPC smoke coverage for authentication,
@@ -59,6 +59,7 @@ wake timing still need system verification.
 | --- | --- | --- |
 | id | integer | SQLite ID, not a prototype UUID. |
 | full_name | string | Stored name; do not infer first/last name splits. |
+| organization_id | integer or null | Stable organization ID; null only for legacy/unassociated records. |
 | organization_name | string or null | Joined organization name. |
 | region | string or null | Organization region in the current schema. |
 | status | string | Stored status; archive visibility is separate. |
@@ -68,8 +69,8 @@ wake timing still need system verification.
 | photo_path | string or null | Stored reference; does not grant webview access. |
 
 List results exclude archived contractors and are ordered by full_name. IDs must
-remain within JavaScript's safe integer range; address explicit ID validation
-before adding commands accepting IDs. No date fields occur in this response.
+remain within JavaScript's safe integer range. Mutation IDs are validated as
+positive integers no greater than 9007199254740991. No date fields occur in this response.
 Define timestamp format, timezone, nullability, and never-contacted behavior for
 later history/contact commands before implementation.
 
@@ -90,9 +91,9 @@ later history/contact commands before implementation.
 
 Organization has id (integer), name (string), and region (string or null).
 Results exclude archived organizations and are ordered by name. No date fields
-are returned. Current contractor records lack organization_id: duplicate
-organization names make per-organization roster/count lookup ambiguous, so the
-UI disables those ambiguous rosters/counts pending an extended contract.
+are returned. Contractor responses now include organization_id in list, search,
+region, skill, follow-up, and single-record reads. Rosters, counts, filter values
+and form selections use IDs so duplicate names remain distinct.
 
 The directory reads full_name and organization_name directly; profile routes
 compare numeric IDs as URL strings. Country/city fields and contact dates are
@@ -101,6 +102,50 @@ loaded contractor records. History/follow-up metrics are unavailable. Current
 search/status/region/organization filters are frontend filters of the loaded
 records, not verified backend filtering. No fixtures are loaded.
 
-Create/update/archive, organization creation, region/skill/decay filters, contact/history,
+Region/skill/decay command filtering, organization update/archive, contact/history,
 media, and native quick actions need later contracts and registered commands.
 Both index.html and the earlier integration.html use the same IPC wrapper.
+
+## Contractor mutations and organization creation
+
+Every mutation takes one top-level argument, { request: ... }, and requires a
+live authenticated session. Requests and nested profile objects reject unknown
+fields; no ignored country/city/photo/status/organization-change payloads.
+
+| Command / wrapper | request fields | Success |
+| --- | --- | --- |
+| create_organization / createOrganization | name: string; region: string or null (optional) | Persisted Organization |
+| create_contractor / createContractor | organization_id: integer; profile: ProfileFields | Persisted Contractor |
+| update_contractor / updateContractor | id: integer; profile: ProfileFields | Persisted Contractor |
+| archive_contractor / archiveContractor | id: integer | null after archive completes |
+
+ProfileFields: full_name (required string), role/email/phone (optional string or
+null). Updates REPLACE these profile fields; omitted/blank optional values clear
+them to null. The UI submits all displayed fields. Name is not split/inferred.
+Create requires an existing non-archived organization and starts Active. Editing
+preserves organization_id, status, photo, and history. Transfers and status
+changes need separate audited workflows; this editor does not perform them.
+Organization names need not be unique; IDs identify records. Blank region is null.
+
+Backend normalization trims values. Full name/organization name must be nonempty
+and at most 200 Unicode scalar values; role/region max 120, email max 254, phone
+max 80. Normalized strings may not contain control characters. Optional blanks
+become null. Provided email must have one @, nonempty local/domain portions, a
+dotted domain without leading/trailing dot, and no whitespace. This is a basic
+plausibility check, not complete RFC validation. Phone is free text within its
+length/control limits. Region comes from organization, not a contractor input.
+
+Inputs are validated again in backend profiles.rs. Contractor create/update use
+transactions and return only after commit; partial field saves roll back. Errors
+include Full name is required, Organization name is required, field length/control
+messages, Enter an email such as name@example.com, Record ID must be a positive
+safe integer, Organization not found or archived, and Contractor not found or
+archived. Internal SQL failures map to Unable to save contractor, Unable to save
+organization, or Unable to archive contractor without exposing SQL/paths.
+
+Archive uses archived_at to hide the record, never DELETE, and preserves its
+status/fields. Existing SQLite CURRENT_TIMESTAMP supplies archived_at in UTC
+(YYYY-MM-DD HH:MM:SS); it is not returned by these commands. Repeated archive or
+editing an archived/missing ID rejects. No restore UI or permanent deletion is
+introduced. If saving succeeds but directory refresh fails, UI reports the save
+separately and asks for Refresh rather than resubmitting a duplicate create.

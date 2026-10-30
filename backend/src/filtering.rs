@@ -12,7 +12,8 @@ pub fn get_contractors_by_region(conn: &Connection, region: &str) -> Result<Vec<
             c.role,
             c.email,
             c.phone,
-            c.photo_path
+            c.photo_path,
+            c.organization_id
          FROM contractors c
          JOIN organizations o
            ON c.organization_id = o.id
@@ -32,6 +33,7 @@ pub fn get_contractors_by_region(conn: &Connection, region: &str) -> Result<Vec<
             email: row.get(6)?,
             phone: row.get(7)?,
             photo_path: row.get(8)?,
+            organization_id: row.get(9)?,
         })
     })?;
 
