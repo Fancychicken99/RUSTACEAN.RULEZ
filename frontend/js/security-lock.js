@@ -1,114 +1,159 @@
 (() => {
-  const LOCK_TIMEOUT_MS = 5 * 60 * 1000;
-  const overlayId = 'security-lock-overlay';
-  let inactivityTimer;
+  const IDLE_MS = 15 * 60 * 1000;
+  const ACTIVITY_THROTTLE_MS = 30 * 1000;
+  const byId = id => document.getElementById(id);
+  const workspace = byId('workspace');
+  const auth = byId('auth');
+  const form = byId('auth-form');
+  let authenticated = false;
+  let needsSetup = false;
+  let busy = false;
+  let checking = false;
+  let activityPending = false;
+  let version = 0;
+  let idleTimer;
+  let expiresAt = 0;
+  let lastActivitySent = 0;
 
-  const overlayStyles = document.createElement('style');
-  overlayStyles.textContent = `
-    #${overlayId} {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      background: #f4f5fa;
-      color: #232d42;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    #${overlayId} .security-lock-panel {
-      width: min(100%, 400px);
-      padding: 2rem;
-      text-align: center;
-      background: #fff;
-      border: 1px solid #edf0f5;
-      border-radius: 1rem;
-      box-shadow: 0 12px 40px rgba(17, 38, 146, 0.12);
-    }
-    #${overlayId} .security-lock-icon {
-      display: inline-grid;
-      place-items: center;
-      width: 58px;
-      height: 58px;
-      margin-bottom: 1rem;
-      color: #3a57e8;
-      background: #eef0ff;
-      border-radius: 16px;
-      font-size: 1.65rem;
-    }
-    #${overlayId} h2 { margin: 0 0 .5rem; font-size: 1.35rem; }
-    #${overlayId} p { margin: 0 0 1.25rem; color: #8a92a6; font-size: .9rem; }
-    #${overlayId} input {
-      display: block;
-      width: 100%;
-      margin-bottom: .75rem;
-      padding: .7rem .8rem;
-      border: 1px solid #dfe3ec;
-      border-radius: .55rem;
-      font: inherit;
-    }
-    #${overlayId} input:focus { outline: 3px solid rgba(58, 87, 232, .16); border-color: #3a57e8; }
-    #${overlayId} button {
-      width: 100%;
-      padding: .72rem 1rem;
-      color: #fff;
-      background: #3a57e8;
-      border: 0;
-      border-radius: .55rem;
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    #${overlayId} button:hover { background: #304bd2; }
-  `;
-  document.head.appendChild(overlayStyles);
-
-  const overlay = document.createElement('div');
-  overlay.id = overlayId;
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-labelledby', 'security-lock-title');
-  overlay.innerHTML = `
-    <form class="security-lock-panel" id="security-lock-form">
-      <div class="security-lock-icon" aria-hidden="true">&#128274;</div>
-      <h2 id="security-lock-title">Workspace locked</h2>
-      <p>Enter your password to continue.</p>
-      <label class="visually-hidden" for="security-lock-password">Password</label>
-      <input id="security-lock-password" type="password" autocomplete="current-password" placeholder="Password" required>
-      <button type="submit">Unlock</button>
-    </form>
-  `;
-  document.body.appendChild(overlay);
-
-  const passwordInput = document.getElementById('security-lock-password');
-  const lockForm = document.getElementById('security-lock-form');
-
-  function lockScreen() {
-    overlay.style.display = 'flex';
-    passwordInput.value = '';
-    passwordInput.focus();
+  function message(text) { byId('message').textContent = text; }
+  function configureForm(status) {
+    needsSetup = !status.admin_exists;
+    byId('auth-heading').textContent = needsSetup ? 'Set up local administrator' : 'Log in';
+    byId('submit-auth').textContent = needsSetup ? 'Create password' : 'Log in';
+    byId('setup-help').hidden = !needsSetup;
+    byId('password').autocomplete = needsSetup ? 'new-password' : 'current-password';
+    form.hidden = false;
+    byId('retry-auth').hidden = true;
   }
-
-  function resetInactivityTimer() {
-    window.clearTimeout(inactivityTimer);
-    inactivityTimer = window.setTimeout(lockScreen, LOCK_TIMEOUT_MS);
+  function showLocked() {
+    authenticated = false;
+    clearTimeout(idleTimer);
+    workspace.hidden = true;
+    workspace.inert = true;
+    auth.hidden = false;
+    byId('password').value = '';
+    document.querySelectorAll('.modal.show, .offcanvas.show').forEach(element => {
+      (element.classList.contains('modal') ? bootstrap.Modal : bootstrap.Offcanvas).getInstance(element)?.hide();
+    });
+    document.querySelectorAll('.modal form').forEach(modalForm => modalForm.reset());
+    window.dispatchEvent(new Event('crm:locked'));
   }
-
-  ['mousemove', 'click', 'keydown'].forEach((eventName) => {
-    window.addEventListener(eventName, resetInactivityTimer, { passive: true });
-  });
-
-  lockForm.addEventListener('submit', (event) => {
+  async function lock(reason = 'Workspace locked.') {
+    ++version;
+    showLocked();
+    message(reason);
+    try {
+      await window.crmApi.logout();
+    } catch (error) {
+      message(`Workspace hidden. Could not confirm backend lock: ${error.message}`);
+      byId('retry-auth').hidden = false;
+    }
+  }
+  function resetIdleTimer() {
+    expiresAt = Date.now() + IDLE_MS;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => lock('Workspace locked after inactivity.'), IDLE_MS);
+  }
+  function unlock() {
+    ++version;
+    authenticated = true;
+    lastActivitySent = 0;
+    resetIdleTimer();
+    auth.hidden = true;
+    workspace.hidden = false;
+    workspace.inert = false;
+    window.dispatchEvent(new Event('crm:unlocked'));
+  }
+  async function connect() {
+    if (busy) return;
+    busy = true;
+    byId('retry-auth').disabled = true;
+    const requestVersion = ++version;
+    try {
+      const status = await window.crmApi.getAuthStatus();
+      // A reloaded page starts locked even if the process held an old session.
+      if (status.authenticated) await window.crmApi.logout();
+      if (requestVersion !== version) return;
+      configureForm(status);
+      message(needsSetup ? 'Create your local administrator password.' : 'Enter your password to open the workspace.');
+    } catch (error) {
+      if (requestVersion !== version) return;
+      form.hidden = true;
+      byId('auth-heading').textContent = 'Connection unavailable';
+      message(error.message);
+      byId('retry-auth').hidden = false;
+    } finally {
+      busy = false;
+      byId('retry-auth').disabled = false;
+    }
+  }
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (passwordInput.value === 'admin123') {
-      overlay.style.display = 'none';
-      resetInactivityTimer();
-    } else {
-      window.alert('Incorrect password. Please try again.');
-      passwordInput.focus();
+    if (busy) return;
+    busy = true;
+    byId('submit-auth').disabled = true;
+    const requestVersion = version;
+    const password = byId('password').value;
+    byId('password').value = '';
+    try {
+      if (needsSetup) {
+        await window.crmApi.setupAdmin(password);
+        const status = await window.crmApi.getAuthStatus();
+        if (requestVersion !== version) return;
+        configureForm(status);
+        message('Administrator configured. Log in with your new password.');
+      } else {
+        const correct = await window.crmApi.login(password);
+        if (requestVersion !== version) {
+          if (correct) await window.crmApi.logout();
+          return;
+        }
+        if (correct) unlock();
+        else message('Incorrect password.');
+      }
+    } catch (error) {
+      if (requestVersion === version) message(error.message);
+    } finally {
+      busy = false;
+      byId('submit-auth').disabled = false;
     }
   });
+  byId('retry-auth').addEventListener('click', connect);
+  byId('lock').addEventListener('click', () => lock());
+  byId('logout').addEventListener('click', () => lock());
 
-  resetInactivityTimer();
+  async function recordActivity(event) {
+    if (!authenticated || !event.isTrusted) return;
+    if (Date.now() >= expiresAt) { await lock('Workspace locked after inactivity.'); return; }
+    resetIdleTimer();
+    if (activityPending || Date.now() - lastActivitySent < ACTIVITY_THROTTLE_MS) return;
+    const requestVersion = version;
+    activityPending = true;
+    lastActivitySent = Date.now();
+    try {
+      await window.crmApi.recordActivity();
+    } catch (error) {
+      if (authenticated && requestVersion === version) await lock(error.message);
+    } finally {
+      activityPending = false;
+    }
+  }
+  ['pointerdown', 'pointermove', 'keydown', 'input'].forEach(name => window.addEventListener(name, recordActivity, { passive: true }));
+
+  async function checkSession() {
+    if (!authenticated || checking || busy) return;
+    if (Date.now() >= expiresAt) { await lock('Workspace locked after inactivity.'); return; }
+    const requestVersion = version;
+    checking = true;
+    try {
+      const status = await window.crmApi.getAuthStatus();
+      if (authenticated && requestVersion === version && !status.authenticated) await lock('Session expired. Log in again.');
+    } catch (error) {
+      if (authenticated && requestVersion === version) await lock(error.message);
+    } finally { checking = false; }
+  }
+  setInterval(checkSession, 5000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkSession(); });
+  window.crmSession = Object.freeze({ get authenticated() { return authenticated; }, lock });
+  connect();
 })();

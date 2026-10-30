@@ -1,103 +1,140 @@
 # Session handoff
 
 Personal to Broughnut. Updated October 29, 2026.
-Branch: dev. Base before this bridge checkpoint: 32a8cd1. User explicitly
-authorized committing and pushing the reviewed bridge milestone. This document
-is included in that commit; verify origin/dev before retrieving on another device.
+Branch: dev. HANDOFF OUT explicitly requested. This checkpoint accompanies the
+reviewed CRM layout integration commit, based on 89cfcb8. Verify origin/dev
+contains this checkpoint before resuming on the other device.
 
-## User instructions and learning
+## Standing instructions
 
-Broughnut owns ALL remaining MVP work across frontend/backend/bridge. Do not
-leave necessary edits for teammates. Document affected files, changes, reasons,
-checks, and limitations in docs/integration-changes.md, and interface changes in
-docs/ipc-contract.md. Keep this checkpoint current while working. Commit/push or
-HANDOFF OUT only when explicitly requested; prior publication was scoped.
+Broughnut owns ALL remaining MVP implementation across frontend/backend/bridge.
+Do not defer required edits to teammates. Record files, what/why, verification,
+and limitations in docs/integration-changes.md; update ipc-contract.md for shared
+interfaces. Keep this checkpoint current. Commit/push or HANDOFF OUT only on
+explicit request. Previous commit/push authorization was scoped and fulfilled.
+Explain file placement and Rust concepts in small steps, with teach-back as useful.
+Deliverable is a runnable native executable. See broughnut-workflow.md and
+learning-log.md for personal preferences/progress; optional device-workflow.md
+only when invoked. No new teach-back in this implementation slice.
 
-Deliver a runnable native executable. Explain purpose/file placement and Rust
-concepts in small steps as they arise. See docs/broughnut-workflow.md and
-learning-log.md. Teach-back covered Rust/Cargo, Result, empty/error distinctions,
-borrowing, mutex release, registration, and SQL boundaries. Revisit ownership
-scope and None versus empty text through actual implementation.
+## Scope and baseline
 
-## Scope
+User supplied original SOW and authorized correcting exaggerated storage/security/
+runtime claims. docs/statement-of-work.md remains a revised DRAFT, not approved
+scope. Proposed Sprint 1: offline Windows executable; local auth/inactivity;
+persisted browse/detail/create/edit/archive linked to organizations; region
+filter; useful errors; restart persistence; 50+ synthetic profiles. Final targets
+remain Windows/macOS/Linux. Don't claim full MVP or SOW acceptance yet.
 
-User supplied original SOW and authorized revision addressing exaggerated
-security/storage/runtime promises. docs/statement-of-work.md is the revised
-DRAFT, not client-approved scope. Proposed Sprint 1 MVP: offline Windows
-executable; local auth/inactivity; persisted browse/detail/create/edit/archive;
-organization association; region filter; useful errors; restart persistence;
-50+ synthetic profiles. Final targets remain Windows/macOS/Linux and final
-features remain in the SOW. Do not promise a schedule without remaining time.
+Rust/Cargo 1.99.1 MSVC and existing C++ Build Tools work on this device. Backend
+27 tests passed after the previous repository cleanup. Backend source/schema
+unchanged this slice. Prior 89cfcb8 contains cleanup, initial five-command Tauri
+bridge, earlier integration screen, tests/docs/checkpoint. Source layout:
+frontend/ (HTML/css/js/vendor/fixtures), backend/ crate, src-tauri/ native bridge,
+docs/, scripts/. Backend package name remains secure_crm_backend.
 
-## Completed and verified
+## Current connected behavior
 
-- HANDOFF IN synchronized dev; installed Rust/Cargo 1.99.1 MSVC with existing C++
-  Build Tools. All 27 backend tests passed, including after repository moves.
-- Reorganized frontend/ (HTML, css/, js/, fixtures/) and renamed Rust directory
-  backend-prototype/ to backend/. Package name remains secure_crm_backend.
-  Moved reference material under docs/. Updated paths/README and root .gitignore.
-- Preserved 50 fixture contractors and five organizations exactly when extracting
-  demo-data.js. These are NOT imported SQLite profiles or repeatable seed data.
-- Added initial IPC contract and pure JS promise/error wrappers.
-- NOW added runnable src-tauri/ project: startup opens app-data crm.db, shared
-  state serializes session/database calls, five registered commands provide auth
-  status, admin setup, login, logout, and protected contractor retrieval.
-- Uses existing backend functions; no Rust backend source changes. Desktop has
-  independent Cargo.lock, resolving Tauri 2.12.5 and rusqlite 0.41.1.
-- Initial executable loads frontend/integration.html, NOT original index.html.
-  Local-only screen verifies setup/login/list/lock without CDN/fixture fallback.
-- scripts/desktop.ps1 -Action Test passed (one real bridge workflow).
-  Covers setup/reject replacement, wrong/correct login, real record read/reopen,
-  logout, failed login relocking, persisted admin and fresh session on reopen.
-- scripts/desktop.ps1 -Action Build produced
-  src-tauri/target/debug/rustacean_crm.exe (about 14 MB).
-- node scripts/test-desktop-smoke.cjs PASSED real UI -> IPC -> backend -> SQLite
-  with a fresh temporary database; checks setup, validation, login errors, empty
-  list, setup protection, lock, process restart, and persisted password. Captured
-  screenshot inspected. Uses built-in Node CDP, not WebDriver or mocked invoke.
-- Test artifacts retained at the printed temp path; latest run:
-  C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-ihtP0a
-- Test launches/processes closed. Normal application data was not used for tests.
+- src-tauri/ now opens frontend/index.html, the original Northstar CRM layout.
+- Added seven-command contract: prior auth status/setup/login/logout/list plus
+  list_organizations and record_activity. All registered; organization/activity
+  commands require a live session and call existing backend functions.
+- Original contractor-list.js now loads real lists on unlock/Refresh. Uses
+  full_name/organization_name and numeric IDs correctly, including profile URL
+  restoration. Dashboard totals/regions and select options derive from records.
+- Fixture data is NOT loaded. The 50 original contractors/five organizations are
+  preserved under frontend/fixtures but are not imported database profiles.
+  Fresh app DBs therefore show a genuine empty state.
+- Setup/login/lock UI replaces hardcoded demo-password logic. Workspace starts
+  hidden/inert. Lock clears arrays, tables, profile, search/filter state and route;
+  pending response generations are invalidated. Errors show useful messages and
+  Refresh allows retry. No fixture fallback or false success.
+- Trusted user activity resets a 15-minute UI idle timer and calls record_activity
+  at most every 30 seconds. Five-second auth polling never renews a session;
+  expired sessions cannot revive. Visibility changes check idle time. Full-duration
+  and sleep/wake verification remain pending. Reload relocks the process session.
+- Pinned original Bootstrap 5.3.3 and Icons 1.11.3 CSS/JS/fonts are local in vendor/
+  with licenses/provenance. CSS/JS match original integrity hashes. Inline theme
+  script moved to theme-init.js and inline styles to CSS; CSP not weakened.
+- Placeholder totals, trends, and activity removed. Missing country/city/contact
+  data and follow-up/history are unavailable, not fabricated. Initials stand in
+  for media. Duplicate organization names disable ambiguous roster/count lookups
+  because contractor response currently lacks organization_id.
+- Create buttons disabled; add-contractor.js is no longer loaded, so its old
+  console-only submission is not exposed. Old integration.html and standalone
+  profile fragment remain reference/earlier screens, not default entry points.
 
-## Commands and environment
+## Checks performed
 
-See docs/desktop-development.md for build/run/test details. From root:
+- Locked desktop Rust tests: TWO workflows passed. Covers setup/login/logout,
+  persisted actual contractor retrieval/reopen, organizations/activity protection,
+  and activity failing to revive an expired session (zero-duration test).
+- Locked debug executable build passed. Non-fatal incremental-cache hard-link
+  warning falls back to copies. Output src-tauri/target/debug/rustacean_crm.exe.
+- FINAL node scripts/test-desktop-smoke.cjs PASSED against the actual CRM window:
+  setup validation, wrong/correct password, empty list, setup overwrite protection,
+  lock, process restart, persisted records/orgs, numeric profile route/reload,
+  literal markup-like names, roster, cleared data, and local assets.
+- Populated records are inserted directly into a TEST-OWNED SQLite DB for setup;
+  this does NOT verify UI create. Failure/retry and delayed response after lock
+  are explicitly simulated UI conditions, separate from real IPC verification.
+- Test blocks original CDN hosts and observes zero external HTTP(S) requests;
+  no unexpected browser errors or CSP violations; no page horizontal overflow.
+  This is NOT OS network-disconnected launch evidence.
+- All frontend JS parses; index local refs/fonts resolve; no fixture loader,
+  remote resource URLs or inline style attributes. cargo fmt/diff checks pass.
+- Final screenshot inspected; footer encoding/topbar crowding corrected.
+- Retained final test DB/screenshots:
+  C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-SHk5dv
+  Test processes closed. No normal app DB used/reset. Earlier failed test runs
+  retained their temp artifacts; failures were test URL/reload/CSP presentation
+  issues and are resolved in the final run.
+
+## Next implementation
+
+Own the next complete create/edit/archive slice:
+1. Extend typed IPC contract with organization selection/create and contractor
+   create/update/archive/region filtering, using existing backend functions.
+2. Align the form with actual stored fields, organization numeric IDs, validation,
+   and missing-value behavior. Add organization_id to list contract/backend queries
+   if needed; don't infer organization identity from duplicate names.
+3. Wire forms/buttons, show completion/errors, refresh saved lists; test create,
+   edit, archive and process-restart persistence through the real UI.
+4. Add repeatable persisted import for 50+ fictional records (current fixtures
+   are not import-ready seed data). Then backend region filter acceptance.
+No waiting for Connor/Josseline; log changes to their code and why.
+
+Country/city/media, history/quick actions/final scope, actual timeout duration,
+OS-disconnected launch, release/installer builds and macOS/Linux remain pending.
+Formal Hope UI alignment is not confirmed by vendored Bootstrap alone.
+
+## Included transfer and resume commands
+
+Changes after 89cfcb8: original HTML/CSS/controller/security-lock/wrapper,
+theme-init.js, vendor assets/licenses, Rust commands/main/config, expanded smoke
+script, README/development/contract/E2E/change-log docs and personal notes.
+This handoff commit contains the reviewed files above. No branch switch.
+Generated schemas, executable/build products, databases, and test screenshots
+are ignored or outside the checkout and do not travel through Git. Rebuild on
+the receiving device; do not copy target/ or application databases.
+See docs/desktop-development.md.
+
+From root:
   .\scripts\desktop.ps1 -Action Test
   .\scripts\desktop.ps1 -Action Build
   .\scripts\desktop.ps1 -Action Run
   node scripts/test-desktop-smoke.cjs
 
-Debug-only RUSTACEAN_TEST_DATA_DIR must be absolute and isolates crm.db; release
-ignores it. Smoke test sets a localhost WebView2 debugging port only for its own
-child. Requires Windows/WebView2 and Node 24 for smoke automation. Dev build is
-not an installer or a verified release artifact. Initial Tauri dependency build
-needed network-enabled execution; incremental hard-link warning was non-fatal.
+Debug-only absolute RUSTACEAN_TEST_DATA_DIR isolates test storage; release ignores
+it. Smoke uses Node 24 built-in SQLite/WebSocket and a localhost debugging port
+only for its child. The executable needs WebView2. No release installer verified.
 
-## Current limitations and next step
+## Receiving-device first step
 
-First connection works, full MVP does not yet. Original frontend/index.html still
-uses fixture-driven contractor-list.js; add form only logs; security-lock.js has
-a hardcoded demo password. CDN CSS/JS and missing images remain in that prototype.
-New integration page has real auth/empty results but no CRUD/filter/import yet.
-Backend timeout is 15 minutes since authorized backend action; five-second status
-polling clears expiry without renewing it. UI activity renewal and actual timeout
-timing test remain pending. Network-disconnected launch/release/macOS/Linux not
-verified. UI nonempty records not tested; Rust bridge nonempty persistence is.
-
-NEXT: connect Connor's original layout to the real auth/list flow, then add typed
-organization/create/update/archive/region-filter commands and wrappers using
-existing backend functions. Own any required frontend/backend changes and log
-what/why; do not ask teammates to finish them. Define missing field mappings
-explicitly (backend full_name, numeric IDs, nullable fields, organization region).
-Prepare deterministic synthetic import after schema/contract decisions.
-
-## Work included in this checkpoint
-
-Everything after 32a8cd1: repository moves, .gitignore, README/docs/script path
-updates, contract/wrappers, integration log, personal notes, src-tauri source/lock
-and icons, integration page assets, desktop runner and smoke test.
-The user authorized this scoped commit and push. No branch switch. Build
-products/databases are ignored and are not transferred through Git. Rebuild on
-another device using the documented setup; machine-installed tools are separate.
-Pre-commit readiness review also excluded generated src-tauri/gen/schemas/ files.
-Whitespace checks passed; no source changes since the passing executable tests.
+Use HANDOFF IN to safely synchronize dev, reread this checkpoint, and verify Rust,
+C++ tools, Node 24, and WebView2 locally. Run the backend checks and desktop build/
+tests before calling results locally verified. Existing tests/screenshots above
+are evidence from this Windows device only. Then resume the create/edit/archive
+slice; the full MVP is not complete. No new work is pending outside this scoped
+commit at handoff preparation. Report push success separately; an interrupted
+push would mean the receiving device cannot retrieve this checkpoint yet.

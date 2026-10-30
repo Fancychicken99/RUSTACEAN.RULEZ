@@ -64,3 +64,23 @@ commands.rs calls existing backend modules, and a page consumes serialized
 results. Built the Windows executable and verified real UI/IPC setup/login/list/
 lock/restart against isolated SQLite. Original dashboard wiring is still next.
 No additional user teach-back or independent coding proficiency confirmed.
+
+## Original layout integration
+
+Applied the bridge to the existing CRM layout instead of the small first screen.
+Explained that canonical backend fields are rendered without inferring first/last
+names, numeric IDs need string comparison in routes, and loaded record state must
+be cleared/invalidated on lock. Added organization/activity commands using existing
+backend functions and expiry authorization checks. Local UI assets keep the same
+Bootstrap versions; moved inline script/styles for CSP rather than weakening it.
+No new user teach-back or independent implementation exercise confirmed.
+
+Verified original CRM screen with actual persisted records and safe literal text,
+organizations, numeric-ID profiles/routes, lock clearing and restart. Added a
+separate zero-duration backend session test; actual 15-minute timing still untested.
+Failure/retry and late responses were simulated frontend conditions; do not present
+those as real database failures. Snapshot and detailed checks are in checkpoint.
+
+HANDOFF OUT requested: learning state and next implementation step captured in
+session-handoff.md. Resume through actual create/edit/archive code; do not treat
+tool-driven test success as proof of independent user coding proficiency.

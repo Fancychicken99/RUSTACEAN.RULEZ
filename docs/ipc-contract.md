@@ -1,11 +1,12 @@
 # Initial IPC contract
 
 Updated October 29, 2026. Target for the first integration slice.
-JavaScript wrappers exist in frontend/js/tauri-api.js. All five commands below
+JavaScript wrappers exist in frontend/js/tauri-api.js. All seven commands below
 are implemented in src-tauri/src/commands.rs and registered in main.rs.
-frontend/integration.html uses them; the original dashboard still uses fixtures.
-The Windows debug executable passed real UI/IPC setup/login/list/lock/restart
-smoke checks. The earlier docs/reference/tauri-bridge-example.rs remains reference.
+frontend/index.html now uses them in the original CRM layout, without fixtures.
+The Windows debug executable has real UI/IPC smoke coverage for authentication,
+lists, profiles, organizations, lock and restart. The earlier bridge example and
+integration.html remain reference/earlier implementation, not the default entry.
 
 ## Boundary and conventions
 
@@ -30,6 +31,8 @@ An empty array is success. Option fields serialize to explicit nulls.
 | login / login | { password: string } | boolean | session::login. True starts session; false is invalid credentials and locks session. |
 | logout / logout | {} | null | session::logout. Safe when already locked; database-state lock failures reject. |
 | list_contractors / listContractors | {} | Contractor[] | protected::list_contractors_if_authenticated. Requires active session. |
+| list_organizations / listOrganizations | {} | Organization[] | Requires active session; database::get_organizations. |
+| record_activity / recordActivity | {} | null | Requires active session; session::authorize_action renews only an unexpired session; otherwise Login required. |
 
 Setup requires at least 12 Unicode scalar values, matching the backend's Rust
 chars().count() rule. Login does not transform the supplied password. Database
@@ -39,13 +42,16 @@ Auth status exposes metadata only, never passwords or password hashes.
 Intended error strings: Login required; Database unavailable; Unable to load
 contractors; Password must contain at least 12 characters; Administrator already
 configured; Unable to configure administrator; Unable to read authentication
-status; Login failed. Internal errors must not expose SQL, paths, or credentials.
+status; Login failed; Unable to load organizations. Internal errors must not expose SQL, paths, or credentials.
 
 The initial executable uses a 15-minute backend inactivity timeout, pending
 client agreement. Backend access checks remain authoritative. Status polling
 every five seconds does not renew activity and clears expired display data.
-General UI activity handoff needs a later contract; it is not implemented.
-A new process starts locked even if the admin persists.
+Trusted pointer/keyboard/input events reset a 15-minute frontend timer and call
+record_activity at most once per 30 seconds. Merely polling status never renews
+the session. Background responses cannot reopen a locked UI. A new process or
+page reload starts locked even if the admin persists. Full-duration and sleep/
+wake timing still need system verification.
 
 ## Contractor response
 
@@ -80,6 +86,21 @@ later history/contact commands before implementation.
   complete storage/permission/display contract.
 - Fresh databases need first-admin setup before login can work.
 
-Create/update/archive, organizations, region/skill/decay filters, contact/history,
+## Organization response and UI mapping
+
+Organization has id (integer), name (string), and region (string or null).
+Results exclude archived organizations and are ordered by name. No date fields
+are returned. Current contractor records lack organization_id: duplicate
+organization names make per-organization roster/count lookup ambiguous, so the
+UI disables those ambiguous rosters/counts pending an extended contract.
+
+The directory reads full_name and organization_name directly; profile routes
+compare numeric IDs as URL strings. Country/city fields and contact dates are
+shown as unavailable rather than inferred. Dashboard totals/regions derive from
+loaded contractor records. History/follow-up metrics are unavailable. Current
+search/status/region/organization filters are frontend filters of the loaded
+records, not verified backend filtering. No fixtures are loaded.
+
+Create/update/archive, organization creation, region/skill/decay filters, contact/history,
 media, and native quick actions need later contracts and registered commands.
-The original index page still uses fixtures; only integration.html is connected.
+Both index.html and the earlier integration.html use the same IPC wrapper.

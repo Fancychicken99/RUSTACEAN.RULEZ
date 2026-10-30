@@ -8,6 +8,8 @@ window.crmApi = Object.freeze({
   login: (password) => invokeCrm('login', { password }),
   logout: () => invokeCrm('logout'),
   listContractors: () => invokeCrm('list_contractors'),
+  listOrganizations: () => invokeCrm('list_organizations'),
+  recordActivity: () => invokeCrm('record_activity'),
 });
 
 async function invokeCrm(command, args = {}) {

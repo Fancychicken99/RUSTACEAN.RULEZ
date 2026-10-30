@@ -3,18 +3,27 @@
 Status: initial Windows executable smoke test implemented and passed on October
 29, 2026. scripts/test-desktop-smoke.cjs launches the real debug executable and
 drives its WebView2 via local CDP. It covers setup validation, wrong/correct login,
-protected empty list, one-time setup, lock, and persisted login after restart.
-It uses a fresh debug-only data directory, not mocks. Full CRM scenarios below
+protected empty and persisted lists, numeric profile routes/reload, organizations,
+safe text rendering, lock/data clearing, and persisted login after restart.
+It uses a fresh debug-only data directory for real IPC; explicitly simulated
+UI failures test retry and late-response handling separately. Full CRUD scenarios
 remain pending. See desktop-development.md for commands and limitations.
 The `backend` contains a Rust/SQLite crate and backend tests.
 `tests/persistence_workflows.rs` adds isolated file-backed database workflows;
 these are backend integration coverage, not UI/IPC or application-restart tests.
 See [Rust development](rust-development.md) for commands.
 
-The checkout now contains a src-tauri/ executable with an initial connected
-integration.html screen. The original index.html dashboard remains fixture-based.
+The src-tauri/ executable now opens the original index.html CRM layout connected
+to real authentication/contractor/organization retrieval. The earlier
+integration.html is retained but is not the default entry. Neither uses fixtures.
 The reference bridge example is not the registered implementation. Confirm the
 exact screen/build before treating a result as database persistence evidence.
+
+The smoke test blocks the original remote CDN hosts and asserts no external
+HTTP(S) requests were observed. That is not a test with OS networking disabled.
+UI create/edit/archive and backend-filter acceptance remain pending. Test data
+for populated-list checks is inserted directly into a disposable database after
+initial empty-database checks; it is not evidence of UI creation.
 
 ## Sprint 1 milestone: MVP ready for E2E testing
 

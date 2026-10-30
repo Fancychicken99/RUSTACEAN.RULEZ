@@ -1,73 +1,81 @@
 # RUSTACEAN.RULEZ
 
-Student contractor CRM for Dr. Burchfield. The target is a native Rust/Tauri
-desktop executable. A first Windows Tauri executable now supports real local
-administrator setup, login/logout, and protected SQLite contractor retrieval.
-The original CRM dashboard is still a separate frontend prototype.
+Student contractor CRM for Dr. Burchfield. The Windows Tauri executable now
+opens the original Northstar layout with real local authentication, saved
+contractor/organization lists, profile selection, and dashboard counts. Full
+MVP create/edit/archive/filter/import workflows are still in progress.
 
 ## Repository layout
 
 ```text
 frontend/
-  index.html                  Browser prototype entry point
-  integration.html            First connected executable screen
-  contractor-profile.html     Static profile fragment
-  css/                        Page styles
-  js/                         UI scripts and tauri-api.js IPC boundary
-  fixtures/demo-data.js        Explicit fictional prototype data
+  index.html                  Connected CRM entry point
+  integration.html            Earlier minimal integration screen (not default)
+  contractor-profile.html     Earlier static profile fragment (not loaded)
+  css/                        Application styles
+  js/                         UI controllers and tauri-api.js IPC boundary
+  vendor/                     Pinned Bootstrap assets, fonts, and licenses
+  fixtures/demo-data.js        Archived prototype fixtures; not loaded by CRM
 backend/
-  Cargo.toml, Cargo.lock       Rust package and locked dependencies
-  src/                        Reusable backend modules and demo executable
-  tests/                      Backend integration tests
-docs/
-  ipc-contract.md             Initial command/data contract and implementation status
-  statement-of-work.md         Proposed revised scope and acceptance criteria
-  backend-handoff.md          Backend reference notes; verify against current code
-  reference/                  Uncompiled Tauri bridge example
-scripts/                      Development and verification commands
-src-tauri/                    Native executable startup, shared state, commands
+  Cargo.toml, Cargo.lock       Reusable secure_crm_backend package
+  src/                        SQLite/auth/session modules and demo executable
+  tests/                      Backend tests
+src-tauri/                    Native startup, shared state, registered commands
+scripts/                      Build and verification commands
+docs/                         Contracts, scope, development notes, change log
 ```
 
-Connor's UI work belongs in `frontend/`; Josseline's SQL and persistence belong
-in `backend/`. Broughnut's JavaScript IPC boundary is
-`frontend/js/tauri-api.js`. Tauri startup, state, and command registration
-live in root `src-tauri/`, depending on the backend library by local path.
-Broughnut owns all remaining MVP work across these layers and records edits in
-[the integration change log](docs/integration-changes.md). The Rust backend package remains
-named `secure_crm_backend`; only its directory changed from `backend-prototype`.
+Broughnut owns all remaining MVP implementation across frontend/backend/bridge.
+Record edits and their purpose in [integration-changes.md](docs/integration-changes.md)
+and shared interfaces in [ipc-contract.md](docs/ipc-contract.md). Original teammate
+ownership identifies existing work; it does not defer remaining implementation.
 
-## Frontend preview and integration status
+## Build and run
 
-Open `frontend/index.html` for the existing browser prototype. Paths are relative
-to that page. The explicit fixture script loads before the page controller;
-fixtures are not a backend fallback or a repeatable database import. Store future
-reusable database seed files in a dedicated `data/` directory when introduced.
+From PowerShell at the repository root:
 
-`frontend/integration.html` loads `frontend/js/tauri-api.js` and calls real
-commands in the executable. The original index page does not use it yet.
-The wrapper returns promises and errors without rendering. See
-[the IPC contract](docs/ipc-contract.md). Only frontend/ is embedded as webview
-assets, not the whole repository. The integration page uses local assets only;
-the original prototype still has the limitations below.
+```powershell
+.\scripts\desktop.ps1 -Action Test
+.\scripts\desktop.ps1 -Action Build
+.\scripts\desktop.ps1 -Action Run
+```
 
-Existing limitations: Bootstrap assets still use CDN URLs; referenced images and
-logos are absent; the standalone profile file is a fragment; the lock script uses
-demo credentials. Local asset packaging, real authentication, fixture removal,
-and connected data rendering remain integration work. Previewing these screens
-does not verify offline operation, persistence, or security.
+Build output: `src-tauri/target/debug/rustacean_crm.exe`. It can be launched
+directly after building. Rust/C++ tooling is needed to build; Windows WebView2 is
+needed to run. This is a debug executable, not a verified installer/release.
+See [desktop development](docs/desktop-development.md) for setup, storage, test
+isolation, inactivity behavior, and platform limitations.
 
-The optional [handoff workflow](docs/device-workflow.md) is available to any team
-member. Broughnut's personal Rust learning preferences remain separate.
+A fresh database starts with password setup and then login. No automatic seed
+or fixture fallback is used. Opening the HTML directly in a browser shows a
+backend-unavailable error; use the executable for real data.
 
-## Testing
+## Verification
 
-The goal is a runnable MVP by the end of Sprint 1. An initial real-executable
-smoke test covers setup/login/lock, empty results, and persisted credentials after
-restart; this does not establish the full CRM MVP. See
-[the E2E test plan](docs/e2e-test-plan.md) for prerequisites, team responsibilities,
-and scenarios. Full CRM scenario coverage remains pending.
-Rust backend tests and persistence workflows are available; see
-[Rust development](docs/rust-development.md) for setup and commands.
+```powershell
+.\scripts\test-backend.ps1
+node scripts/test-desktop-smoke.cjs
+```
 
-Build/run the first executable and its smoke test using
-[desktop development instructions](docs/desktop-development.md).
+The Windows smoke test drives the real executable with isolated SQLite and
+checks setup/login/lock/restart, empty and persisted records, organizations,
+numeric profile routes, and text-safe rendering. It also checks local assets
+with the original CDN hosts blocked and no external HTTP(S) requests observed.
+Failure/retry and stale-response handling use explicitly simulated UI failures.
+See [the E2E plan](docs/e2e-test-plan.md) for remaining acceptance scenarios.
+
+## Current limits
+
+Create/edit/archive and organization creation are not connected yet; creation
+buttons are disabled rather than reporting false success. Region/organization/
+status/search filters currently operate on the loaded list, not dedicated backend
+filter commands. Country/city filters are unavailable because the response lacks
+those fields. Contact-history metrics and activity are marked unavailable rather
+than fabricated. Media/native quick actions, persisted synthetic import, full
+inactivity-duration testing, OS-disconnected launch, release packaging, and
+macOS/Linux verification remain pending. Existing Bootstrap styling is preserved;
+formal Hope UI requirement alignment remains to be confirmed.
+
+[The revised SOW](docs/statement-of-work.md) remains a proposal, not approved
+scope or proof of compliance. Optional [device workflow](docs/device-workflow.md)
+is used only on explicit request; Broughnut's learning notes are personal.

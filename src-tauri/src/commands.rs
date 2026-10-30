@@ -1,7 +1,7 @@
 use rusqlite::Connection;
 use secure_crm_backend::{
     admin::{admin_exists, create_first_admin},
-    database::Contractor,
+    database::{Contractor, Organization, get_organizations},
     protected::list_contractors_if_authenticated,
     session::SessionManager,
     setup::initialize_database,
@@ -85,6 +85,21 @@ impl AppState {
         let state = self.lock()?;
         list_contractors_if_authenticated(&state.conn, &state.session)
     }
+
+    fn organizations(&self) -> Result<Vec<Organization>, String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        get_organizations(&state.conn).map_err(|_| "Unable to load organizations".into())
+    }
+
+    fn activity(&self) -> Result<(), String> {
+        if !self.lock()?.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        Ok(())
+    }
 }
 
 #[tauri::command]
@@ -112,6 +127,16 @@ pub fn list_contractors(state: tauri::State<'_, AppState>) -> Result<Vec<Contrac
     state.contractors()
 }
 
+#[tauri::command]
+pub fn list_organizations(state: tauri::State<'_, AppState>) -> Result<Vec<Organization>, String> {
+    state.organizations()
+}
+
+#[tauri::command]
+pub fn record_activity(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    state.activity()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -123,6 +148,8 @@ mod tests {
         let app = AppState::open(&path).unwrap();
         assert!(!app.auth_status().unwrap().admin_exists);
         assert_eq!(app.contractors().unwrap_err(), "Login required");
+        assert_eq!(app.organizations().unwrap_err(), "Login required");
+        assert_eq!(app.activity().unwrap_err(), "Login required");
         assert!(app.configure_admin("short").is_err());
         assert!(!app.auth_status().unwrap().admin_exists);
         app.configure_admin("fictional test password").unwrap();
@@ -131,6 +158,8 @@ mod tests {
         assert!(!app.sign_in("incorrect").unwrap());
         assert!(app.sign_in("fictional test password").unwrap());
         assert!(app.contractors().unwrap().is_empty());
+        assert!(app.organizations().unwrap().is_empty());
+        app.activity().unwrap();
         {
             let state = app.lock().unwrap();
             let org = secure_crm_backend::database::add_organization(
@@ -145,6 +174,10 @@ mod tests {
         assert_eq!(
             app.contractors().unwrap()[0].full_name,
             "Fictional Rowan Finch"
+        );
+        assert_eq!(
+            app.organizations().unwrap()[0].name,
+            "Fictional Integration Workshop"
         );
         app.sign_out().unwrap();
         assert_eq!(app.contractors().unwrap_err(), "Login required");
@@ -161,5 +194,18 @@ mod tests {
         );
         assert!(!reopened.sign_in("incorrect").unwrap());
         assert_eq!(reopened.contractors().unwrap_err(), "Login required");
+    }
+
+    #[test]
+    fn expired_session_cannot_be_revived_by_activity() {
+        let directory = tempfile::tempdir().unwrap();
+        let app = AppState::open(&directory.path().join("expiry.db")).unwrap();
+        app.configure_admin("fictional test password").unwrap();
+        app.lock().unwrap().session = SessionManager::new(Duration::ZERO);
+        assert!(app.sign_in("fictional test password").unwrap());
+        assert!(!app.auth_status().unwrap().authenticated);
+        assert_eq!(app.activity().unwrap_err(), "Login required");
+        assert_eq!(app.organizations().unwrap_err(), "Login required");
+        assert_eq!(app.contractors().unwrap_err(), "Login required");
     }
 }

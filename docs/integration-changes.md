@@ -73,3 +73,39 @@ actions/final-scope features; release installers and macOS/Linux. Current timeou
 is 15 minutes since backend activity, with five-second UI status polling. Expiry
 timing and network-disconnected launch have not been tested. This is a first
 working connection, not completed MVP acceptance.
+
+## Original CRM layout connected — October 29, 2026
+
+Status: reviewed and verified; included in the explicitly requested HANDOFF OUT
+commit following 89cfcb8. Push outcome is reported separately.
+
+| Files | What changed and why |
+| --- | --- |
+| frontend/index.html | Made original layout the connected entry point. Added password setup/login UI, initial hidden/inert workspace, Refresh/Lock/logout controls and status messages. Removed fixture loading and invented totals/activity; disabled creation controls until save commands exist. Unsupported country/city filters are disabled. |
+| frontend/js/contractor-list.js | Replaced fixture arrays with real contractor/organization requests. Uses full_name, organization_name and numeric IDs explicitly; fixes profile route restoration. Builds counts/regions/options from saved records, shows empty/error/loading states, and supports retry. Clears records/profile/search/options on lock and ignores late responses. Duplicate organization-name rosters/counts are unavailable rather than merged incorrectly. |
+| frontend/js/security-lock.js | Replaced demo password/visual-only lock with real setup/login/logout/session checks. Trusted UI activity renews an existing backend session at most every 30 seconds; status polling does not. Keeps a 15-minute UI idle timer, clears data on lock, and checks visibility changes. Does not claim verified full-duration/sleep behavior. |
+| frontend/js/theme-init.js; frontend/css/styles.css | Moved early inline theme script to a local file and inline styles to CSS for CSP compatibility. Added auth styling and responsive topbar adjustments. Fixed existing mojibake in generated footer text. |
+| frontend/js/tauri-api.js; src-tauri/src/commands.rs and main.rs | Added registered list_organizations and record_activity commands/wrappers using existing backend functions. Requires authorization for both. Added organization/activity checks and an expired-session test. Backend source/SQL/schema unchanged. |
+| frontend/vendor/ | Vendored existing Bootstrap 5.3.3 and Icons 1.11.3 CSS/JS/fonts with MIT licenses and provenance. Bootstrap CSS/JS match original integrity hashes; no library upgrade. |
+| src-tauri/tauri.conf.json | Default window now opens index.html, not the minimal integration screen; CSP remains restrictive. |
+| scripts/test-desktop-smoke.cjs | Real executable checks now cover populated records/organizations/profiles/routes and literal markup-like text. Direct SQLite inserts are test setup only. Blocks original CDN hosts, tracks external requests, and checks layout/CSP errors. Separately simulates UI request failure/retry and delayed completion after lock. |
+| README; desktop-development/ipc-contract/e2e-test-plan docs; personal notes | Updated run/verification instructions, contracts, limitations, ownership, and resume context. |
+
+Rust tests passed: two bridge workflows, including protected organization access
+and activity failing to revive an expired session. Debug executable built.
+Main-window smoke checks passed before final presentation adjustments; final
+verification results are recorded in the session checkpoint. No backend source
+changed, so the previously passing 27 backend tests were not repeated.
+
+Existing layout and backend were reused. Controls not connected yet are disabled
+or marked unavailable, with no fake success or fixture fallback. Client-side
+filtering of loaded records does not establish backend-filter acceptance. Final
+MVP still needs create/edit/archive/organization setup, backend filter wiring,
+repeatable 50+ synthetic import, and final inactivity/offline/platform evidence.
+
+Final verification for the original-layout slice: two locked Rust bridge tests
+passed; locked debug build passed; final real-window smoke test passed with zero
+external HTTP(S) requests, browser errors/CSP violations, or page overflow.
+Final directory screenshot inspected. Artifacts retained at the path recorded
+in session-handoff.md. Source is included in this handoff commit; no backend
+source/schema changed. Node syntax, local asset/font resolution, cargo fmt and diff checks pass.

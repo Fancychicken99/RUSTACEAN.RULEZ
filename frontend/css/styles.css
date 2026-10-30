@@ -219,3 +219,17 @@ a { text-decoration: none; }
   .activity-card .table tbody td { padding-right: 1rem; padding-left: 1rem; }
   .profile-button { padding-right: .1rem; }
 }
+
+/* Authentication uses local assets and hides the workspace before any request. */
+[hidden] { display: none !important; }
+.auth-overlay { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; background: var(--hope-bg); }
+.auth-panel { width: min(100%, 420px); }
+.workspace-message { color: var(--hope-text); background: var(--hope-bg); }
+.metric-card[aria-disabled="true"] { cursor: default !important; }
+#workspace .progress { height: 8px; }
+
+.metric-card { cursor: pointer; transition: transform .2s; }
+.alert-icon { color: #d9534f; background: #fff0ef; }
+
+.topbar > .container-fluid { flex-wrap: wrap; gap: .5rem 0; }
+.topbar-search { min-width: 160px; flex-basis: 160px; }
