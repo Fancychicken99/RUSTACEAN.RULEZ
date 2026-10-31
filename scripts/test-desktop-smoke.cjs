@@ -11,7 +11,7 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const releaseLaunchOnly = process.argv.includes('--release-launch-only');
 const executable = path.resolve(__dirname, `../src-tauri/target/${releaseLaunchOnly ? 'release' : 'debug'}/rustacean_crm.exe`);
 const idleOnly = process.argv.includes('--idle-only');
-const testDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rustacean-desktop-smoke-'));
+const testDirectory = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP || os.tmpdir(), 'rustacean-desktop-smoke-'));
 let child;
 let socket;
 let sequence = 0;
@@ -59,8 +59,12 @@ async function launch() {
     windowsHide: true,
     env: { ...process.env, ...(!releaseLaunchOnly ? { RUSTACEAN_TEST_DATA_DIR: testDirectory } : {}),
       WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1` },
-    stdio: 'ignore',
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
+  const appLog = fs.createWriteStream(path.join(testDirectory, `application-${port}.log`));
+  child.stdout.pipe(appLog, { end: false });
+  child.stderr.pipe(appLog, { end: false });
+  child.on('close', () => appLog.end());
   child.on('error', error => console.error('Launch error:', error.message));
   let target;
   await until(async () => {
@@ -69,7 +73,7 @@ async function launch() {
       target = targets.find(item => item.type === 'page' && (item.url.includes('tauri.localhost') || item.url.startsWith('tauri://localhost')));
       return Boolean(target);
     } catch { return false; }
-  }, 'WebView2 CRM page');
+  }, 'WebView2 CRM page', 60000);
   socket = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, { once: true }); socket.addEventListener('error', reject, { once: true }); });
   socket.addEventListener('message', event => {

@@ -9,6 +9,12 @@ Publication: 8010226 pushed to dev on October 31. Native workflow run
 macOS 14 image brownout/retirement. Runner changed to supported macos-15 for
 the follow-up build. This is a CI environment correction, not a Mac app failure.
 Windows CI was still running when recorded; no successful Mac build claimed.
+Run 41223572908: Mac backend/bridge tests and universal .app/DMG compilation
+PASSED. Post-build lipo check failed due to argument order in our workflow;
+corrected input filename before -verify_arch. No downloadable Mac artifact from
+that failed job. Windows compiled but CDP page discovery timed out; explicit
+official WebView2 provisioning, 60-second initial discovery and application logs
+added for disposable runner. Failure artifacts retained under RUNNER_TEMP.
 
 User explicitly requires MVP executables on both Windows and macOS; has access
 to a teammate/professor's Mac. Do not delegate implementation. SOW MVP platforms

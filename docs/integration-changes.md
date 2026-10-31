@@ -253,3 +253,11 @@ Publication/CI follow-up: 8010226 pushed; run 41223485488 cancelled its Mac job
 before steps because GitHub is retiring macos-14 (scheduled image brownout).
 Changed runner to macos-15, retaining the universal build. Removed only trailing
 blank whitespace from vendored Hope CSS after staged diff review flagged it.
+
+Run 41223572908 compiled the actual universal Mac app and DMG after native tests,
+then failed our lipo argument order. Corrected workflow command (input first).
+Windows compiled but its first CDP page discovery timed out. Added explicit
+official WebView2 runtime installation on disposable runner, 60-second initial
+discovery, process stdout/stderr logs and failure-artifact upload. Smoke data now
+uses RUNNER_TEMP when available so CI diagnostics are retrievable. These are
+test/build changes; no production timeout or data-path changes.

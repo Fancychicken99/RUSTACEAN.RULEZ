@@ -40,6 +40,14 @@ jobs:
         run: cargo test --locked --manifest-path backend/Cargo.toml
       - name: Bridge tests
         run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - name: Provision WebView2 on disposable Windows runner
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $runtimeSetup = Join-Path $env:RUNNER_TEMP 'MicrosoftEdgeWebView2RuntimeInstallerX64.exe'
+          Invoke-WebRequest 'https://go.microsoft.com/fwlink/?linkid=2124701' -OutFile $runtimeSetup
+          $installer = Start-Process -FilePath $runtimeSetup -ArgumentList '/silent /install' -Wait -PassThru -WindowStyle Hidden
+          if ($installer.ExitCode -notin @(0, 3010)) { throw "WebView2 provisioning failed: $($installer.ExitCode)" }
       - name: Windows executable smoke
         if: runner.os == 'Windows'
         run: |
@@ -54,7 +62,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app" "src-tauri/target/universal-apple-darwin/release/bundle/Rustacean-CRM-macos-universal.zip"
-          lipo -verify_arch arm64 x86_64 "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app/Contents/MacOS/rustacean_crm"
+          lipo "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app/Contents/MacOS/rustacean_crm" -verify_arch arm64 x86_64
           codesign --verify --deep --strict "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app"
       - name: macOS packaged process launch
         if: runner.os == 'macOS'
@@ -87,3 +95,10 @@ jobs:
           path: |
             src-tauri/target/universal-apple-darwin/release/bundle/*.zip
             src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+      - name: Preserve Windows diagnostics on failure
+        if: failure() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-smoke-diagnostics-${{ github.sha }}
+          if-no-files-found: ignore
+          path: ${{ runner.temp }}/rustacean-desktop-smoke-*/
