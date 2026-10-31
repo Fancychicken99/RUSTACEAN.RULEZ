@@ -270,3 +270,11 @@ Added explicitly enabled GitHub-hosted-only, exe-scoped HKLM debug arguments,
 removed after every test process stop. Refuses an existing app policy; local
 runs unchanged. No production security bypass, timeout or command changes.
 Reference: https://github.com/MicrosoftEdge/WebView2Feedback/issues/5640.
+
+Run 41225451664 confirmed Windows CDP attachment now works. Browser diagnostics
+identified Bootstrap CSS/JS SRI failure from Windows checkout newline conversion.
+Added `frontend/vendor/** -text` in .gitattributes and early exact-byte integrity
+verification in scripts/check-ui-assets.cjs/native CI. Hash checks remain enabled;
+vendor runtime content unchanged. This fixes a real fresh-Windows-checkout issue,
+not just test timing. Mac bundle from 53e4a66 was downloaded and artifact SHA256
+verified; retained under ignored src-tauri/target/distribution/macos-53e4a66.

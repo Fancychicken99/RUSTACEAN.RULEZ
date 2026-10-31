@@ -22,6 +22,12 @@ that elevated hosts ignore WEBVIEW2_* environment flags. Smoke now uses an
 exe-scoped HKLM debug policy only when explicitly enabled inside a disposable
 GitHub-hosted runner, removing it after each app stop. Local runs and production
 code do not change system policy. Follow-up CI pending.
+Run 41225451664: Windows CDP attachment succeeded. Bootstrap CSS/JS were blocked
+because Windows Git checkout converted LF bytes to CRLF, invalidating existing
+SRI hashes. .gitattributes now preserves all vendor bytes (-text); added early
+check-ui-assets.cjs hash verification to native CI. Integrity protection retained.
+No functional asset replacement. Mac output from 53e4a66 downloaded/verified:
+src-tauri/target/distribution/macos-53e4a66 (app ZIP plus DMG, ignored build output).
 
 User explicitly requires MVP executables on both Windows and macOS; has access
 to a teammate/professor's Mac. Do not delegate implementation. SOW MVP platforms
