@@ -1,5 +1,14 @@
 # Rust learning log
 
+## Native CI verification — October 31, 2026
+
+Both platform builds now verified on native runners. Introduced byte integrity:
+Windows checkout newline conversion changed Bootstrap hashes, so browser blocked
+CSS/JS; preserving vendored bytes fixes it without removing integrity protection.
+Distinguished compiled universal Mac bundle/process startup from actual Mac UI
+acceptance, and Windows debug full flows from release startup. Broughnut's own
+coding/understanding not inferred from agent-driven CI or build success.
+
 ## Native packaging and cross-platform time — October 31, 2026
 
 MVP now targets Windows and macOS per user. Explained native .exe versus .app

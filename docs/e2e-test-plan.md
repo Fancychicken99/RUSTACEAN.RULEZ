@@ -6,8 +6,9 @@ Full debug Windows regression passed with official Hope UI and dual-clock expiry
 release startup check (`node scripts/test-desktop-smoke.cjs --release-launch-only`)
 passed against the actual optimized executable. That startup mode uses ordinary
 app data and does not submit login/import/edit forms. It is not release CRUD or
-installer acceptance. Mac CI is prepared but not yet executed; its planned
-architecture/signature/process checks do not establish full UI acceptance.
+installer acceptance. Native Mac CI build and architecture/signature/process
+checks now passed; these do not establish full UI acceptance. Exact verified
+run and downloaded artifact hashes are in mvp-build-evidence.md.
 
 Status: Windows executable smoke coverage expanded October 30, 2026. scripts/test-desktop-smoke.cjs launches the real debug executable and
 drives its WebView2 via local CDP. It covers setup validation, wrong/correct login,

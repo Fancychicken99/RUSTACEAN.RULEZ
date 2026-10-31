@@ -1,78 +1,69 @@
 # Session handoff
 
-Personal to Broughnut. Updated October 31, 2026.
+Personal to Broughnut. Updated October 31, 2026. Branch: dev.
 
-## Current continuation: Windows AND macOS MVP
+## Current verified milestone
 
-Publication: 8010226 pushed to dev on October 31. Native workflow run
-41223485488 started; Mac job cancelled before steps due to GitHub's scheduled
-macOS 14 image brownout/retirement. Runner changed to supported macos-15 for
-the follow-up build. This is a CI environment correction, not a Mac app failure.
-Windows CI was still running when recorded; no successful Mac build claimed.
-Run 41223572908: Mac backend/bridge tests and universal .app/DMG compilation
-PASSED. Post-build lipo check failed due to argument order in our workflow;
-corrected input filename before -verify_arch. No downloadable Mac artifact from
-that failed job. Windows compiled but CDP page discovery timed out; explicit
-official WebView2 provisioning, 60-second initial discovery and application logs
-added for disposable runner. Failure artifacts retained under RUNNER_TEMP.
-Run 41224508852: Mac native tests, universal .app/DMG, lipo/code-signature checks
-and ten-second packaged process launch PASSED. Mac artifact 13051906369 exists.
-Windows CDP still timed out despite runtime installation. Microsoft documents
-that elevated hosts ignore WEBVIEW2_* environment flags. Smoke now uses an
-exe-scoped HKLM debug policy only when explicitly enabled inside a disposable
-GitHub-hosted runner, removing it after each app stop. Local runs and production
-code do not change system policy. Follow-up CI pending.
-Run 41225451664: Windows CDP attachment succeeded. Bootstrap CSS/JS were blocked
-because Windows Git checkout converted LF bytes to CRLF, invalidating existing
-SRI hashes. .gitattributes now preserves all vendor bytes (-text); added early
-check-ui-assets.cjs hash verification to native CI. Integrity protection retained.
-No functional asset replacement. Mac output from 53e4a66 downloaded/verified:
-src-tauri/target/distribution/macos-53e4a66 (app ZIP plus DMG, ignored build output).
+Broughnut explicitly requires Sprint 1 MVP executables on Windows AND macOS.
+Has access to a teammate/professor's Mac; Broughnut owns fixes/implementation.
+The SOW's seven functional MVP checks remain; final features remain separate.
+User authorized commit/push and continuing MVP completion on October 31.
 
-User explicitly requires MVP executables on both Windows and macOS; has access
-to a teammate/professor's Mac. Do not delegate implementation. SOW MVP platforms
-updated; seven functional acceptance checks remain, final features stay separate.
-See docs/mvp-distribution.md for native build/demo steps and exact limitations.
+Release source: 9c41b187190207b0c808387362958cfd51c32033, pushed to origin/dev.
+Native workflow 41226249859 PASSED both jobs. See mvp-build-evidence.md for exact
+checks, artifact links/hashes and limitations; mvp-distribution.md for demo steps.
 
-Reviewed publication after 3541d46: prior inactivity-test edits plus pinned Tauri
-CLI 2.12.4 package/lock, enabled bundling, Windows offline-WebView2 NSIS setup,
-macOS 13+ universal .app/DMG/ad-hoc signing configuration, native build workflow
-for dev pushes, Mac shell and Windows Package helpers, valid ICO/PNG/ICNS from
-source SVG. Workflow has not been pushed/run; NO Mac binary is built yet.
-User explicitly authorized commit/push on October 31 to continue MVP completion.
-Push and native CI outcomes must be verified separately; no Mac result claimed.
+Windows: 35 backend + four bridge tests, exact-byte UI integrity, full real debug
+CRUD/filter/import/lock/restart smoke, release exe and offline-WebView2 NSIS setup,
+and actual release locked-login-screen launch passed on a fresh hosted runner.
+Mac: 35 backend + four bridge tests, asset integrity, universal app/DMG build,
+arm64/x86_64 verification, ad-hoc signature verification and ten-second packaged
+process launch passed on macOS 15. Full Mac UI/hardware acceptance NOT verified.
 
-Official Hope UI 1.0.3 CSS/loader/license now vendored at pinned upstream commit;
-removed Google Fonts import/source-map reference. Existing Bootstrap JS/base CSS
-and custom rendering retained. Added visible keyboard focus. Full Windows debug
-UI smoke passed and imported-directory screenshot reviewed with actual Hope UI.
+Verified artifact downloads retained locally (ignored, not transferred via Git):
+- src-tauri/target/distribution/windows-9c41b18/rustacean_crm.exe
+- src-tauri/target/distribution/windows-9c41b18/bundle/nsis/Rustacean CRM_0.1.0_x64-setup.exe
+- src-tauri/target/distribution/macos-9c41b18/Rustacean-CRM-macos-universal.zip
+- src-tauri/target/distribution/macos-9c41b18/dmg/Rustacean CRM_0.1.0_universal.dmg
+Both outer artifact archive SHA256 values matched GitHub metadata before extraction.
+Mac app stays inside metadata-preserving ZIP/DMG when transferring from Windows.
+No user database bundled. Windows unsigned; Mac ad-hoc, not notarized; downloaded
+Mac demo may need OS approval. Targets Windows 10/11 x64 and macOS 13+ universal;
+oldest target OSes are configured, not each independently tested.
 
-Backend session.rs now requires BOTH monotonic and wall elapsed within timeout;
-clock rollback fails closed. Four unit tests model suspend-like elapsed time,
-clock rollback, monotonic expiry and non-renewing status/renewal. No IPC fields,
-database schema or normal timeout changes. Frontend also checks session on focus
-and pageshow. main.rs shadowed debug data path avoids a release-only mut warning.
+## Implementation and remaining acceptance
 
-Checks: 35 backend tests and four bridge tests passed; locked debug and release
-builds passed, Windows NSIS setup generated (~212 MiB with offline WebView2).
-Real final debug UI CRUD/filter/import/restart regression passed, zero unexpected
-browser errors/CSP/external HTTP(S), artifacts:
-C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-1YKzWK.
-Actual release exe login-screen launch passed (no login/import/edit forms):
-C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-VJ3qBK.
-That release launch uses ordinary app data; mutation smoke used disposable DBs.
-Rust formatting, JS syntax and bash syntax checked. Windows installer extraction
-initially failed moving the NSIS cache; verified official cache was copied and
-official plugin hash checked, then bundling succeeded. No application workaround.
+Published changes: pinned Tauri CLI 2.12.4/package-lock, enabled native bundling,
+Windows Package helper/Mac shell commands, CI artifacts, proper ICO/PNG/ICNS from
+SVG. Official MIT Hope UI 1.0.3 CSS/loader packaged locally; Google Fonts import
+removed, Bootstrap JS/base and application rendering retained. Focus outline
+preserved. Exact vendor bytes protected against Windows CRLF conversion by
+.gitattributes; early SRI check catches broken UI assets before compilation.
 
-Next blocker: Mac build execution. Reviewed workflow can generate Mac artifacts
-on GitHub after explicit commit/push authorization, or source can build on a Mac
-using bash scripts/desktop.sh package. Need actual Mac UI/offline/sleep testing;
-Windows installer/fresh-machine/release CRUD/offline/sleep checks also pending.
-Ad-hoc Mac signature is for demo, not notarized public distribution; downloaded
-Mac package may need OS approval. No end-user Rust/Node required on either OS.
-Prior 900.38-second full idle pass predates dual-clock change; do not claim it
-was rerun on this updated backend. No ordinary user records reset or imported.
+SessionManager now requires monotonic AND wall elapsed within normal 15 minutes;
+backward clock anomaly locks. Four deterministic tests cover suspend-like wall
+elapsed, monotonic expiry, rollback and status/renewal behavior. Frontend checks
+on focus/pageshow too. No IPC/schema changes or production timeout bypass.
+Prior real 900.38-second idle pass predates this dual-clock change. Actual OS
+sleep/wake still needs testing. Mutation smoke used disposable databases; local
+release startup observed ordinary app-data login without submitting data forms.
+
+CI fixes: macOS 14 retired (use macos-15); corrected lipo argument order;
+elevated WebView2 ignores environment debug flags, so hosted CI explicitly sets
+an exe-scoped HKLM debugging policy and removes it on app stop. Guard refuses
+local/self-hosted execution; this was verified locally before registry access.
+Production code/local ordinary runs do not modify policy. Diagnostics stay in
+RUNNER_TEMP; existing policies are preserved. See integration-changes.md.
+
+Next: actual Mac UI create/edit/archive/filter/import/restart using downloaded
+package; actual OS-network-disconnected launch/use and sleep/wake on both OSes;
+fresh-machine installer and full release CRUD acceptance. No client acceptance,
+security certification, notarization, Intel-hardware execution or Linux claim.
+Do not defer required implementation/fixes to teammates. Final scope still adds
+organization update/archive, transfers/status/history, skill/contact/decay UI,
+media/native actions and restore UI. Teaching stays Python-grounded, short,
+during development, no routine quizzes or proficiency inferred from test success.
+Update integration-changes/IPC notes when relevant and keep checkpoint current.
 
 ## Earlier inactivity checkpoint (October 30)
 Latest local continuation after 3541d46: HANDOFF IN fetched/pulled dev clean;

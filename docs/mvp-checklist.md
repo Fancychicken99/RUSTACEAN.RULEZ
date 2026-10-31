@@ -10,7 +10,7 @@ see checkpoint/change log and verify origin/dev for transfer state.
 | Proposed MVP behavior | Evidence | Status |
 | --- | --- | --- |
 | Runnable Windows executable | Debug build/full real WebView2 smoke; optimized release .exe and NSIS setup with offline WebView2 generated; real release login-screen launch | Built and tested locally at these layers; installer/fresh-machine and release CRUD acceptance pending |
-| macOS native executable | Universal app/DMG commands, ICNS icon, ad-hoc signing and native CI configured | Build/launch/UI acceptance pending Mac runner or local Mac |
+| macOS native executable | Native CI built universal app/DMG and verified both architectures/signature plus process launch | Built; full Mac UI/device/offline acceptance pending; see mvp-build-evidence.md |
 | Hope UI presentation | Pinned official 1.0.3 MIT CSS/loader packaged locally; remote font import removed; full UI smoke and screenshot review | Verified on Windows debug build; Mac visual check pending |
 | Local password setup/login/errors/protected access | Bridge tests and real UI setup/wrong/correct password/lock/restart | Verified for tested flows |
 | Inactivity lock | Prior real idle run locked at 900.38 seconds; current dual-clock session adds four tests for suspend-like elapsed time, clock rollback, monotonic expiry and status/renewal behavior; real UI regression passed | Full-duration pass predates dual-clock change; actual OS sleep/wake pending |
@@ -28,7 +28,8 @@ Before treating the proposed MVP as client-ready: confirm its scope/timeout with
 the client, verify sleep/wake behavior, launch with
 OS networking disconnected, review UI scenarios manually, and document the exact
 build/environment/prerequisites on BOTH platforms. Windows release generation is
-verified; installation on a fresh machine and macOS build/UI acceptance remain.
+verified; native Mac builds passed too. Installation on a fresh machine and full
+Mac UI acceptance remain. See mvp-build-evidence.md for exact checks/downloads.
 Linux remains final scope. Official Hope UI CSS is now packaged locally; the
 Windows debug UI regression and screenshot review passed with it loaded.
 

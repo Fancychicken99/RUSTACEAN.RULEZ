@@ -1,8 +1,9 @@
 # RUSTACEAN.RULEZ
 
 Student contractor CRM for Dr. Burchfield. MVP targets Windows and macOS.
-Windows release executable/installer are built locally; universal macOS
-packaging and native CI are prepared, pending a Mac build and acceptance.
+Windows exe/installer and universal macOS app/DMG both passed native CI builds.
+See [build evidence and downloads](docs/mvp-build-evidence.md) for the verified
+source, packages and limits of the checks.
 See [MVP distribution](docs/mvp-distribution.md) for outputs, commands and demo
 steps. The Windows Tauri executable now
 opens the original Northstar layout with real local authentication, saved
@@ -87,7 +88,7 @@ SQLite; organization/status/search filters then narrow those returned records. C
 those fields. Contact-history metrics and activity are marked unavailable rather
 than fabricated. Media/native quick actions and skill/decay UI remain final-scope
 work. Windows release/installer generation and release login-screen launch passed;
-fresh-machine install, OS-disconnected use and macOS/Linux verification remain
+fresh-machine install, OS-disconnected use, full Mac UI and Linux verification remain
 pending. The prior full-duration inactivity run passed; dual-clock expiry now
 also has deterministic boundary tests. Actual sleep/wake still needs a check.
 Official Hope UI CSS is packaged locally with its MIT license and no font CDN.

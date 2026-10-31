@@ -2,7 +2,8 @@
 
 October 31, 2026: MVP now requires Windows and macOS. Windows optimized exe and
 offline-WebView2 NSIS setup have been generated; release login-screen launch
-passed. Native Mac packaging/CI is prepared but has not run. See
+passed. Native Windows/Mac CI builds now passed; exact evidence/downloads are in
+mvp-build-evidence.md. Full Mac UI/device acceptance remains. See
 [MVP distribution](mvp-distribution.md) for exact commands, outputs and acceptance
 limits. Official Hope UI is now locally packaged. Backend dual-clock expiry adds
 sleep-spanning wall time; actual OS sleep/wake remains a manual acceptance check.

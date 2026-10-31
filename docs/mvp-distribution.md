@@ -12,8 +12,9 @@ handoffs remain separate. This document does not claim client acceptance.
 | Windows 10/11, x64 | `src-tauri/target/release/rustacean_crm.exe` or `src-tauri/target/release/bundle/nsis/Rustacean CRM_0.1.0_x64-setup.exe` | WebView2; setup includes its offline installer. Standalone exe needs an existing compatible WebView2 installation. |
 | macOS 13+, Apple Silicon or Intel | `src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app` in a metadata-preserving ZIP, or the DMG under `bundle/dmg/` | Built-in WKWebView. No Rust/Cargo/Node runtime. Actual OS/hardware acceptance still required. |
 
-The Windows files have been built locally. The macOS paths describe expected
-build output; a Mac build has not yet run in this Windows session. Do not rename
+Both platforms were built successfully by native CI from 9c41b18. See
+mvp-build-evidence.md for downloads, local package paths and exact checks.
+The table above describes build-machine outputs. Do not rename
 an exe to app or copy a Windows binary to a Mac. Keep the whole .app bundle.
 
 Both builds embed HTML/CSS/JavaScript and the fictional dataset. User databases
@@ -121,7 +122,8 @@ monotonic expiry and non-renewing status reads. These do not simulate an actual
 OS sleep. The prior real 900.38-second inactivity pass preceded the dual-clock
 change; the updated code has automated boundary/regression coverage.
 
-Pending: actual Mac build and both-architecture UI use; downloaded Mac package
+Native builds, Mac signature/architecture/process launch and Windows release
+startup now passed; see mvp-build-evidence.md. Pending: Mac UI use; downloaded Mac package
 approval; release/fresh-machine install and full CRUD; actual sleep/wake and
 OS-network-disconnected runs on both platforms. macOS 13 and Windows 10 are
 configured targets, not claims of testing on those oldest OS releases.

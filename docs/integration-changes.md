@@ -278,3 +278,13 @@ verification in scripts/check-ui-assets.cjs/native CI. Hash checks remain enable
 vendor runtime content unchanged. This fixes a real fresh-Windows-checkout issue,
 not just test timing. Mac bundle from 53e4a66 was downloaded and artifact SHA256
 verified; retained under ignored src-tauri/target/distribution/macos-53e4a66.
+
+Final native run 41226249859 for 9c41b187190207b0c808387362958cfd51c32033 PASSED
+both jobs: 35 backend/four bridge tests each; exact-byte assets; Windows debug
+full UI regression, release exe/NSIS and release login-screen launch; Mac universal
+app/DMG, architecture/signature and packaged-process launch. Both platform artifact
+downloads matched GitHub SHA256 and were retained under ignored distribution/
+directories. Full evidence/links/hashes: docs/mvp-build-evidence.md. CI policy
+guard also verified to refuse local/self-hosted use before registry access.
+Only evidence/docs change after this build; no new runtime code. Physical Mac UI,
+offline/sleep and fresh-machine/release-CRUD acceptance still pending.
