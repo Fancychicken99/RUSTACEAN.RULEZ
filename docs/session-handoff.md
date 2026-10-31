@@ -4,6 +4,12 @@ Personal to Broughnut. Updated October 31, 2026.
 
 ## Current continuation: Windows AND macOS MVP
 
+Publication: 8010226 pushed to dev on October 31. Native workflow run
+41223485488 started; Mac job cancelled before steps due to GitHub's scheduled
+macOS 14 image brownout/retirement. Runner changed to supported macos-15 for
+the follow-up build. This is a CI environment correction, not a Mac app failure.
+Windows CI was still running when recorded; no successful Mac build claimed.
+
 User explicitly requires MVP executables on both Windows and macOS; has access
 to a teammate/professor's Mac. Do not delegate implementation. SOW MVP platforms
 updated; seven functional acceptance checks remain, final features stay separate.

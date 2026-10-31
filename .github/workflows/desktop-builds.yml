@@ -17,7 +17,7 @@ jobs:
           - os: windows-latest
             platform: windows-x64
             script: package:windows
-          - os: macos-14
+          - os: macos-15
             platform: macos-universal
             script: package:macos
     runs-on: ${{ matrix.os }}

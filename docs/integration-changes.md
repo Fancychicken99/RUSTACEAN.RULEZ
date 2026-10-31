@@ -248,3 +248,8 @@ installer/fresh-machine/release CRUD/offline/sleep checks remain. No blanket MVP
 security, signing/notarization or cross-platform acceptance claim. The previous
 real 900.38-second idle run predates dual-clock logic; deterministic tests are
 separate evidence. Ordinary user records were not imported/reset.
+
+Publication/CI follow-up: 8010226 pushed; run 41223485488 cancelled its Mac job
+before steps because GitHub is retiring macos-14 (scheduled image brownout).
+Changed runner to macos-15, retaining the universal build. Removed only trailing
+blank whitespace from vendored Hope CSS after staged diff review flagged it.
