@@ -50,6 +50,8 @@ jobs:
           if ($installer.ExitCode -notin @(0, 3010)) { throw "WebView2 provisioning failed: $($installer.ExitCode)" }
       - name: Windows executable smoke
         if: runner.os == 'Windows'
+        env:
+          RUSTACEAN_CI_WEBVIEW_POLICY: '1'
         run: |
           cargo build --locked --manifest-path src-tauri/Cargo.toml
           node scripts/test-desktop-smoke.cjs
@@ -57,6 +59,8 @@ jobs:
         run: npm run ${{ matrix.script }}
       - name: Windows release launch
         if: runner.os == 'Windows'
+        env:
+          RUSTACEAN_CI_WEBVIEW_POLICY: '1'
         run: node scripts/test-desktop-smoke.cjs --release-launch-only
       - name: Preserve macOS app metadata
         if: runner.os == 'macOS'

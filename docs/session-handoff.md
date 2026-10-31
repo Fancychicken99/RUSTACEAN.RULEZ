@@ -15,6 +15,13 @@ corrected input filename before -verify_arch. No downloadable Mac artifact from
 that failed job. Windows compiled but CDP page discovery timed out; explicit
 official WebView2 provisioning, 60-second initial discovery and application logs
 added for disposable runner. Failure artifacts retained under RUNNER_TEMP.
+Run 41224508852: Mac native tests, universal .app/DMG, lipo/code-signature checks
+and ten-second packaged process launch PASSED. Mac artifact 13051906369 exists.
+Windows CDP still timed out despite runtime installation. Microsoft documents
+that elevated hosts ignore WEBVIEW2_* environment flags. Smoke now uses an
+exe-scoped HKLM debug policy only when explicitly enabled inside a disposable
+GitHub-hosted runner, removing it after each app stop. Local runs and production
+code do not change system policy. Follow-up CI pending.
 
 User explicitly requires MVP executables on both Windows and macOS; has access
 to a teammate/professor's Mac. Do not delegate implementation. SOW MVP platforms

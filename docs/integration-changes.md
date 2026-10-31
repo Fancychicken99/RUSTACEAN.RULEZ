@@ -261,3 +261,12 @@ official WebView2 runtime installation on disposable runner, 60-second initial
 discovery, process stdout/stderr logs and failure-artifact upload. Smoke data now
 uses RUNNER_TEMP when available so CI diagnostics are retrievable. These are
 test/build changes; no production timeout or data-path changes.
+
+Run 41224508852: Mac job succeeded through signature/architecture/process launch
+and artifact upload. Windows runtime installed, app created isolated DB, but no
+CDP endpoint appeared. Microsoft vendor explanation: elevated hosts ignore
+environment-based WebView2 debug arguments (WebView2Feedback issue 5640).
+Added explicitly enabled GitHub-hosted-only, exe-scoped HKLM debug arguments,
+removed after every test process stop. Refuses an existing app policy; local
+runs unchanged. No production security bypass, timeout or command changes.
+Reference: https://github.com/MicrosoftEdge/WebView2Feedback/issues/5640.

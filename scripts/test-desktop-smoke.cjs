@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const net = require('node:net');
-const { spawn } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 const assert = require('node:assert/strict');
 const { DatabaseSync } = require('node:sqlite');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -14,6 +14,8 @@ const idleOnly = process.argv.includes('--idle-only');
 const testDirectory = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP || os.tmpdir(), 'rustacean-desktop-smoke-'));
 let child;
 let socket;
+let ciPolicyActive = false;
+const ciPolicyKey = 'HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge\\WebView2\\AdditionalBrowserArguments';
 let sequence = 0;
 const pending = new Map();
 const externalRequests = new Set();
@@ -55,10 +57,23 @@ async function evaluate(expression) {
 }
 async function launch() {
   const port = await freePort();
+  const debugArguments = `--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1`;
+  if (process.env.RUSTACEAN_CI_WEBVIEW_POLICY === '1') {
+    if (process.env.GITHUB_ACTIONS !== 'true' || process.env.RUNNER_ENVIRONMENT !== 'github-hosted') {
+      throw new Error('Machine debugging policy is restricted to disposable GitHub-hosted CI.');
+    }
+    // Elevated WebView2 intentionally ignores environment-based debugging flags.
+    // Scope the documented machine policy to this exe on the disposable VM only.
+    const previous = spawnSync('reg.exe', ['query', ciPolicyKey, '/v', 'rustacean_crm.exe'], { windowsHide: true });
+    if (previous.status === 0) throw new Error('Preserving an existing WebView2 application policy.');
+    const policy = spawnSync('reg.exe', ['add', ciPolicyKey, '/v', 'rustacean_crm.exe', '/t', 'REG_SZ', '/d', debugArguments, '/f'], { windowsHide: true });
+    if (policy.status !== 0) throw new Error('Could not configure CI WebView2 debugging policy.');
+    ciPolicyActive = true;
+  }
   child = spawn(executable, [], {
     windowsHide: true,
     env: { ...process.env, ...(!releaseLaunchOnly ? { RUSTACEAN_TEST_DATA_DIR: testDirectory } : {}),
-      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1` },
+      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: debugArguments },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   const appLog = fs.createWriteStream(path.join(testDirectory, `application-${port}.log`));
@@ -150,6 +165,11 @@ async function stop() {
     const exited = new Promise(resolve => child.once('exit', resolve));
     child.kill();
     await exited;
+  }
+  if (ciPolicyActive) {
+    const removed = spawnSync('reg.exe', ['delete', ciPolicyKey, '/v', 'rustacean_crm.exe', '/f'], { windowsHide: true });
+    if (removed.status !== 0) throw new Error('Could not remove CI WebView2 debugging policy.');
+    ciPolicyActive = false;
   }
 }
 async function verifyRealInactivity() {
