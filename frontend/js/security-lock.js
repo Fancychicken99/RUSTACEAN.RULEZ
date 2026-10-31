@@ -155,6 +155,8 @@
   }
   setInterval(checkSession, 5000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkSession(); });
+  window.addEventListener('focus', checkSession);
+  window.addEventListener('pageshow', checkSession);
   window.crmSession = Object.freeze({ get authenticated() { return authenticated; }, lock });
   connect();
 })();

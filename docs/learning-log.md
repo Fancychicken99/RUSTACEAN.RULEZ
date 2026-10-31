@@ -1,5 +1,26 @@
 # Rust learning log
 
+## Native packaging and cross-platform time — October 31, 2026
+
+MVP now targets Windows and macOS per user. Explained native .exe versus .app
+bundle, development tools versus end-user runtime, and universal Mac architecture.
+Introduced stopwatch versus wall-clock comparison: Instant can exclude suspend;
+SystemTime adds sleep-spanning expiry and backward clock errors require login.
+`matches!` checks successful elapsed duration before renewal. Four deterministic
+clock tests passed; those are not OS sleep tests. Windows release build/launch
+and full debug UI smoke passed; Mac build still pending actual Mac execution.
+No user coding exercise, quiz or independent proficiency claim.
+
+## Full-duration inactivity acceptance — October 30, 2026
+
+Explained UI timer versus backend authorization: `time.elapsed() <
+self.inactivity_timeout` compares elapsed time to the allowed duration before
+renewal. Non-renewing status reads observe expiry without keeping a session alive.
+The optional real-executable test waited the actual 15 minutes (900.38 seconds),
+checked clearing/access rejection, then re-login persistence. No timeout override
+or production code change. OS sleep/wake/network-disconnect evidence remains
+separate. No user exercise or independent proficiency claim; no quiz requested.
+
 ## Develop and learn agreement — October 30, 2026
 
 User requests learning Rust during development and deeper review afterward,

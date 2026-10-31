@@ -1,6 +1,10 @@
 # RUSTACEAN.RULEZ
 
-Student contractor CRM for Dr. Burchfield. The Windows Tauri executable now
+Student contractor CRM for Dr. Burchfield. MVP targets Windows and macOS.
+Windows release executable/installer are built locally; universal macOS
+packaging and native CI are prepared, pending a Mac build and acceptance.
+See [MVP distribution](docs/mvp-distribution.md) for outputs, commands and demo
+steps. The Windows Tauri executable now
 opens the original Northstar layout with real local authentication, saved
 contractor/organization lists, profile selection, and dashboard counts. Full
 MVP contractor create/edit/archive and organization creation are connected;
@@ -46,6 +50,9 @@ From PowerShell at the repository root:
 Build output: `src-tauri/target/debug/rustacean_crm.exe`. It can be launched
 directly after building. Rust/C++ tooling is needed to build; Windows WebView2 is
 needed to run. This is a debug executable, not a verified installer/release.
+For the Windows release executable and offline-WebView2 installer, run `npm ci`
+then `.\scripts\desktop.ps1 -Action Package`. On a Mac, use
+`bash scripts/desktop.sh package`; see the distribution guide for prerequisites.
 See [desktop development](docs/desktop-development.md) for setup, storage, test
 isolation, inactivity behavior, and platform limitations.
 
@@ -78,10 +85,12 @@ Editing currently covers full name, role, email and phone; organization transfer
 and status changes are separate pending workflows. Region filtering queries
 SQLite; organization/status/search filters then narrow those returned records. Country/city filters are unavailable because the response lacks
 those fields. Contact-history metrics and activity are marked unavailable rather
-than fabricated. Media/native quick actions, skill/decay UI, full
-inactivity-duration testing, OS-disconnected launch, release packaging, and
-macOS/Linux verification remain pending. Existing Bootstrap styling is preserved;
-formal Hope UI requirement alignment remains to be confirmed.
+than fabricated. Media/native quick actions and skill/decay UI remain final-scope
+work. Windows release/installer generation and release login-screen launch passed;
+fresh-machine install, OS-disconnected use and macOS/Linux verification remain
+pending. The prior full-duration inactivity run passed; dual-clock expiry now
+also has deterministic boundary tests. Actual sleep/wake still needs a check.
+Official Hope UI CSS is packaged locally with its MIT license and no font CDN.
 
 [The revised SOW](docs/statement-of-work.md) remains a proposal, not approved
 scope or proof of compliance. Optional [device workflow](docs/device-workflow.md)

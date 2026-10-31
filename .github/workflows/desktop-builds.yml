@@ -1,0 +1,89 @@
+name: Windows and macOS MVP builds
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows-x64
+            script: package:windows
+          - os: macos-14
+            platform: macos-universal
+            script: package:macos
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.99.1 --profile minimal
+      - name: Select pinned Rust toolchain
+        run: rustup override set 1.99.1
+      - name: Install both macOS targets
+        if: runner.os == 'macOS'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Backend tests
+        run: cargo test --locked --manifest-path backend/Cargo.toml
+      - name: Bridge tests
+        run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - name: Windows executable smoke
+        if: runner.os == 'Windows'
+        run: |
+          cargo build --locked --manifest-path src-tauri/Cargo.toml
+          node scripts/test-desktop-smoke.cjs
+      - name: Build native packages
+        run: npm run ${{ matrix.script }}
+      - name: Windows release launch
+        if: runner.os == 'Windows'
+        run: node scripts/test-desktop-smoke.cjs --release-launch-only
+      - name: Preserve macOS app metadata
+        if: runner.os == 'macOS'
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app" "src-tauri/target/universal-apple-darwin/release/bundle/Rustacean-CRM-macos-universal.zip"
+          lipo -verify_arch arm64 x86_64 "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app/Contents/MacOS/rustacean_crm"
+          codesign --verify --deep --strict "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app"
+      - name: macOS packaged process launch
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app/Contents/MacOS/rustacean_crm" > macos-launch.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          sleep 10
+          if ! kill -0 "$app_pid" 2>/dev/null; then
+            cat macos-launch.log
+            exit 1
+          fi
+          echo "Packaged process stayed alive for 10 seconds; full UI acceptance remains a separate check."
+      - name: Upload Windows packages
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rustacean-CRM-${{ matrix.platform }}-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/release/rustacean_crm.exe
+            src-tauri/target/release/bundle/nsis/*-setup.exe
+      - name: Upload macOS packages
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rustacean-CRM-${{ matrix.platform }}-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/universal-apple-darwin/release/bundle/*.zip
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg

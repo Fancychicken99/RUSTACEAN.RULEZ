@@ -1,5 +1,12 @@
 # Desktop executable development
 
+October 31, 2026: MVP now requires Windows and macOS. Windows optimized exe and
+offline-WebView2 NSIS setup have been generated; release login-screen launch
+passed. Native Mac packaging/CI is prepared but has not run. See
+[MVP distribution](mvp-distribution.md) for exact commands, outputs and acceptance
+limits. Official Hope UI is now locally packaged. Backend dual-clock expiry adds
+sleep-spanning wall time; actual OS sleep/wake remains a manual acceptance check.
+
 src-tauri/ depends on the existing backend crate and embeds frontend/ assets.
 The default window now loads frontend/index.html: the original Northstar layout
 connected to real local authentication and SQLite contractor/organization lists.
@@ -131,4 +138,7 @@ Expanded tests: 31 backend tests, four bridge workflows, and real-window checks
 for import cancel/import/repeat/restart, edited/archived sample preservation,
 region-match/no-match/clear, local status filtering and full dashboard totals.
 Filter failure/response-order conditions are explicitly simulated. No OS-level
-network disconnect or full-duration inactivity evidence is claimed.
+network disconnect evidence is claimed. A separate optional real-duration run,
+`node scripts/test-desktop-smoke.cjs --idle-only`, passed at 900.38 seconds on
+October 30, 2026: UI lock/clearing, protected read and renewal rejection, and
+re-login persistence. OS sleep/wake remains unverified. See e2e-test-plan.md.

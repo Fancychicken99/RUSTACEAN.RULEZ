@@ -1,6 +1,6 @@
 # Secure Military Contractor CRM — revised Statement of Work
 
-Draft revision: October 29, 2026. Client: Benjamin Burchfield.
+Draft revision: October 31, 2026. Client: Benjamin Burchfield.
 Prepared by: Junior Development Team (three members).
 
 This proposed revision incorporates feedback on the October 23 draft's storage,
@@ -31,13 +31,17 @@ platform; a universal dependency-free executable is not promised.
 
 ## Proposed Sprint 1 MVP
 
-Demonstrate one integrated Windows executable to the client. This milestone is a
-subset of final scope, not a claim of three-platform completion.
+Demonstrate integrated native executables on Windows and macOS. Broughnut
+explicitly expanded the MVP platform requirement on October 31, 2026; this
+supersedes the earlier Windows-only MVP plan. It remains a subset of final scope,
+not a claim of Linux completion or client acceptance. macOS uses an executable
+application bundle (.app), with a DMG for delivery; Windows uses .exe.
 
 Acceptance checks:
 
-1. Launch the executable on a documented Windows environment with networking
-   disabled; navigation and required UI assets work.
+1. Launch the executable on documented Windows and macOS environments with networking
+   disabled; navigation and required UI assets work. Run the following checks on
+   each platform and identify the tested hardware/OS/build.
 2. Set up a local password, authenticate, reject an incorrect password, and
    enforce a documented inactivity timeout. Protected commands reject locked
    sessions; an overlay alone does not satisfy this requirement.

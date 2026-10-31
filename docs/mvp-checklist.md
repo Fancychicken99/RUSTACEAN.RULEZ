@@ -1,15 +1,19 @@
 # Proposed Sprint 1 MVP evidence checklist
 
-Updated October 30, 2026. This maps the proposed revised SOW to current evidence;
+Updated October 31, 2026. Broughnut now requires Windows AND macOS for MVP.
+See mvp-distribution.md for build outputs and per-platform demo steps.
+This maps the proposed revised SOW to current evidence;
 it is not client approval, final security certification, or full-release acceptance.
 This checklist accompanies the reviewed filter/import handoff after 3c027d8;
 see checkpoint/change log and verify origin/dev for transfer state.
 
 | Proposed MVP behavior | Evidence | Status |
 | --- | --- | --- |
-| Runnable Windows executable | Debug build and real WebView2 smoke test | Verified on development device; fresh-machine/release packaging pending |
+| Runnable Windows executable | Debug build/full real WebView2 smoke; optimized release .exe and NSIS setup with offline WebView2 generated; real release login-screen launch | Built and tested locally at these layers; installer/fresh-machine and release CRUD acceptance pending |
+| macOS native executable | Universal app/DMG commands, ICNS icon, ad-hoc signing and native CI configured | Build/launch/UI acceptance pending Mac runner or local Mac |
+| Hope UI presentation | Pinned official 1.0.3 MIT CSS/loader packaged locally; remote font import removed; full UI smoke and screenshot review | Verified on Windows debug build; Mac visual check pending |
 | Local password setup/login/errors/protected access | Bridge tests and real UI setup/wrong/correct password/lock/restart | Verified for tested flows |
-| Inactivity lock | UI timer/activity renewal, protected backend expiry test, UI manual/editor lock tests | Implemented; real full-duration/sleep/wake test pending |
+| Inactivity lock | Prior real idle run locked at 900.38 seconds; current dual-clock session adds four tests for suspend-like elapsed time, clock rollback, monotonic expiry and status/renewal behavior; real UI regression passed | Full-duration pass predates dual-clock change; actual OS sleep/wake pending |
 | Browse/create/edit/archive contractor linked to organization | Real UI create organization/contractor, edit/restart, cancel/confirm archive/restart and read-only retained-row inspection | Verified for name/role/email/phone; transfer/status changes separate |
 | Region filtering and clearing | Real SQLite command and UI match/no-match/clear, independent global totals | Verified; other geography fields not implemented |
 | Useful errors and no fixture fallback | Real field validation; rollback tests; simulated UI request failures/reordering | Verified at these layers; simulated conditions labelled |
@@ -21,11 +25,12 @@ runs automatically. Direct SQLite in the UI smoke runner is read-only retention/
 count inspection, not seed setup or behavior under test.
 
 Before treating the proposed MVP as client-ready: confirm its scope/timeout with
-the client, verify actual inactivity duration and sleep/wake behavior, launch with
+the client, verify sleep/wake behavior, launch with
 OS networking disconnected, review UI scenarios manually, and document the exact
-build/environment/prerequisites. End-user release/installer handling and final
-macOS/Linux targets remain separate work. The SOW's Hope UI requirement still
-needs explicit alignment evidence; Bootstrap packaging alone is not proof.
+build/environment/prerequisites on BOTH platforms. Windows release generation is
+verified; installation on a fresh machine and macOS build/UI acceptance remain.
+Linux remains final scope. Official Hope UI CSS is now packaged locally; the
+Windows debug UI regression and screenshot review passed with it loaded.
 
 Run from repository root:
 

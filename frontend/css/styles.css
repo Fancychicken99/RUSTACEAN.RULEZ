@@ -235,6 +235,7 @@ a { text-decoration: none; }
 .topbar-search { min-width: 160px; flex-basis: 160px; }
 
 /* Keep navigation and explicit sample import reachable beside long directories. */
+:focus-visible { outline: 2px solid var(--hope-blue); outline-offset: 2px; }
 @media (min-width: 992px) {
   .sidebar { position: sticky; top: 0; height: 100vh; align-self: flex-start; overflow-y: auto; }
 }

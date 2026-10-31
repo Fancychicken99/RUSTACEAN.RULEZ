@@ -1,9 +1,72 @@
 # Session handoff
 
-Personal to Broughnut. Updated October 30, 2026.
-Branch: dev. HANDOFF OUT explicitly requested. This checkpoint accompanies the
-reviewed region-filter/sample-import milestone following 3c027d8. Verify
-origin/dev contains this checkpoint before relying on another device.
+Personal to Broughnut. Updated October 31, 2026.
+
+## Current continuation: Windows AND macOS MVP
+
+User explicitly requires MVP executables on both Windows and macOS; has access
+to a teammate/professor's Mac. Do not delegate implementation. SOW MVP platforms
+updated; seven functional acceptance checks remain, final features stay separate.
+See docs/mvp-distribution.md for native build/demo steps and exact limitations.
+
+Reviewed publication after 3541d46: prior inactivity-test edits plus pinned Tauri
+CLI 2.12.4 package/lock, enabled bundling, Windows offline-WebView2 NSIS setup,
+macOS 13+ universal .app/DMG/ad-hoc signing configuration, native build workflow
+for dev pushes, Mac shell and Windows Package helpers, valid ICO/PNG/ICNS from
+source SVG. Workflow has not been pushed/run; NO Mac binary is built yet.
+User explicitly authorized commit/push on October 31 to continue MVP completion.
+Push and native CI outcomes must be verified separately; no Mac result claimed.
+
+Official Hope UI 1.0.3 CSS/loader/license now vendored at pinned upstream commit;
+removed Google Fonts import/source-map reference. Existing Bootstrap JS/base CSS
+and custom rendering retained. Added visible keyboard focus. Full Windows debug
+UI smoke passed and imported-directory screenshot reviewed with actual Hope UI.
+
+Backend session.rs now requires BOTH monotonic and wall elapsed within timeout;
+clock rollback fails closed. Four unit tests model suspend-like elapsed time,
+clock rollback, monotonic expiry and non-renewing status/renewal. No IPC fields,
+database schema or normal timeout changes. Frontend also checks session on focus
+and pageshow. main.rs shadowed debug data path avoids a release-only mut warning.
+
+Checks: 35 backend tests and four bridge tests passed; locked debug and release
+builds passed, Windows NSIS setup generated (~212 MiB with offline WebView2).
+Real final debug UI CRUD/filter/import/restart regression passed, zero unexpected
+browser errors/CSP/external HTTP(S), artifacts:
+C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-1YKzWK.
+Actual release exe login-screen launch passed (no login/import/edit forms):
+C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-VJ3qBK.
+That release launch uses ordinary app data; mutation smoke used disposable DBs.
+Rust formatting, JS syntax and bash syntax checked. Windows installer extraction
+initially failed moving the NSIS cache; verified official cache was copied and
+official plugin hash checked, then bundling succeeded. No application workaround.
+
+Next blocker: Mac build execution. Reviewed workflow can generate Mac artifacts
+on GitHub after explicit commit/push authorization, or source can build on a Mac
+using bash scripts/desktop.sh package. Need actual Mac UI/offline/sleep testing;
+Windows installer/fresh-machine/release CRUD/offline/sleep checks also pending.
+Ad-hoc Mac signature is for demo, not notarized public distribution; downloaded
+Mac package may need OS approval. No end-user Rust/Node required on either OS.
+Prior 900.38-second full idle pass predates dual-clock change; do not claim it
+was rerun on this updated backend. No ordinary user records reset or imported.
+
+## Earlier inactivity checkpoint (October 30)
+Latest local continuation after 3541d46: HANDOFF IN fetched/pulled dev clean;
+31 backend and four bridge tests passed locally. Added optional real-duration
+inactivity smoke and acceptance instructions; these changes are UNCOMMITTED.
+Locked debug build and JavaScript syntax/diff checks passed. Real WebView2
+`--idle-only` run PASSED at 900.38 seconds (normal 15-minute timeout): hidden/inert
+workspace, cleared contractor rows, protected read/activity renewal rejected,
+re-login restored access to all 60 saved fictional records. Screenshot reviewed.
+Evidence: C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-VD4RYX
+(inactivity-result.json, inactivity-lock.png, disposable crm.db). Ordinary app data
+untouched; test process closed. No production code/timeout/interface changes.
+Next: actual OS sleep/wake and OS-network-disconnected launch acceptance checks;
+procedures in e2e-test-plan.md. No such result claimed yet. Earlier milestone
+details below are historical; full-duration awake inactivity is now verified.
+
+Branch: dev. Published milestone: 3541d46, region-filter/sample-import work after
+3c027d8. Current acceptance-test continuation is local and not yet published.
+Verify origin/dev and working-tree state before relying on another device.
 
 ## Standing instructions and learning workflow
 
@@ -109,7 +172,7 @@ scripts/. Initial 50 JS fixture records remain unused; no fixture fallback.
 ## Next step toward MVP acceptance
 
 Core proposed MVP data flows are now implemented and tested. Before calling the
-MVP accepted, verify actual inactivity duration and sleep/wake behavior; launch
+MVP accepted, verify sleep/wake behavior; launch
 with OS networking disconnected; manually review client demo scenarios; document
 build/runtime prerequisites and agreed scope/timeout. See mvp-checklist.md.
 Consider targeted testability for timeout only if needed, without production

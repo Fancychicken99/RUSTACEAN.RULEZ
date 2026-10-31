@@ -46,8 +46,12 @@ contractors; Password must contain at least 12 characters; Administrator already
 configured; Unable to configure administrator; Unable to read authentication
 status; Login failed; Unable to load organizations. Internal errors must not expose SQL, paths, or credentials.
 
-The initial executable uses a 15-minute backend inactivity timeout, pending
-client agreement. Backend access checks remain authoritative. Status polling
+The executable uses a 15-minute backend inactivity timeout, pending client
+agreement. It checks monotonic and wall-clock elapsed time, expiring
+if either reaches the timeout; a backward clock anomaly locks the session.
+This counts time across suspend even where Instant excludes it. Clock-policy
+unit tests do not establish actual OS sleep/wake acceptance. No IPC fields changed.
+Backend access checks remain authoritative. Status polling
 every five seconds does not renew activity and clears expired display data.
 Trusted pointer/keyboard/input events reset a 15-minute frontend timer and call
 record_activity at most once per 30 seconds. Merely polling status never renews

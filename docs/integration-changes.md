@@ -184,3 +184,67 @@ Artifacts: C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-7Prsqq.
 Formatting, syntax, dataset/DOM checks, lock metadata and diff checks passed.
 Source is included in this handoff commit. No normal app database touched. MVP evidence
 and remaining acceptance are mapped in docs/mvp-checklist.md.
+
+## Full-duration inactivity acceptance — October 30, 2026
+
+Added optional `--idle-only` mode to scripts/test-desktop-smoke.cjs. It runs the
+real debug executable for the normal 15-minute interval with a disposable SQLite
+database, no clock/timeout overrides, and non-renewing status observations. It
+checks lock/hidden/inert state, cleared rows, protected-command rejection,
+rejected activity renewal and re-login persistence. Saves JSON timing evidence
+and a lock screenshot. Default smoke behavior is unchanged. No teammate
+application modules, command contracts, dependencies or production timeouts changed.
+
+docs/e2e-test-plan.md documents the optional run and separate manual sleep/wake
+and disconnected-launch steps. Runtime result is recorded in session-handoff.md;
+these manual scenarios remain pending until actually observed. JavaScript syntax,
+locked debug build and diff checks passed before the timed run. No normal app
+database was changed. Changes remain local until explicit commit/push permission.
+
+Result: real-duration run PASSED at 900.38 seconds on October 30, 2026, including
+cleared UI, rejected protected read/activity and successful re-login with 60
+records. Screenshot reviewed; artifacts retained outside Git at
+C:\Users\BRODYM~1\AppData\Local\Temp\rustacean-desktop-smoke-VD4RYX.
+Initial test-script expression error was corrected before the successful run.
+
+## Windows/macOS MVP distribution — October 31, 2026
+
+Broughnut explicitly expanded MVP platforms to Windows and macOS; retained the
+seven functional MVP checks rather than silently treating every final feature
+as a Sprint 1 requirement. User authorized commit/push of the reviewed changes
+on October 31 to continue MVP completion; publication/CI outcomes reported separately.
+
+| Files | Change and reason |
+| --- | --- |
+| package.json/package-lock.json | Pinned development-only Tauri CLI 2.12.4 and native package commands. Node/npm is not required by end users. |
+| src-tauri/tauri.conf.json | Enabled bundling; Windows NSIS with offline WebView2 installer; macOS 13+ universal app/DMG build with ad-hoc signature. macOS 13 avoids relying on older WebKit without the UI's modern APIs. No system-wide security bypass or signing credentials introduced. |
+| src-tauri/icon.svg, icons/icon.ico, icon.png, icon.icns | Replaced tiny placeholder icon with generated native icon formats from a reviewable SVG, including Mac ICNS. |
+| scripts/desktop.ps1, desktop.sh; .gitattributes | Windows Package helper and Mac test/build/run/package commands, LF shell-script checkouts. Existing Cargo-only development workflow retained. |
+| .github/workflows/desktop-builds.yml | Native Windows/Mac runners test and build; Windows debug CRUD smoke and release login launch; Mac architecture/signature checks and ten-second packaged-process check. Uploads artifacts, no public Release or repository write token. Has not run yet. |
+| backend/src/session.rs (Josseline's module) | ActivityTime stores Instant plus SystemTime. Both must be fresh; rollback locks, suspend-like wall elapsed expires even when monotonic time excludes sleep. Four meaningful clock-policy unit tests. No SQL/schema/IPC change. |
+| frontend/js/security-lock.js (Connor's UI) | Check session on focus/pageshow as well as visibility/polling, so returning to a window rechecks access. No timeout change. |
+| frontend/index.html, css/styles.css, vendor/hope-ui/ (Connor's UI) | Actually loads pinned official Hope UI CSS; existing Bootstrap JS/base and rendering retained. Vendor MIT license/loader; remove Google Fonts import/source map for offline packaging; preserve visible keyboard focus. Windows screenshot inspected. |
+| src-tauri/src/main.rs | Shadow debug-only test path instead of mutating a release variable; removes release warning without adding a production data-path bypass. |
+| scripts/test-desktop-smoke.cjs | Release-launch-only mode checks actual optimized exe login screen without submitting login/data forms. Release uses ordinary app data; all mutation smoke remains debug-isolated. |
+| SOW, README, distribution/checklist/development/E2E/IPC/personal docs | Records user-directed platform scope, build/runtime separation, exact evidence, demos, limitations and learning state. |
+
+Checks: 35 backend and four bridge tests passed; locked debug/release builds;
+actual Windows NSIS setup generated (~212 MiB including offline WebView2); final
+debug CRUD/filter/import/restart smoke passed with Hope UI, zero browser errors,
+CSP violations or external HTTP(S). Artifacts: temporary smoke directory 1YKzWK.
+Actual release login-screen launch passed; screenshot in temporary directory
+VJ3qBK. No login/import/edit forms submitted in release. Bash syntax, JS syntax,
+Rust formatting and whitespace checked. Tauri's official NSIS cache rename
+failed locally; used a copy of its verified extraction and hash-checked official
+plugin, then packaging succeeded. No app workaround or changed installer logic.
+
+Windows SHA256 receipts (local output, not committed binaries):
+- release exe: AFA8BED36223DE3A1A55452CE33DA3FFE7E550ECB0BAE4C03679DA077EB2F286
+- setup exe: 98279DAFF386D85CAAD633F9BBC0DA8A9EAE569AB7E4A3EFD9D52B789E4D225B
+
+Mac build/launch/UI tests have NOT run. Need native runner/local Mac; downloaded
+ad-hoc package approval, full CRUD/offline/sleep acceptance on Mac, plus Windows
+installer/fresh-machine/release CRUD/offline/sleep checks remain. No blanket MVP,
+security, signing/notarization or cross-platform acceptance claim. The previous
+real 900.38-second idle run predates dual-clock logic; deterministic tests are
+separate evidence. Ordinary user records were not imported/reset.

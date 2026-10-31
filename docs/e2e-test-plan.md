@@ -1,5 +1,14 @@
 # Executable end-to-end test plan
 
+October 31 platform update: MVP now requires Windows and macOS. See
+mvp-distribution.md for per-platform package commands and demo acceptance.
+Full debug Windows regression passed with official Hope UI and dual-clock expiry;
+release startup check (`node scripts/test-desktop-smoke.cjs --release-launch-only`)
+passed against the actual optimized executable. That startup mode uses ordinary
+app data and does not submit login/import/edit forms. It is not release CRUD or
+installer acceptance. Mac CI is prepared but not yet executed; its planned
+architecture/signature/process checks do not establish full UI acceptance.
+
 Status: Windows executable smoke coverage expanded October 30, 2026. scripts/test-desktop-smoke.cjs launches the real debug executable and
 drives its WebView2 via local CDP. It covers setup validation, wrong/correct login,
 protected empty and persisted lists, numeric profile routes/reload, organizations,
@@ -79,6 +88,40 @@ Broughnut owns all remaining MVP implementation and verification, including UI s
 Fixture-driven frontend filtering can be checked earlier, but label that result as prototype UI coverage. Do not count it as verification of Rust queries. Likewise, a visible lock overlay alone does not prove authentication or data protection.
 
 ## Execution and reporting
+
+### Full-duration inactivity check
+
+Build the debug executable, then run:
+
+```powershell
+node scripts/test-desktop-smoke.cjs --idle-only
+```
+
+This optional Windows/WebView2 scenario takes about 15 minutes. Leave its window
+untouched; trusted pointer/keyboard activity renews the session. It uses a fresh
+temporary database and imports 60 fictional records through the UI. It makes no
+clock or timeout overrides. Non-renewing authentication-status reads observe the
+wait; no protected reads are made until after expiry. It checks that the UI
+locks, becomes hidden/inert, clears contractor rows, rejects protected reads and
+activity renewal, and permits re-login with the saved records intact. It saves
+`inactivity-result.json` and `inactivity-lock.png` beside the temporary database.
+An early lock or failure to lock within 16 minutes fails the scenario. This does
+not isolate backend-only expiry from frontend logout, or verify OS sleep/wake.
+
+### Manual acceptance checks still required
+
+- Sleep/wake: use only fictional records; log in, put Windows to sleep, leave it
+  asleep beyond 15 minutes, then wake it. Before interacting with records, confirm
+  the workspace locks/clears and requires login. Repeat with a shorter sleep to
+  check behavior within the session duration. Record actual timings and results.
+- Disconnected launch: close the CRM, disconnect Wi-Fi/Ethernet using Windows,
+  then launch the executable. Log in, browse/filter records, create/edit/archive
+  a clearly fictional test contractor and restart to verify persistence. Restore
+  networking afterward. Record WebView2/build prerequisites and results. CDN
+  blocking or a browser offline simulation does not establish this result.
+
+These manual scenarios are pending until observed; this agent does not change
+the user's system networking or put their device to sleep as part of automation.
 
 1. Build the agreed test executable and record its commit, build command, OS, and dependency versions.
 2. Create a fresh test directory and seed only fictional records. Run one application instance and serial tests initially to avoid shared database conflicts.

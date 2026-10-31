@@ -8,7 +8,9 @@ const { spawn } = require('node:child_process');
 const assert = require('node:assert/strict');
 const { DatabaseSync } = require('node:sqlite');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-const executable = path.resolve(__dirname, '../src-tauri/target/debug/rustacean_crm.exe');
+const releaseLaunchOnly = process.argv.includes('--release-launch-only');
+const executable = path.resolve(__dirname, `../src-tauri/target/${releaseLaunchOnly ? 'release' : 'debug'}/rustacean_crm.exe`);
+const idleOnly = process.argv.includes('--idle-only');
 const testDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rustacean-desktop-smoke-'));
 let child;
 let socket;
@@ -55,7 +57,7 @@ async function launch() {
   const port = await freePort();
   child = spawn(executable, [], {
     windowsHide: true,
-    env: { ...process.env, RUSTACEAN_TEST_DATA_DIR: testDirectory,
+    env: { ...process.env, ...(!releaseLaunchOnly ? { RUSTACEAN_TEST_DATA_DIR: testDirectory } : {}),
       WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1` },
     stdio: 'ignore',
   });
@@ -146,9 +148,81 @@ async function stop() {
     await exited;
   }
 }
+async function verifyRealInactivity() {
+  await launch();
+  await submit('fictional smoke password'); // One-time setup, then a separate login.
+  await submit('fictional smoke password');
+  await waitForRecords();
+  await importSamples(60, 0);
+  await evaluate("document.getElementById('nav-contacts').click()");
+  await directoryReady();
+  assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 60);
+  // Start a fresh session after setup/import. No clock overrides, timeout changes,
+  // synthetic activity, or protected requests during the subsequent idle period.
+  await evaluate("window.crmSession.lock()");
+  await submit('fictional smoke password');
+  await waitForRecords();
+  const started = performance.now();
+  console.log('Real 15-minute idle check started. Leave this test window untouched.');
+  while (performance.now() - started < 16 * 60 * 1000) {
+    const state = await evaluate(`(async () => ({
+      locked: !window.crmSession.authenticated,
+      hidden: document.getElementById('workspace').hidden,
+      inert: document.getElementById('workspace').inert,
+      rows: document.querySelectorAll('.contractor-row').length,
+      message: document.getElementById('message').textContent,
+      backend: await window.crmApi.getAuthStatus()
+    }))()`);
+    const elapsed = performance.now() - started;
+    if (state.locked) {
+      assert.ok(elapsed >= 14 * 60 * 1000 + 55 * 1000, 'Must not lock substantially before 15 minutes.');
+      assert.equal(state.hidden, true);
+      assert.equal(state.inert, true);
+      assert.equal(state.rows, 0, 'Loaded contractor rows must clear on expiry.');
+      assert.equal(state.backend.authenticated, false);
+      assert.match(state.message, /inactivity|expired/i);
+      assert.equal(await evaluate("window.crmApi.listContractors().catch(error => error.message)"), 'Login required');
+      assert.equal(await evaluate("window.crmApi.recordActivity().catch(error => error.message)"), 'Login required');
+      const screenshot = await cdp('Page.captureScreenshot', { format: 'png' });
+      fs.writeFileSync(path.join(testDirectory, 'inactivity-lock.png'), Buffer.from(screenshot.data, 'base64'));
+      await submit('fictional smoke password'); await waitForRecords();
+      assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 60);
+      assert.deepEqual(browserErrors, []);
+      assert.equal(externalRequests.size, 0);
+      const report = { scenario: 'real-15-minute-inactivity', passed: true,
+        elapsedSeconds: elapsed / 1000, completedAt: new Date().toISOString(),
+        executable, limitations: ['No OS sleep/wake or disconnected-network verification.'] };
+      fs.writeFileSync(path.join(testDirectory, 'inactivity-result.json'), JSON.stringify(report, null, 2));
+      console.log('PASS: real 15-minute idle lock, cleared UI, protected-command rejection and re-login persistence.', report);
+      console.log('Retained test data and screenshot:', testDirectory);
+      return;
+    }
+    assert.equal(state.backend.authenticated, true, 'Backend must remain authenticated before expiry.');
+    console.log(`Idle: ${Math.floor(elapsed / 1000)} seconds; workspace still open.`);
+    await delay(30000);
+  }
+  throw new Error('Workspace did not lock within 16 minutes.');
+}
 (async () => {
   if (process.platform !== 'win32') throw new Error('This smoke test targets Windows/WebView2.');
   assert.ok(fs.existsSync(executable), 'Build the debug executable first.');
+  if (releaseLaunchOnly) {
+    if (idleOnly) throw new Error('Release launch check cannot run idle/mutation scenarios.');
+    // Release ignores the debug data override and opens ordinary app data.
+    // Observe startup only: do not submit setup/login/import or mutation forms.
+    await launch();
+    assert.equal(await evaluate("document.getElementById('workspace').hidden"), true);
+    assert.equal(await evaluate("document.getElementById('workspace').inert"), true);
+    assert.equal(await evaluate("window.crmApi.getAuthStatus().then(status => status.authenticated)"), false);
+    assert.deepEqual(browserErrors, []);
+    assert.equal(externalRequests.size, 0);
+    const screenshot = await cdp('Page.captureScreenshot', { format: 'png' });
+    fs.writeFileSync(path.join(testDirectory, 'release-launch.png'), Buffer.from(screenshot.data, 'base64'));
+    console.log('PASS: real release executable opened to the locked authentication UI; no login or data forms submitted.');
+    console.log('Release uses ordinary app data. Screenshot:', testDirectory);
+    return;
+  }
+  if (idleOnly) { await verifyRealInactivity(); return; }
   await launch();
   assert.equal(await evaluate("document.getElementById('auth-heading').textContent"), 'Set up local administrator');
   assert.equal(await evaluate("window.crmApi.listContractors().catch(error => error.message)"), 'Login required');

@@ -22,10 +22,21 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
+    "targets": "all",
+    "category": "Business",
+    "shortDescription": "Offline fictional contractor CRM",
+    "windows": {
+      "webviewInstallMode": { "type": "offlineInstaller" }
+    },
+    "macOS": {
+      "minimumSystemVersion": "13.0",
+      "signingIdentity": "-"
+    },
     "icon": [
       "icons/icon.ico",
-      "icons/icon.png"
+      "icons/icon.png",
+      "icons/icon.icns"
     ]
   }
 }
