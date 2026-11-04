@@ -22,6 +22,8 @@
     byId('submit-auth').textContent = needsSetup ? 'Create password' : 'Log in';
     byId('setup-help').hidden = !needsSetup;
     byId('password').autocomplete = needsSetup ? 'new-password' : 'current-password';
+    byId('confirm-password-group').hidden = !needsSetup;
+    byId('confirm-password').required = needsSetup;
     form.hidden = false;
     byId('retry-auth').hidden = true;
   }
@@ -33,6 +35,8 @@
     workspace.inert = true;
     auth.hidden = false;
     byId('password').value = '';
+    byId('confirm-password').value = '';
+    byId('confirm-password').classList.remove('is-invalid');
     document.querySelectorAll('.modal.show, .offcanvas.show').forEach(element => {
       (element.classList.contains('modal') ? bootstrap.Modal : bootstrap.Offcanvas).getInstance(element)?.hide();
     });
@@ -91,11 +95,19 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (busy) return;
+    const password = byId('password').value;
+    const confirmPassword = byId('confirm-password');
+    confirmPassword.classList.remove('is-invalid');
+    if (needsSetup && password !== confirmPassword.value) {
+      confirmPassword.classList.add('is-invalid');
+      confirmPassword.focus();
+      return;
+    }
     busy = true;
     byId('submit-auth').disabled = true;
     const requestVersion = version;
-    const password = byId('password').value;
     byId('password').value = '';
+    confirmPassword.value = '';
     try {
       if (needsSetup) {
         await window.crmApi.setupAdmin(password);

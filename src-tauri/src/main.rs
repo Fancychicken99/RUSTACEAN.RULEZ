@@ -37,6 +37,8 @@ fn main() {
             commands::archive_contractor,
             commands::set_contractor_status,
             commands::create_organization,
+            commands::update_organization,
+            commands::archive_organization,
             commands::filter_contractors,
             commands::import_sample_data,
             commands::record_contact_note

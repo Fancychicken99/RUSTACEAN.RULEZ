@@ -204,11 +204,14 @@ pub struct Organization {
     pub id: i64,
     pub name: String,
     pub region: Option<String>,
+    pub phone: Option<String>,
+    pub email: Option<String>,
+    pub notes: Option<String>,
 }
 
 pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, region
+        "SELECT id, name, region, phone, email, notes
          FROM organizations
          WHERE archived_at IS NULL
          ORDER BY name",
@@ -219,6 +222,9 @@ pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
             id: row.get(0)?,
             name: row.get(1)?,
             region: row.get(2)?,
+            phone: row.get(3)?,
+            email: row.get(4)?,
+            notes: row.get(5)?,
         })
     })?;
 
@@ -242,6 +248,27 @@ pub fn update_organization(
     Ok(rows_updated > 0)
 }
 
+pub fn update_organization_details(
+    conn: &Connection,
+    organization_id: i64,
+    name: &str,
+    region: &str,
+    phone: Option<&str>,
+    email: Option<&str>,
+    notes: Option<&str>,
+) -> Result<bool> {
+    let rows_updated = conn.execute(
+        "UPDATE organizations SET name = ?1, region = ?2, phone = ?3, email = ?4, notes = ?5
+         WHERE id = ?6 AND archived_at IS NULL",
+        params![name, region, phone, email, notes, organization_id],
+    )?;
+    Ok(rows_updated > 0)
+}
+
+pub fn add_organization_profile_fields(conn: &Connection) -> Result<()> {
+    add_organization_archive_field(conn)
+}
+
 pub fn add_organization_archive_field(conn: &Connection) -> Result<()> {
     // Make sure the first migration is completed
     add_profile_fields(conn)?;
@@ -262,6 +289,18 @@ pub fn add_organization_archive_field(conn: &Connection) -> Result<()> {
 
             COMMIT;
             ",
+        )?;
+    }
+
+    let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+    if version < 3 {
+        conn.execute_batch(
+            "BEGIN IMMEDIATE;
+             ALTER TABLE organizations ADD COLUMN phone TEXT;
+             ALTER TABLE organizations ADD COLUMN email TEXT;
+             ALTER TABLE organizations ADD COLUMN notes TEXT;
+             PRAGMA user_version = 3;
+             COMMIT;",
         )?;
     }
 

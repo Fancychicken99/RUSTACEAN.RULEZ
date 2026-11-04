@@ -121,7 +121,9 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 
 | Command / wrapper | request fields | Success |
 | --- | --- | --- |
-| create_organization / createOrganization | name: string; region: string or null (optional) | Persisted Organization |
+| create_organization / createOrganization | name: string; region, phone, email, notes: string or null (optional) | Persisted Organization |
+| update_organization / updateOrganization | id: integer; name: string; region, phone, email, notes: string or null | Persisted Organization |
+| archive_organization / archiveOrganization | id: integer | null after archive completes |
 | create_contractor / createContractor | organization_id: integer; profile: ProfileFields | Persisted Contractor |
 | update_contractor / updateContractor | id: integer; profile: ProfileFields | Persisted Contractor |
 | archive_contractor / archiveContractor | id: integer | null after archive completes |
@@ -137,6 +139,7 @@ separate set_contractor_status command and accept only Active/Inactive. Transfer
 remain a separate workflow. Organization active/inactive status is not modeled;
 archived_at remains a separate visibility action.
 Organization names need not be unique; IDs identify records. Blank region is null.
+Organization phone, email, and notes are trimmed and persisted; email receives the same basic plausibility validation as contractor email. Archiving an organization sets its `archived_at` timestamp in UTC and hides it from the active organization list. Existing contractors retain their records and organization association.
 
 Backend normalization trims values. Full name/organization name must be nonempty
 and at most 200 Unicode scalar values; role/region max 120, email max 254, phone

@@ -1,6 +1,7 @@
 //! Validated, atomic profile workflows. SQL and transaction ownership stay here.
 use crate::database::{
     Contractor, Organization, add_contractor, archive_contractor, get_contractor,
+    update_organization_details, get_organizations,
 };
 use rusqlite::{Connection, params};
 use std::fmt;
@@ -197,15 +198,69 @@ pub fn create_organization(
     name: String,
     region: Option<String>,
 ) -> Result<Organization, ProfileError> {
+    create_organization_profile(conn, name, region, None, None, None)
+}
+
+pub fn create_organization_profile(
+    conn: &mut Connection,
+    name: String,
+    region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
+) -> Result<Organization, ProfileError> {
     let name = text(name, "Organization name", 200, true)?.unwrap();
     let region = text(region.unwrap_or_default(), "Region", 120, false)?;
+    let phone = text(phone.unwrap_or_default(), "Phone", 80, false)?;
+    let email = text(email.unwrap_or_default(), "Email", 254, false)?;
+    let notes = text(notes.unwrap_or_default(), "Notes", 5_000, false)?;
+    if let Some(email) = &email {
+        let parts: Vec<_> = email.split('@').collect();
+        if parts.len() != 2 || parts[0].is_empty() || parts[1].is_empty()
+            || !parts[1].contains('.') || parts[1].starts_with('.') || parts[1].ends_with('.')
+            || email.chars().any(char::is_whitespace) {
+            return Err(ProfileError::InvalidInput("Enter an email such as name@example.com".into()));
+        }
+    }
     let tx = conn.transaction()?;
     tx.execute(
-        "INSERT INTO organizations (name, region) VALUES (?1, ?2)",
-        params![name, region],
+        "INSERT INTO organizations (name, region, phone, email, notes) VALUES (?1, ?2, ?3, ?4, ?5)",
+        params![name, region, phone, email, notes],
     )?;
     let id = tx.last_insert_rowid();
     validate_id(id)?;
+    let saved = get_organizations(&tx)?.into_iter().find(|org| org.id == id)
+        .ok_or(ProfileError::NotFound("Organization not found"))?;
     tx.commit()?;
-    Ok(Organization { id, name, region })
+    Ok(saved)
+}
+
+pub fn update_organization_profile(
+    conn: &Connection,
+    id: i64,
+    name: String,
+    region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
+) -> Result<Organization, ProfileError> {
+    validate_id(id)?;
+    let name = text(name, "Organization name", 200, true)?.unwrap();
+    let region = text(region.unwrap_or_default(), "Region", 120, false)?;
+    let phone = text(phone.unwrap_or_default(), "Phone", 80, false)?;
+    let email = text(email.unwrap_or_default(), "Email", 254, false)?;
+    let notes = text(notes.unwrap_or_default(), "Notes", 5_000, false)?;
+    if let Some(email) = &email {
+        let parts: Vec<_> = email.split('@').collect();
+        if parts.len() != 2 || parts[0].is_empty() || parts[1].is_empty()
+            || !parts[1].contains('.') || parts[1].starts_with('.') || parts[1].ends_with('.')
+            || email.chars().any(char::is_whitespace) {
+            return Err(ProfileError::InvalidInput("Enter an email such as name@example.com".into()));
+        }
+    }
+    if !update_organization_details(conn, id, &name, region.as_deref().unwrap_or(""), phone.as_deref(), email.as_deref(), notes.as_deref())? {
+        return Err(ProfileError::NotFound("Organization not found or archived"));
+    }
+    get_organizations(conn)?.into_iter().find(|org| org.id == id)
+        .ok_or(ProfileError::NotFound("Organization not found or archived"))
 }

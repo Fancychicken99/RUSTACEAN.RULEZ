@@ -1,6 +1,6 @@
 use rusqlite::{Connection, Result};
 
-use crate::database::{add_organization_archive_field, create_tables};
+use crate::database::{add_organization_profile_fields, create_tables};
 
 use crate::admin::create_admin_table;
 use crate::contacts::create_contact_table;
@@ -12,7 +12,7 @@ pub fn initialize_database(conn: &Connection) -> Result<()> {
     create_tables(conn)?;
 
     // Apply existing database migrations
-    add_organization_archive_field(conn)?;
+    add_organization_profile_fields(conn)?;
 
     // Create contractor movement history
     create_history_table(conn)?;

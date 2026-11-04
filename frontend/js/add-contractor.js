@@ -2,6 +2,7 @@
   const byId = id => document.getElementById(id);
   const modalIds = ['add-contractor-modal', 'organization-modal', 'archive-modal'];
   let editingId = null;
+  let editingOrganizationId = null;
   let archiveId = null;
   let busy = false;
   let epoch = 0;
@@ -32,6 +33,36 @@
   }
   function fullName({ prefix, first, middle, last, suffix }) {
     return [prefix, first, middle, last, suffix].map(value => value.trim()).filter(Boolean).join(' ');
+  }
+  function addCustomFieldRow(kind, name = '', value = '') {
+    const list = document.querySelector(`[data-custom-fields="${kind}"]`);
+    const row = document.createElement('div');
+    row.className = 'row g-2 align-items-end mb-2 custom-field-row';
+    const nameColumn = document.createElement('div'); nameColumn.className = 'col-md-5';
+    const nameLabel = document.createElement('label'); nameLabel.className = 'form-label'; nameLabel.textContent = 'Field Name';
+    const nameInput = document.createElement('input'); nameInput.className = 'form-control'; nameInput.type = 'text'; nameInput.dataset.customFieldName = ''; nameInput.placeholder = 'e.g., Callsign'; nameInput.value = name;
+    nameLabel.appendChild(nameInput); nameColumn.appendChild(nameLabel);
+    const valueColumn = document.createElement('div'); valueColumn.className = 'col-md-5';
+    const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = 'Field Value';
+    const valueInput = document.createElement('input'); valueInput.className = 'form-control'; valueInput.type = 'text'; valueInput.dataset.customFieldValue = ''; valueInput.placeholder = 'Enter a value'; valueInput.value = value;
+    valueLabel.appendChild(valueInput); valueColumn.appendChild(valueLabel);
+    const actionColumn = document.createElement('div'); actionColumn.className = 'col-md-2';
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
+    actionColumn.appendChild(remove); row.append(nameColumn, valueColumn, actionColumn); list.appendChild(row);
+  }
+  function customFields(kind) {
+    return [...document.querySelectorAll(`[data-custom-fields="${kind}"] .custom-field-row`)].reduce((result, row) => {
+      const name = row.querySelector('[data-custom-field-name]').value.trim();
+      const value = row.querySelector('[data-custom-field-value]').value.trim();
+      if (name && value) result[name] = value;
+      return result;
+    }, {});
+  }
+  document.querySelectorAll('[data-add-custom-field]').forEach(button => button.addEventListener('click', () => addCustomFieldRow(button.dataset.addCustomField)));
+  function populateCustomFields(kind, values = {}) {
+    const list = document.querySelector(`[data-custom-fields="${kind}"]`);
+    list.replaceChildren();
+    Object.entries(values && typeof values === 'object' ? values : {}).forEach(([name, value]) => addCustomFieldRow(kind, name, value));
   }
 
   function validSession(token) { return token === epoch && window.crmSession?.authenticated; }
@@ -73,8 +104,10 @@
     byId('contractor-role').value = record?.role ?? '';
     byId('contractor-email').value = record?.email ?? '';
     setPhone('contractor-phone', record?.phone ?? '');
+    ['street_address_1', 'street_address_2', 'city', 'state_province', 'country'].forEach(field => { byId(`contractor-${({street_address_1:'street1',street_address_2:'street2',state_province:'state'})[field] ?? field}`).value = record?.[field] ?? ''; });
+    populateCustomFields('contractor', record?.extra_information);
     organizationOptions(record);
-    byId('organization-help').textContent = record ? 'Organization transfers are a separate workflow; this editor preserves the current organization.' : 'Region comes from the selected organization.';
+    byId('contractor-organization-help').textContent = record ? 'Organization transfers are a separate workflow; this editor preserves the current organization.' : 'Region comes from the selected organization.';
     byId('contractor-form-message').textContent = !record && window.crmDirectory.organizations.length === 0
       ? 'Create an organization from Organizations before adding a contractor.' : '';
     setBusy(false);
@@ -90,6 +123,28 @@
     prepareContractor(event.detail);
     bootstrap.Modal.getOrCreateInstance(contractorModal).show();
   });
+  window.addEventListener('crm:edit-organization', event => {
+    if (!window.crmSession?.authenticated || busy) return;
+    const organization = event.detail;
+    editingOrganizationId = organization.id;
+    ++epoch;
+    byId('organization-form').reset();
+    byId('organization-title').textContent = 'Edit Organization';
+    byId('save-organization').textContent = 'Save changes';
+    byId('organization-name').value = organization.name ?? '';
+    byId('organization-region').value = organization.region ?? '';
+    byId('organization-email').value = organization.email ?? '';
+    setPhone('organization-phone', organization.phone ?? '');
+    ['street_address_1', 'street_address_2', 'city', 'state_province', 'country'].forEach(field => { byId(`organization-${({street_address_1:'street1',street_address_2:'street2',state_province:'state'})[field] ?? field}`).value = organization[field] ?? ''; });
+    populateCustomFields('organization', organization.extra_information);
+    byId('organization-notes').value = organization.notes ?? '';
+    byId('organization-help').textContent = 'Logo replacement is not available in this build.';
+    byId('inline-contractor-section').hidden = true;
+    byId('inline-contractor-fields').hidden = true;
+    byId('organization-form-message').textContent = '';
+    setBusy(false);
+    bootstrap.Modal.getOrCreateInstance(byId('organization-modal')).show();
+  });
   window.addEventListener('crm:archive-contractor', event => {
     if (!window.crmSession?.authenticated || busy) return;
     ++epoch;
@@ -102,12 +157,20 @@
   byId('organization-modal').addEventListener('show.bs.modal', event => {
     if (!window.crmSession?.authenticated || busy) { event.preventDefault(); return; }
     ++epoch;
-    byId('organization-form').reset();
-    byId('inline-contractor-fields').hidden = true;
-    byId('toggle-inline-contractor').setAttribute('aria-expanded', 'false');
-    ['organization-phone', 'organization-secondary-phone', 'inline-contractor-phone'].forEach(id => setPhone(id));
-    byId('inline-contractor-fields').querySelectorAll('input, select').forEach(input => { input.required = false; });
-    byId('organization-form-message').textContent = '';
+    if (event.relatedTarget) {
+      editingOrganizationId = null;
+      byId('organization-form').reset();
+      populateCustomFields('organization', {});
+      byId('organization-title').textContent = 'Add organization';
+      byId('save-organization').textContent = 'Save organization';
+      byId('organization-help').textContent = 'Region identifies the organization’s primary operating area.';
+      byId('inline-contractor-section').hidden = false;
+      byId('inline-contractor-fields').hidden = true;
+      byId('toggle-inline-contractor').setAttribute('aria-expanded', 'false');
+      ['organization-phone', 'organization-secondary-phone', 'inline-contractor-phone'].forEach(id => setPhone(id));
+      byId('inline-contractor-fields').querySelectorAll('input, select').forEach(input => { input.required = false; });
+      byId('organization-form-message').textContent = '';
+    }
     setBusy(false);
   });
   byId('toggle-inline-contractor').addEventListener('click', event => {
@@ -131,6 +194,12 @@
       byId(id).querySelector('form').reset();
       byId(id).querySelectorAll('[role="status"]').forEach(element => { element.textContent = ''; });
       if (id === 'archive-modal') byId('archive-name').textContent = '';
+      if (id === 'organization-modal') {
+        editingOrganizationId = null;
+        byId('organization-title').textContent = 'Add organization';
+        byId('save-organization').textContent = 'Save organization';
+        byId('organization-help').textContent = 'Logo selection is ready; saving image files requires the desktop file import connection.';
+      }
     });
   });
 
@@ -183,10 +252,14 @@
       role: byId('contractor-role').value || null,
       email: byId('contractor-email').value.trim(),
       phone: byId('contractor-phone').value,
+      address: { street_address_1: byId('contractor-street1').value.trim(), street_address_2: byId('contractor-street2').value.trim(), city: byId('contractor-city').value.trim(), state_province: byId('contractor-state').value.trim(), country: byId('contractor-country').value.trim() },
+      extra_information: customFields('contractor'),
       headshot_filename: byId('contractor-headshot').files[0]?.name ?? null,
       created_at: createdAt,
     };
     console.log('Sprint 2 contractor save payload:', JSON.stringify(sprint2Payload));
+    // Keep the IPC request aligned with the currently installed Rust ProfileFields contract.
+    // The expanded payload is ready for the backend contract extension; it is not persisted yet.
     const profile = { full_name: sprint2Payload.full_name, role: sprint2Payload.role, email: sprint2Payload.email, phone: sprint2Payload.phone };
     const id = editingId;
     const request = id === null ? { organization_id: sprint2Payload.organization_id, profile } : { id, profile };
@@ -197,7 +270,7 @@
   byId('organization-form').addEventListener('submit', event => {
     event.preventDefault();
     if (busy || !window.crmSession?.authenticated) return;
-    const inlineOpen = !byId('inline-contractor-fields').hidden;
+    const inlineOpen = editingOrganizationId === null && !byId('inline-contractor-fields').hidden;
     if ((inlineOpen && !phoneIsComplete('inline-contractor-phone')) || !event.currentTarget.reportValidity()) return;
     if (!window.confirm('Confirm save this organization?')) return;
     const createdAt = new Date().toISOString();
@@ -208,6 +281,9 @@
     const sprint2Payload = {
       name: byId('organization-name').value.trim(), region: byId('organization-region').value.trim() || null,
       phone: byId('organization-phone').value || null,
+      email: byId('organization-email').value.trim() || null,
+      address: { street_address_1: byId('organization-street1').value.trim(), street_address_2: byId('organization-street2').value.trim(), city: byId('organization-city').value.trim(), state_province: byId('organization-state').value.trim(), country: byId('organization-country').value.trim() },
+      extra_information: customFields('organization'),
       secondary_phone: byId('organization-secondary-phone').value || null,
       secondary_contact: byId('organization-secondary-contact').value.trim() || null,
       secondary_email: byId('organization-secondary-email').value.trim() || null,
@@ -220,9 +296,13 @@
       } : null,
     };
     console.log('Sprint 2 organization save payload:', JSON.stringify(sprint2Payload));
-    const request = { name: sprint2Payload.name, region: sprint2Payload.region };
+    // The current organization IPC request accepts only these fields.
+    const request = { name: sprint2Payload.name, region: sprint2Payload.region, phone: sprint2Payload.phone, email: sprint2Payload.email, notes: sprint2Payload.notes };
+    const organizationId = editingOrganizationId;
     mutate('organization-modal', 'organization-form-message', async () => {
-      const organization = await window.crmApi.createOrganization(request);
+      const organization = organizationId === null
+        ? await window.crmApi.createOrganization(request)
+        : await window.crmApi.updateOrganization({ id: organizationId, ...request });
       if (sprint2Payload.contractor) {
         const profile = { full_name: sprint2Payload.contractor.full_name, role: sprint2Payload.contractor.role, email: sprint2Payload.contractor.email, phone: sprint2Payload.contractor.phone };
         console.log('Sprint 2 inline contractor payload:', JSON.stringify({ ...sprint2Payload.contractor, organization_id: organization.id, created_at: createdAt }));
@@ -234,7 +314,7 @@
         }
       }
       return organization;
-    }, () => byId('nav-organizations').click(), 'Organization saved.');
+    }, () => byId('nav-organizations').click(), organizationId === null ? 'Organization saved.' : 'Organization updated.');
   });
   byId('archive-form').addEventListener('submit', event => {
     event.preventDefault();
@@ -251,6 +331,8 @@
       const modal = byId(id);
       modal.inert = true;
       modal.querySelector('form').reset();
+      if (id === 'add-contractor-modal') populateCustomFields('contractor', {});
+      if (id === 'organization-modal') populateCustomFields('organization', {});
       modal.querySelectorAll('[role="status"]').forEach(element => { element.textContent = ''; });
       bootstrap.Modal.getInstance(modal)?.hide();
     });
