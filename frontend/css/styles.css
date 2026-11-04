@@ -146,6 +146,14 @@ a { text-decoration: none; }
 .org-logo-label { font-size: .74rem; }
 .person-cell { display: flex; align-items: center; gap: .7rem; }
 .table-avatar { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: 0 0 auto; border-radius: 50%; font-size: .68rem; font-weight: 700; }
+.contractor-profile-hero { min-height: 190px; }
+.contractor-profile-image { display: grid; place-items: center; width: 168px; height: 168px; flex: 0 0 auto; overflow: hidden; color: #747e93; background: #eef0ff; border: 1px solid var(--hope-border); border-radius: 1rem; }
+.contractor-profile-image img { width: 100%; height: 100%; object-fit: cover; }
+.contractor-profile-placeholder { display: grid; justify-items: center; gap: .5rem; padding: 1rem; color: #747e93; text-align: center; font-size: .78rem; }
+.contractor-profile-placeholder i { font-size: 3rem; }
+.profile-status-banner { margin: -1.5rem -1.5rem 1.5rem; padding: .7rem 1rem; font-weight: 750; letter-spacing: .06em; text-align: center; text-transform: uppercase; }
+.profile-status-deceased { color: #fff; background: #5b6474; }
+.profile-status-archived { color: #3c2b00; background: #ffc94d; }
 .avatar-blue { color: #3a57e8; background: #eef0ff; }
 .avatar-purple { color: #8453c7; background: #f3edfc; }
 .avatar-green { color: #16916f; background: #e7f7f1; }
@@ -209,6 +217,12 @@ a { text-decoration: none; }
 :root[data-bs-theme="dark"] .dropdown-divider { border-color: var(--hope-border); }
 :root[data-bs-theme="dark"] .org-logo-placeholder { color: #b5bdcc; background: #252c3b; border-color: #414a60; }
 :root[data-bs-theme="dark"] .org-logo-initials { background: #2e3650; }
+:root[data-bs-theme="dark"] .contractor-profile-image { color: #c1c8d6; background: #252c3b; }
+:root[data-bs-theme="dark"] .contractor-profile-placeholder { color: #c1c8d6; }
+:root[data-bs-theme="dark"] .profile-status-archived { color: #2d2100; background: #e8b83f; }
+:root[data-bs-theme="dark"] .table-avatar.avatar-blue { color: #c4ccff; background: transparent; }
+:root[data-bs-theme="dark"] .table-avatar.avatar-purple { color: #d5baff; background: transparent; }
+:root[data-bs-theme="dark"] .table-avatar.avatar-green { color: #9ce4cc; background: transparent; }
 :root[data-bs-theme="dark"] .list-group-item { color: var(--hope-text); background-color: #202636; border-color: var(--hope-border); }
 
 @media (max-width: 991.98px) {

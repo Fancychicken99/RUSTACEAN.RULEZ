@@ -2,7 +2,7 @@ use rusqlite::Connection;
 use secure_crm_backend::{
     admin::{admin_exists, create_first_admin},
     contacts,
-    database::{Contractor, Organization, get_organizations},
+    database::{Contractor, Organization, archive_organization as archive_organization_record, get_organizations},
     profiles::{self, ProfileError, ProfileFields},
     protected::list_contractors_if_authenticated,
     search::search_contractors,
@@ -49,6 +49,19 @@ pub struct UpdateContractorRequest {
 pub struct OrganizationRequest {
     name: String,
     region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UpdateOrganizationRequest {
+    id: i64,
+    name: String,
+    region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
 }
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -246,8 +259,30 @@ impl AppState {
         if !state.session.authorize_action() {
             return Err("Login required".into());
         }
-        profiles::create_organization(&mut state.conn, request.name, request.region)
+        profiles::create_organization_profile(&mut state.conn, request.name, request.region, request.phone, request.email, request.notes)
             .map_err(|e| profile_error(e, "Unable to save organization"))
+    }
+
+    fn update_org(&self, request: UpdateOrganizationRequest) -> Result<Organization, String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::update_organization_profile(&state.conn, request.id, request.name, request.region, request.phone, request.email, request.notes)
+            .map_err(|e| profile_error(e, "Unable to save organization"))
+    }
+
+    fn archive_org(&self, request: RecordRequest) -> Result<(), String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::validate_id(request.id).map_err(|e| e.to_string())?;
+        if !archive_organization_record(&state.conn, request.id)
+            .map_err(|_| "Unable to archive organization")? {
+            return Err("Organization not found or archived".into());
+        }
+        Ok(())
     }
 }
 
@@ -342,6 +377,22 @@ pub fn create_organization(
     state.create_org(request)
 }
 
+#[tauri::command]
+pub fn update_organization(
+    request: UpdateOrganizationRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Organization, String> {
+    state.update_org(request)
+}
+
+#[tauri::command]
+pub fn archive_organization(
+    request: RecordRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    state.archive_org(request)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -424,7 +475,10 @@ mod tests {
         assert_eq!(
             app.create_org(OrganizationRequest {
                 name: "Fictional Org".into(),
-                region: None
+                region: None,
+                phone: None,
+                email: None,
+                notes: None,
             })
             .unwrap_err(),
             "Login required"
@@ -455,6 +509,9 @@ mod tests {
             .create_org(OrganizationRequest {
                 name: "Fictional Org".into(),
                 region: Some("Test Region".into()),
+                phone: None,
+                email: None,
+                notes: None,
             })
             .unwrap();
         let saved = app
