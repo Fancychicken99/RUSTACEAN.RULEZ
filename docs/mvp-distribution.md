@@ -1,6 +1,6 @@
 # Windows and macOS MVP delivery
 
-Updated October 31, 2026. Broughnut requires the MVP on both platforms. The
+Branding updated November 4, 2026. Broughnut requires the MVP on both platforms. The
 functional scope is the seven acceptance checks in statement-of-work.md; final
 release features such as media, transfers/history and native communication
 handoffs remain separate. This document does not claim client acceptance.
@@ -9,12 +9,13 @@ handoffs remain separate. This document does not claim client acceptance.
 
 | Platform target | File | Runtime prerequisites |
 | --- | --- | --- |
-| Windows 10/11, x64 | `src-tauri/target/release/rustacean_crm.exe` or `src-tauri/target/release/bundle/nsis/Rustacean CRM_0.1.0_x64-setup.exe` | WebView2; setup includes its offline installer. Standalone exe needs an existing compatible WebView2 installation. |
-| macOS 13+, Apple Silicon or Intel | `src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app` in a metadata-preserving ZIP, or the DMG under `bundle/dmg/` | Built-in WKWebView. No Rust/Cargo/Node runtime. Actual OS/hardware acceptance still required. |
+| Windows 10/11, x64 | `src-tauri/target/release/rustacean_crm.exe` or `src-tauri/target/release/bundle/nsis/Hippo Harbor CRM_0.1.0_x64-setup.exe` | WebView2; setup includes its offline installer. Standalone exe needs an existing compatible WebView2 installation. |
+| macOS 13+, Apple Silicon or Intel | `src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app` in a metadata-preserving ZIP, or the DMG under `bundle/dmg/` | Built-in WKWebView. No Rust/Cargo/Node runtime. Actual OS/hardware acceptance still required. |
 
-Both platforms were built successfully by native CI from 9c41b18. See
-mvp-build-evidence.md for downloads, local package paths and exact checks.
-The table above describes build-machine outputs. Do not rename
+The table above describes outputs for new Hippo Harbor CRM builds. The earlier
+9c41b18 build used the Rustacean CRM name; its recorded download/package paths
+in mvp-build-evidence.md remain historical evidence, not branded build evidence.
+New branding requires its own native CI and device acceptance results. Do not rename
 an exe to app or copy a Windows binary to a Mac. Keep the whole .app bundle.
 
 Both builds embed HTML/CSS/JavaScript and the fictional dataset. User databases
@@ -58,7 +59,7 @@ rustup toolchain install 1.99.1 --profile minimal
 rustup override set 1.99.1
 bash scripts/desktop.sh test
 bash scripts/desktop.sh package
-open "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app"
+open "src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app"
 ```
 
 The package command installs both Rust targets and combines arm64/x86_64.
@@ -66,8 +67,8 @@ To transfer the bundle while preserving metadata:
 
 ```bash
 ditto -c -k --sequesterRsrc --keepParent \
-  "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app" \
-  "Rustacean-CRM-macos-universal.zip"
+  "src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app" \
+  "Hippo-Harbor-CRM-macos-universal.zip"
 ```
 
 No teammate implementation is needed. Broughnut owns any fixes exposed on the

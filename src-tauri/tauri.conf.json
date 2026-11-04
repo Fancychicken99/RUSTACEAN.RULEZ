@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rustacean CRM",
+  "productName": "Hippo Harbor CRM",
   "version": "0.1.0",
   "identifier": "edu.rustacean.crm",
   "build": {
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Northstar CRM",
+        "title": "Hippo Harbor CRM",
         "url": "index.html",
         "width": 1000,
         "height": 720

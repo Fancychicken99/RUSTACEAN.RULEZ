@@ -49,7 +49,7 @@
       <div id="contact-active-filters" class="active-filter-pills px-3 pt-3" aria-live="polite"></div>
       <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th><th scope="col">Notes</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
     </section>
-    <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
+    <footer class="page-footer">© 2026 Hippo Harbor CRM <span>·</span> Secure, on-device workspace</footer>
   `;
 
   function contractorName(contractor) {
