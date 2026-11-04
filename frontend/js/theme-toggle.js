@@ -8,6 +8,7 @@
   function applyTheme(theme, persist = true) {
     const isDark = theme === 'dark';
     root.dataset.bsTheme = isDark ? 'dark' : 'light';
+    document.body?.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
     toggle.setAttribute('aria-pressed', String(isDark));
     const nextTheme = isDark ? 'light' : 'dark';
     const actionLabel = `Switch to ${nextTheme} mode`;

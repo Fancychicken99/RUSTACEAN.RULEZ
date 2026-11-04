@@ -34,7 +34,7 @@
       const refreshed = await window.crmDirectory.refresh();
       if (!current()) return;
       const result = `Sample import complete: ${report.contractors_added} contractors and ${report.organizations_added} organizations added; ${report.contractors_skipped} contractors and ${report.organizations_skipped} organizations skipped.`;
-      document.getElementById('workspace-message').textContent = result + (refreshed ? '' : ' Could not refresh records. Use Refresh.');
+      document.getElementById('workspace-message').textContent = result + (refreshed ? '' : ' The list could not update automatically; reopen the workspace to reload.');
     } catch (error) {
       if (!current()) return;
       message.textContent = error.message;

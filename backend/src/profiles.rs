@@ -171,6 +171,27 @@ pub fn archive_profile(conn: &Connection, id: i64) -> Result<(), ProfileError> {
     Ok(())
 }
 
+pub fn set_contractor_status(
+    conn: &Connection,
+    id: i64,
+    status: &str,
+) -> Result<Contractor, ProfileError> {
+    validate_id(id)?;
+    if !matches!(status, "Active" | "Inactive") {
+        return Err(ProfileError::InvalidInput(
+            "Status must be Active or Inactive".into(),
+        ));
+    }
+    let changed = conn.execute(
+        "UPDATE contractors SET status = ?1 WHERE id = ?2 AND archived_at IS NULL",
+        params![status, id],
+    )?;
+    if changed == 0 {
+        return Err(ProfileError::NotFound("Contractor not found or archived"));
+    }
+    get_contractor(conn, id)?.ok_or(ProfileError::NotFound("Contractor not found or archived"))
+}
+
 pub fn create_organization(
     conn: &mut Connection,
     name: String,

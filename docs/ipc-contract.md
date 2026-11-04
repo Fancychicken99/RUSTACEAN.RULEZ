@@ -1,7 +1,7 @@
 # Initial IPC contract
 
-Updated October 30, 2026. Implemented read/auth and contractor mutation contract.
-JavaScript wrappers exist in frontend/js/tauri-api.js. All thirteen commands below
+Updated November 4, 2026. Implemented read/auth and contractor mutation contract.
+JavaScript wrappers exist in frontend/js/tauri-api.js. All fifteen commands below
 are implemented in src-tauri/src/commands.rs and registered in main.rs.
 frontend/index.html now uses them in the original CRM layout, without fixtures.
 The Windows debug executable has real UI/IPC smoke coverage for authentication,
@@ -125,13 +125,17 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 | create_contractor / createContractor | organization_id: integer; profile: ProfileFields | Persisted Contractor |
 | update_contractor / updateContractor | id: integer; profile: ProfileFields | Persisted Contractor |
 | archive_contractor / archiveContractor | id: integer | null after archive completes |
+| set_contractor_status / setContractorStatus | id: integer; status: `Active` or `Inactive` | Persisted Contractor |
+| record_contact_note / recordContactNote | id: integer; method: `Email`, `Phone`, `SMS`, `Teams`, or `Other`; note: string | null after insert |
 
 ProfileFields: full_name (required string), role/email/phone (optional string or
 null). Updates REPLACE these profile fields; omitted/blank optional values clear
 them to null. The UI submits all displayed fields. Name is not split/inferred.
 Create requires an existing non-archived organization and starts Active. Editing
-preserves organization_id, status, photo, and history. Transfers and status
-changes need separate audited workflows; this editor does not perform them.
+preserves organization_id, status, photo, and history. Status changes use the
+separate set_contractor_status command and accept only Active/Inactive. Transfers
+remain a separate workflow. Organization active/inactive status is not modeled;
+archived_at remains a separate visibility action.
 Organization names need not be unique; IDs identify records. Blank region is null.
 
 Backend normalization trims values. Full name/organization name must be nonempty
@@ -155,7 +159,11 @@ status/fields. Existing SQLite CURRENT_TIMESTAMP supplies archived_at in UTC
 (YYYY-MM-DD HH:MM:SS); it is not returned by these commands. Repeated archive or
 editing an archived/missing ID rejects. No restore UI or permanent deletion is
 introduced. If saving succeeds but directory refresh fails, UI reports the save
-separately and asks for Refresh rather than resubmitting a duplicate create.
+separately and instructs the user to reopen the workspace rather than resubmit.
+
+set_contractor_status requires an active session, a positive safe ID, and one of
+Active/Inactive. record_contact_note accepts the existing contact method set and
+a nonempty note up to 5000 characters; SQLite supplies contacted_at in UTC.
 
 ## Region filter and fictional-data import
 

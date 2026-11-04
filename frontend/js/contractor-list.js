@@ -17,6 +17,8 @@
   let filterGeneration = 0;
   let filterLoading = false;
   let filterError = null;
+  let noteContractor = null;
+  const pendingStatusIds = new Set();
 
   function updateDashboardMetricCounts() {
     const counts = {
@@ -44,7 +46,8 @@
     <p id="directory-message" class="text-secondary" role="status" aria-live="polite"></p>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
-      <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
+      <div id="contact-active-filters" class="active-filter-pills px-3 pt-3" aria-live="polite"></div>
+      <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th><th scope="col">Notes</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
     </section>
     <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
   `;
@@ -74,19 +77,25 @@
     const tableBody = document.getElementById(tableBodyId);
     const resultCount = document.getElementById(resultCountId);
     if (!tableBody) return;
+    const table = tableBody.closest('table');
+    if (table && window.DataTable?.isDataTable(table)) new DataTable(table).destroy();
     tableBody.replaceChildren();
     tableBody.dataset.loading = String(loading || filterLoading);
     if (data.length === 0) {
       const row = document.createElement('tr');
       const cell = document.createElement('td');
-      cell.colSpan = 8;
+      cell.colSpan = 9;
       cell.className = 'text-secondary p-4';
-      cell.textContent = filterLoading ? 'Filtering saved contractors…' : filterError
-        ? 'Could not filter records. Apply filters or Refresh to try again.'
+      const emptyIcon = document.createElement('i');
+      emptyIcon.className = 'bi bi-person-lines-fill text-primary me-2';
+      emptyIcon.setAttribute('aria-hidden', 'true');
+      const emptyMessage = filterLoading ? 'Filtering saved contractors…' : filterError
+        ? 'Could not filter records. Adjust filters and try again.'
         : loading ? 'Loading saved contractors…' : loadError
-        ? 'Could not load records. Use Refresh to try again.'
+        ? 'Could not load records. Reopen the workspace to try again.'
         : !loaded ? 'Log in to load saved contractors.'
         : contractors.length === 0 ? 'No contractors have been saved yet.' : 'No contractors match these filters.';
+      cell.append(emptyIcon, document.createTextNode(emptyMessage));
       row.appendChild(cell);
       tableBody.appendChild(row);
     }
@@ -118,6 +127,21 @@
       badge.className = `badge ${active ? 'bg-success' : 'bg-secondary'}`;
       badge.textContent = contractor.status ?? '';
       statusCell.appendChild(badge);
+      const canToggle = ['Active', 'Inactive'].includes(contractor.status);
+      const switchWrap = document.createElement('div');
+      switchWrap.className = 'form-check form-switch d-inline-flex align-items-center ms-2 mb-0';
+      const statusToggle = document.createElement('input');
+      statusToggle.className = 'form-check-input contractor-status-toggle';
+      statusToggle.type = 'checkbox';
+      statusToggle.role = 'switch';
+      statusToggle.checked = active;
+      statusToggle.disabled = !canToggle || pendingStatusIds.has(contractor.id);
+      statusToggle.setAttribute('aria-label', `Mark ${contractorName(contractor)} ${active ? 'inactive' : 'active'}`);
+      statusToggle.title = canToggle ? 'Toggle Active/Inactive' : 'Only Active and Inactive records can be toggled';
+      statusToggle.addEventListener('click', event => event.stopPropagation());
+      statusToggle.addEventListener('change', () => changeContractorStatus(contractor, statusToggle));
+      switchWrap.appendChild(statusToggle);
+      statusCell.appendChild(switchWrap);
 
       const daysSinceContact = Number(contractor.days_since_last_contact);
       if (daysSinceContact > 180) {
@@ -141,6 +165,18 @@
         : 'Date unavailable';
       dateCell.classList.add('text-secondary');
       row.appendChild(dateCell);
+      const noteCell = document.createElement('td');
+      const noteButton = document.createElement('button');
+      noteButton.type = 'button';
+      noteButton.className = 'btn btn-sm btn-outline-primary';
+      noteButton.innerHTML = '<i class="bi bi-journal-text" aria-hidden="true"></i><span class="visually-hidden">Log contact note</span>';
+      noteButton.title = 'Log contact note';
+      noteButton.addEventListener('click', event => {
+        event.stopPropagation();
+        openContactNote(contractor);
+      });
+      noteCell.appendChild(noteButton);
+      row.appendChild(noteCell);
       row.classList.add('contractor-row');
       row.dataset.contractorId = String(contractor.id);
       row.tabIndex = 0;
@@ -151,6 +187,7 @@
         switchView('view-contractor-profile', { contractorId: contractor.id });
       });
       row.addEventListener('keydown', (event) => {
+        if (event.target !== row) return;
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           renderContractorProfile(contractor);
@@ -160,6 +197,8 @@
       tableBody.appendChild(row);
     });
     if (resultCount) resultCount.textContent = `${data.length} contractor${data.length === 1 ? '' : 's'}`;
+    renderActiveFilterPills('contact-active-filters', readContactFilters(), removeContactFilter);
+    window.crmDataTable?.(table);
   }
 
   function renderContractorProfile(contractor) {
@@ -236,6 +275,12 @@
       clearContactFilters();
       loadFilteredDirectory();
     });
+    if (loaded) {
+      filterLoading = false;
+      filterError = null;
+      renderTable(filterContractors(readContactFilters(), contractors));
+      return Promise.resolve(true);
+    }
     return loadFilteredDirectory();
   }
 
@@ -248,6 +293,88 @@
       organization: document.getElementById('filter-organization')?.value ?? 'All',
       query: directoryQuery,
     };
+  }
+
+  function renderActiveFilterPills(containerId, filters, onRemove) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.replaceChildren();
+    const labels = { region: 'Region', country: 'Country', citySector: 'City/Sector', status: 'Status', organization: 'Organization', query: 'Search' };
+    const active = Object.entries(filters).filter(([key, value]) => value && value !== 'All');
+    active.forEach(([key, value]) => {
+      const pill = document.createElement('span');
+      pill.className = 'badge rounded-pill text-bg-primary active-filter-pill';
+      const text = document.createElement('span');
+      const organization = key === 'organization' ? organizations.find(item => String(item.id) === String(value))?.name : null;
+      text.textContent = `${labels[key] ?? key}: ${organization ?? value}`;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'active-filter-remove';
+      remove.setAttribute('aria-label', `Remove ${labels[key] ?? key} filter`);
+      remove.innerHTML = '<i class="bi bi-x-lg" aria-hidden="true"></i>';
+      remove.addEventListener('click', () => onRemove(key));
+      pill.append(text, remove);
+      container.appendChild(pill);
+    });
+    container.hidden = active.length === 0;
+  }
+
+  function removeContactFilter(key) {
+    const controls = { region: 'contractor-region-filter', country: 'contractor-country-filter', citySector: 'contractor-city-sector-filter', status: 'filter-status', organization: 'filter-organization' };
+    if (key === 'query') {
+      directoryQuery = '';
+      const search = document.getElementById('global-search');
+      if (search) search.value = '';
+      syncSearchChrome();
+    } else if (controls[key]) {
+      const control = document.getElementById(controls[key]);
+      if (control) control.value = key === 'status' || key === 'organization' ? 'All' : '';
+    }
+    showFilteredDirectory();
+  }
+
+  async function changeContractorStatus(contractor, input) {
+    const previousStatus = contractor.status;
+    const nextStatus = input.checked ? 'Active' : 'Inactive';
+    pendingStatusIds.add(contractor.id);
+    contractor.status = nextStatus;
+    const index = contractors.findIndex(record => record.id === contractor.id);
+    if (index >= 0) contractors[index].status = nextStatus;
+    updateDashboardMetricCounts();
+    renderOrganizations();
+    renderTable(filterContractors(readContactFilters(), contractors));
+    try {
+      const updated = await window.crmApi.setContractorStatus({ id: contractor.id, status: nextStatus });
+      Object.assign(contractor, updated);
+      if (index >= 0) Object.assign(contractors[index], updated);
+      updateDashboardMetricCounts();
+      renderRegions();
+      renderOrganizations();
+      renderTable(filterContractors(readContactFilters(), contractors));
+      const message = document.getElementById('directory-message');
+      if (message) message.textContent = `${contractorName(contractor)} marked ${nextStatus.toLowerCase()}.`;
+    } catch (error) {
+      contractor.status = previousStatus;
+      if (index >= 0) contractors[index].status = previousStatus;
+      updateDashboardMetricCounts();
+      renderOrganizations();
+      renderTable(filterContractors(readContactFilters(), contractors));
+      const message = document.getElementById('directory-message');
+      if (message) message.textContent = error.message;
+      if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
+    } finally {
+      pendingStatusIds.delete(contractor.id);
+      if (window.crmSession?.authenticated) renderTable(filterContractors(readContactFilters(), contractors));
+    }
+  }
+
+  function openContactNote(contractor) {
+    noteContractor = contractor;
+    document.getElementById('contact-note-title').textContent = `Log contact note · ${contractorName(contractor)}`;
+    document.getElementById('contact-note-timestamp').textContent = `Timestamp: ${new Date().toISOString()}`;
+    document.getElementById('contact-note-editor').textContent = '';
+    document.getElementById('contact-note-message').textContent = '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('contact-note-modal')).show();
   }
 
   function clearContactFilters() {
@@ -395,7 +522,8 @@
     switchView(viewId);
   }
 
-  function filterContractors({ country = '', citySector = '', status = 'All', organization = 'All', query = '' }, records) {
+  function filterContractors({ region = '', country = '', citySector = '', status = 'All', organization = 'All', query = '' }, records) {
+    const normalizedRegion = region.toLowerCase();
     const normalizedCountry = country.toLowerCase();
     const normalizedCitySector = citySector.toLowerCase();
     const normalizedQuery = query.trim().toLowerCase();
@@ -407,6 +535,7 @@
           : contractor.status === status);
 
       return matchesStatus &&
+        (!normalizedRegion || String(contractor.region ?? '').toLowerCase().includes(normalizedRegion)) &&
         (organization === 'All' || String(contractor.organization_id) === organization) &&
         (!normalizedCountry || String(contractor.country ?? '').toLowerCase().includes(normalizedCountry)) &&
         (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector)) &&
@@ -415,69 +544,84 @@
   }
 
   function renderOrganizations() {
-    const organizationsGrid = document.getElementById('organizations-grid');
-    if (!organizationsGrid) return;
-    organizationsGrid.replaceChildren();
+    const tableBody = document.getElementById('organizations-table-body');
+    const table = document.getElementById('organizations-table');
+    if (!tableBody || !table) return;
+    if (window.DataTable?.isDataTable(table)) new DataTable(table).destroy();
+    tableBody.replaceChildren();
     if (organizations.length === 0) {
-      const empty = document.createElement('p');
-      empty.className = 'text-secondary';
-      empty.textContent = loading ? 'Loading organizations…' : loadError
-        ? 'Could not load records. Use Refresh to try again.'
-        : loaded ? 'No organizations have been saved yet.' : 'Log in to load organizations.';
-      organizationsGrid.appendChild(empty);
+      const row = document.createElement('tr');
+      const empty = document.createElement('td');
+      empty.colSpan = 5;
+      empty.className = 'text-secondary p-4';
+      const icon = document.createElement('i');
+      icon.className = 'bi bi-buildings text-primary me-2';
+      icon.setAttribute('aria-hidden', 'true');
+      empty.append(icon, document.createTextNode(loading ? 'Loading organizations…' : loadError
+        ? 'Could not load records. Reopen the workspace to try again.'
+        : loaded ? 'No organizations have been saved yet.' : 'Log in to load organizations.'));
+      row.appendChild(empty);
+      tableBody.appendChild(row);
     }
 
-    organizations.forEach((organization) => {
+    const query = directoryQuery.trim().toLocaleLowerCase();
+    const visibleOrganizations = organizations.filter(organization => !query ||
+      `${organization.name} ${organization.region ?? ''}`.toLocaleLowerCase().includes(query));
+    renderActiveFilterPills('organization-active-filters', { query: directoryQuery }, key => {
+      if (key !== 'query') return;
+      directoryQuery = '';
+      const search = document.getElementById('global-search');
+      if (search) search.value = '';
+      syncSearchChrome();
+      renderOrganizations();
+    });
+    if (organizations.length && visibleOrganizations.length === 0) {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 5;
+      cell.className = 'text-secondary p-4';
+      cell.textContent = 'No organizations match this search.';
+      row.appendChild(cell);
+      tableBody.appendChild(row);
+    }
+    visibleOrganizations.forEach((organization) => {
       const activeContractors = contractors.filter((contractor) =>
         contractor.organization_id === organization.id && contractor.status === 'Active'
       ).length;
 
-      const column = document.createElement('div');
-      column.className = 'col';
-      const card = document.createElement('article');
-      card.className = 'card organization-card h-100';
-      card.dataset.organizationId = String(organization.id);
-      const cardBody = document.createElement('div');
-      cardBody.className = 'card-body d-flex flex-column p-4';
-
-      const logo = document.createElement('div');
-      logo.className = 'org-logo-placeholder mb-3';
-      // Initials are a placeholder until media storage/display is connected.
-      logo.setAttribute('aria-label', `Organization initials for ${organization.name}`);
-      const initials = document.createElement('span');
-      initials.className = 'org-logo-initials';
-      initials.textContent = organization.name.slice(0, 2).toUpperCase();
-      const logoLabel = document.createElement('span');
-      logoLabel.className = 'org-logo-label';
-      logoLabel.textContent = 'No logo';
-      logo.append(initials, logoLabel);
-
-      const name = document.createElement('h2');
-      name.className = 'h5 mb-3';
-      name.textContent = organization.name;
-
-      const contractorCount = document.createElement('p');
-      contractorCount.className = 'mb-2';
-      const countLabel = document.createElement('span');
-      countLabel.className = 'text-secondary';
-      countLabel.textContent = 'Active Contractors: ';
-      const countValue = document.createElement('strong');
-      countValue.textContent = String(activeContractors);
-      contractorCount.append(countLabel, countValue);
-
-      const region = document.createElement('p');
-      region.className = 'mb-4';
-      const regionLabel = document.createElement('span');
-      regionLabel.className = 'text-secondary d-block small mb-1';
-      regionLabel.textContent = 'Primary Operating Region';
-      const regionValue = document.createElement('strong');
-      regionValue.textContent = organization.region ?? 'Not provided';
-      region.append(regionLabel, regionValue);
-
+      const row = document.createElement('tr');
+      const name = document.createElement('th');
+      name.scope = 'row';
+      const nameIcon = document.createElement('i');
+      nameIcon.className = 'bi bi-building text-primary me-2';
+      nameIcon.setAttribute('aria-hidden', 'true');
+      name.append(nameIcon, document.createTextNode(organization.name));
+      const region = document.createElement('td');
+      region.textContent = organization.region ?? 'Not provided';
+      const count = document.createElement('td');
+      count.textContent = String(activeContractors);
+      const status = document.createElement('td');
+      const statusWrap = document.createElement('div');
+      statusWrap.className = 'form-check form-switch mb-0';
+      const statusToggle = document.createElement('input');
+      statusToggle.className = 'form-check-input';
+      statusToggle.type = 'checkbox';
+      statusToggle.role = 'switch';
+      statusToggle.disabled = true;
+      statusToggle.indeterminate = true;
+      statusToggle.setAttribute('aria-label', `${organization.name} status is not tracked`);
+      statusToggle.title = 'Organization Active/Inactive status is not supported by the current database';
+      statusWrap.appendChild(statusToggle);
+      const statusLabel = document.createElement('span');
+      statusLabel.className = 'small text-secondary';
+      statusLabel.textContent = 'Not tracked';
+      statusWrap.appendChild(statusLabel);
+      status.appendChild(statusWrap);
+      const actions = document.createElement('td');
       const rosterButton = document.createElement('button');
       rosterButton.className = 'btn btn-outline-primary mt-auto';
       rosterButton.type = 'button';
-      rosterButton.textContent = 'View Roster';
+      rosterButton.innerHTML = '<i class="bi bi-people me-1" aria-hidden="true"></i> View roster';
       rosterButton.addEventListener('click', () => {
         clearContactFilters();
         document.getElementById('filter-organization').value = String(organization.id);
@@ -487,11 +631,12 @@
         document.getElementById('btn-reset-destination').classList.remove('d-none');
       });
 
-      cardBody.append(logo, name, contractorCount, region, rosterButton);
-      card.appendChild(cardBody);
-      column.appendChild(card);
-      organizationsGrid.appendChild(column);
+      actions.appendChild(rosterButton);
+      row.append(name, region, count, status, actions);
+      row.dataset.organizationId = String(organization.id);
+      tableBody.appendChild(row);
     });
+    window.crmDataTable?.(table);
   }
 
   function switchView(viewId, { contractorId = '', skipHistory = false, replaceHistory = false } = {}) {
@@ -628,7 +773,9 @@
   const showFilteredDirectory = () => {
     if (contactsView.classList.contains('d-none')) renderContactList();
     else {
-      loadFilteredDirectory();
+      filterLoading = false;
+      filterError = null;
+      renderTable(filterContractors(readContactFilters(), contractors));
       switchView('view-contacts', { replaceHistory: true });
     }
   };
@@ -636,7 +783,8 @@
   globalSearch?.addEventListener('input', () => {
     directoryQuery = globalSearch.value;
     syncSearchChrome();
-    if (directoryQuery.trim() || !contactsView.classList.contains('d-none')) showFilteredDirectory();
+    if (!document.getElementById('view-organizations').classList.contains('d-none')) renderOrganizations();
+    else if (directoryQuery.trim() || !contactsView.classList.contains('d-none')) showFilteredDirectory();
   });
   document.getElementById('clear-global-search')?.addEventListener('click', () => {
     if (!globalSearch) return;
@@ -723,8 +871,10 @@
     loaded = false;
     loading = false;
     loadError = null;
+    noteContractor = null;
+    document.getElementById('contact-note-editor').replaceChildren();
     contactsView.replaceChildren();
-    document.getElementById('organizations-grid').replaceChildren();
+    document.getElementById('organizations-table-body')?.replaceChildren();
     document.getElementById('contractor-profile-content').textContent = 'Select a contractor to view profile details.';
     ['view-deployments', 'view-pending-archive', 'view-critical-alerts'].forEach(id => document.getElementById(id).replaceChildren());
     clearContactFilters();
@@ -746,8 +896,6 @@
     loadError = null;
     contractors = [];
     organizations = [];
-    const refresh = document.getElementById('refresh-contractors');
-    refresh.disabled = true;
     const status = document.getElementById('workspace-message');
     status.textContent = 'Loading saved records…';
     updateDashboardMetricCounts();
@@ -771,7 +919,6 @@
     } finally {
       if (generation === loadGeneration) {
         loading = false;
-        refresh.disabled = false;
       }
     }
     if (generation !== loadGeneration || !window.crmSession.authenticated) return;
@@ -829,9 +976,41 @@
     },
   });
 
+  document.querySelectorAll('[data-note-command]').forEach(button => button.addEventListener('click', () => {
+    document.getElementById('contact-note-editor').focus();
+    document.execCommand(button.dataset.noteCommand, false);
+  }));
+  document.getElementById('contact-note-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!noteContractor || !window.crmSession?.authenticated) return;
+    const editor = document.getElementById('contact-note-editor');
+    const note = editor.innerText.trim();
+    const message = document.getElementById('contact-note-message');
+    const save = event.currentTarget.querySelector('[type="submit"]');
+    if (!note) { message.textContent = 'Enter a note before saving.'; editor.focus(); return; }
+    const timestamp = new Date().toISOString();
+    save.disabled = true;
+    message.textContent = 'Saving note…';
+    try {
+      await window.crmApi.recordContactNote({ id: noteContractor.id, method: document.getElementById('contact-note-method').value, note: `${timestamp}\n${note}` });
+      noteContractor.last_contact_date = timestamp;
+      noteContractor.days_since_last_contact = 0;
+      const stored = contractors.find(record => record.id === noteContractor.id);
+      if (stored) Object.assign(stored, { last_contact_date: timestamp, days_since_last_contact: 0 });
+      renderTable(filterContractors(readContactFilters(), contractors));
+      document.getElementById('directory-message').textContent = `Contact note saved for ${contractorName(noteContractor)}.`;
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('contact-note-modal')).hide();
+    } catch (error) {
+      message.textContent = error.message;
+      if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
+    } finally {
+      save.disabled = false;
+    }
+  });
+  document.getElementById('contact-note-modal').addEventListener('hidden.bs.modal', () => { noteContractor = null; });
+
   window.addEventListener('crm:unlocked', refreshSavedData);
   window.addEventListener('crm:locked', clearSavedData);
-  document.getElementById('refresh-contractors').addEventListener('click', refreshSavedData);
   updateFilterOptions();
   updateDashboardMetricCounts();
   renderRegions();

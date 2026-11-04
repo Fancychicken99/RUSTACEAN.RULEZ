@@ -1,6 +1,7 @@
 use rusqlite::Connection;
 use secure_crm_backend::{
     admin::{admin_exists, create_first_admin},
+    contacts,
     database::{Contractor, Organization, get_organizations},
     profiles::{self, ProfileError, ProfileFields},
     protected::list_contractors_if_authenticated,
@@ -53,6 +54,19 @@ pub struct OrganizationRequest {
 #[serde(deny_unknown_fields)]
 pub struct RecordRequest {
     id: i64,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContractorStatusRequest {
+    id: i64,
+    status: String,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContactNoteRequest {
+    id: i64,
+    method: String,
+    note: String,
 }
 
 #[derive(serde::Deserialize)]
@@ -193,6 +207,40 @@ impl AppState {
             .map_err(|e| profile_error(e, "Unable to archive contractor"))
     }
 
+    fn set_status(&self, request: ContractorStatusRequest) -> Result<Contractor, String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::set_contractor_status(&state.conn, request.id, &request.status)
+            .map_err(|e| profile_error(e, "Unable to update contractor status"))
+    }
+
+    fn save_contact_note(&self, request: ContactNoteRequest) -> Result<(), String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::validate_id(request.id).map_err(|e| e.to_string())?;
+        if !matches!(request.method.as_str(), "Email" | "Phone" | "SMS" | "Teams" | "Other") {
+            return Err("Select a valid contact method".into());
+        }
+        let note = request.note.trim();
+        if note.is_empty()
+            || note.chars().count() > 5_000
+            || note
+                .chars()
+                .any(|ch| ch.is_control() && ch != '\n' && ch != '\t')
+        {
+            return Err("Contact note is required and must be at most 5000 characters".into());
+        }
+        match contacts::record_contact(&state.conn, request.id, &request.method, note) {
+            Ok(true) => Ok(()),
+            Ok(false) => Err("Contractor not found or archived".into()),
+            Err(_) => Err("Unable to save contact note".into()),
+        }
+    }
+
     fn create_org(&self, request: OrganizationRequest) -> Result<Organization, String> {
         let mut state = self.lock()?;
         if !state.session.authorize_action() {
@@ -271,6 +319,20 @@ pub fn archive_contractor(
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
     state.archive(request)
+}
+#[tauri::command]
+pub fn set_contractor_status(
+    request: ContractorStatusRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Contractor, String> {
+    state.set_status(request)
+}
+#[tauri::command]
+pub fn record_contact_note(
+    request: ContactNoteRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    state.save_contact_note(request)
 }
 #[tauri::command]
 pub fn create_organization(

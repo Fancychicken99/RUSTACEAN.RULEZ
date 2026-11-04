@@ -42,6 +42,7 @@ a { text-decoration: none; }
 .app-shell { min-height: 100vh; }
 
 .sidebar { width: 260px; flex: 0 0 260px; min-height: 100vh; padding: 1.45rem 1rem 1rem; background: #fff; border-right: 1px solid var(--hope-border); transition: width .2s ease, flex-basis .2s ease, margin .2s ease; overflow: hidden; }
+.sidebar.sidebar-collapsed { width: 0; flex-basis: 0; padding-left: 0; padding-right: 0; border: 0; }
 .sidebar.collapse:not(.show) { display: flex; width: 0; flex-basis: 0; padding-left: 0; padding-right: 0; border: 0; }
 .brand { color: var(--hope-text); padding: 0 .65rem 2.1rem; white-space: nowrap; }
 .brand:hover { color: var(--hope-text); }
@@ -128,6 +129,13 @@ a { text-decoration: none; }
 .activity-card .table thead th { padding: .85rem 1.4rem; color: #a0a7b8; background: #fcfcfe; border-bottom: 1px solid var(--hope-border); font-size: .63rem; font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
 .activity-card .table tbody td { padding: .9rem 1.4rem; border-color: #f1f2f6; white-space: nowrap; }
 .activity-card .table tbody tr:last-child td { border-bottom: 0; }
+.active-filter-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
+.active-filter-pills[hidden] { display: none !important; }
+.active-filter-pill { display: inline-flex; align-items: center; gap: .45rem; padding: .4rem .5rem .4rem .75rem; font-weight: 550; }
+.active-filter-remove { display: inline-grid; place-items: center; width: 1.1rem; height: 1.1rem; padding: 0; color: inherit; background: transparent; border: 0; border-radius: 50%; }
+.active-filter-remove:hover, .active-filter-remove:focus-visible { color: var(--hope-blue); background: #fff; }
+.contact-note-editor { min-height: 150px; max-height: 45vh; overflow-y: auto; white-space: pre-wrap; }
+.contact-note-editor:empty::before { color: var(--hope-muted); content: attr(data-placeholder); }
 .contractor-row { cursor: pointer; }
 .contractor-row:hover { background: #f7f8ff; }
 .contractor-row:focus-visible { outline: 2px solid rgba(58, 87, 232, .55); outline-offset: -2px; }
@@ -223,7 +231,8 @@ a { text-decoration: none; }
 /* Authentication uses local assets and hides the workspace before any request. */
 [hidden] { display: none !important; }
 .auth-overlay { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; background: var(--hope-bg); }
-.auth-panel { width: min(100%, 420px); }
+.auth-panel { width: min(100%, 420px); border: 1px solid var(--hope-border); box-shadow: 0 12px 42px rgba(35, 45, 66, .08); }
+.auth-brand-mark { display: grid; place-items: center; width: 42px; height: 42px; color: #fff; background: var(--hope-blue); border-radius: 14px; font-size: 1.1rem; }
 .workspace-message { color: var(--hope-text); background: var(--hope-bg); }
 .metric-card[aria-disabled="true"] { cursor: default !important; }
 #workspace .progress { height: 8px; }

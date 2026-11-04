@@ -39,10 +39,10 @@
     document.querySelectorAll('.modal form').forEach(modalForm => modalForm.reset());
     window.dispatchEvent(new Event('crm:locked'));
   }
-  async function lock(reason = 'Workspace locked.') {
+  async function lock() {
     ++version;
     showLocked();
-    message(reason);
+    message('Enter your password to reopen the workspace.');
     try {
       await window.crmApi.logout();
     } catch (error) {
@@ -121,7 +121,6 @@
   });
   byId('retry-auth').addEventListener('click', connect);
   byId('lock').addEventListener('click', () => lock());
-  byId('logout').addEventListener('click', () => lock());
 
   async function recordActivity(event) {
     if (!authenticated || !event.isTrusted) return;
