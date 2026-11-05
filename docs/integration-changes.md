@@ -303,3 +303,17 @@ built successfully and launched with no browser errors. Its full smoke test
 stopped at the stale authentication helper, which does not fill the newly added
 confirm-password field; later tests also refer to the previous contractor form.
 A full smoke pass is not claimed by this targeted asset repair.
+
+## Repair current Windows smoke regression — November 5, 2026
+
+Updated the desktop smoke runner for setup confirmation, split names, required
+role/email/phone, native save confirmations, the organization table, the public
+directory refresh API and DataTables pagination. Counts now inspect all DataTables
+rows while separate assertions test visible page size and page navigation. Removed
+the Alert Level dropdown's inline style in favor of a local CSS class. Retained
+backend validation, real saves/restarts, archive, duplicate submission and
+simulated stale-response/failure assertions. No backend/schema change.
+
+Local syntax, asset integrity and whitespace checks pass. Windows Application
+Control blocks the native build helper (error 4551); native CI outcome must be
+checked after publication. No machine policy was changed or ordinary DB opened.

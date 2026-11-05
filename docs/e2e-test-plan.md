@@ -132,3 +132,17 @@ the user's system networking or put their device to sleep as part of automation.
 6. Report passed, failed, and blocked scenarios separately. A missing executable is a blocked run, not a passing suite. Establish a reliable local run before adding Windows CI.
 
 Start with launch and one create/restart flow. Expand as features become available. Map scenarios to the actual Statement of Work before using the results as acceptance evidence.
+
+## November 5 smoke regression repair
+
+Updated scripts/test-desktop-smoke.cjs for the current confirmation-password,
+split-name, required role/contact forms, save confirmations, organization table,
+removed refresh buttons and DataTables pagination. Password validation, real IPC,
+persistence, duplicate prevention, error/late-response, archive and offline
+assertions remain enabled. Added mismatched-confirmation coverage and page-change
+checks; --auth-only is an optional focused mode, not the default CI command.
+Moved the Alert Level inline width into styles.css to preserve the CSP.
+
+Local syntax, asset integrity and whitespace checks pass. Local native execution
+is blocked by Windows Application Control (error 4551), so native CI is the
+remaining verification source. No policy was disabled and no user database changed.
