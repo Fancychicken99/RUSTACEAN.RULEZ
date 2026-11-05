@@ -317,3 +317,10 @@ simulated stale-response/failure assertions. No backend/schema change.
 Local syntax, asset integrity and whitespace checks pass. Windows Application
 Control blocks the native build helper (error 4551); native CI outcome must be
 checked after publication. No machine policy was changed or ordinary DB opened.
+
+CI follow-up: the updated suite exposed a real region-filter regression: loaded
+records bypassed loadFilteredDirectory and filtered only cached arrays. Restored
+the existing protected SQLite filter path for directory renders and filter/search
+changes, including Alert Level changes. Existing error and stale-response checks
+remain enabled. The prior pagination protocol error was fixed by returning no
+value from page-changing actions; assertions still verify the resulting page.

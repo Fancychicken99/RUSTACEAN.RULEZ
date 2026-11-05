@@ -362,23 +362,13 @@
   function renderContactList() {
     contactsView.innerHTML = contactListHtml;
     if (contactsView.classList.contains('d-none')) switchView('view-contacts');
-    document.getElementById('alert-level-filter').addEventListener('change', () => {
-      filterLoading = false;
-      filterError = null;
-      renderTable(filterContractors(readContactFilters(), contractors));
-    });
+    document.getElementById('alert-level-filter').addEventListener('change', loadFilteredDirectory);
     document.getElementById('btn-reset-destination').addEventListener('click', () => {
       document.getElementById('destination-title').innerText = 'Contractor Directory';
       document.getElementById('btn-reset-destination').classList.add('d-none');
       clearContactFilters();
       loadFilteredDirectory();
     });
-    if (loaded) {
-      filterLoading = false;
-      filterError = null;
-      renderTable(filterContractors(readContactFilters(), contractors));
-      return Promise.resolve(true);
-    }
     return loadFilteredDirectory();
   }
 
@@ -892,13 +882,9 @@
   const filterForm = document.getElementById('contractor-filter-form');
   const filterPanel = document.getElementById('contractor-filter-panel');
   const showFilteredDirectory = () => {
-    if (contactsView.classList.contains('d-none')) renderContactList();
-    else {
-      filterLoading = false;
-      filterError = null;
-      renderTable(filterContractors(readContactFilters(), contractors));
-      switchView('view-contacts', { replaceHistory: true });
-    }
+    if (contactsView.classList.contains('d-none')) return renderContactList();
+    switchView('view-contacts', { replaceHistory: true });
+    return loadFilteredDirectory();
   };
 
   globalSearch?.addEventListener('input', () => {
