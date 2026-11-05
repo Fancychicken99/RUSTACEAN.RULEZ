@@ -288,3 +288,18 @@ directories. Full evidence/links/hashes: docs/mvp-build-evidence.md. CI policy
 guard also verified to refuse local/self-hosted use before registry access.
 Only evidence/docs change after this build; no new runtime code. Physical Mac UI,
 offline/sleep and fresh-machine/release-CRUD acceptance still pending.
+
+## Offline table asset repair — November 5, 2026
+
+Replaced DataTables and IMask CDN references with pinned local assets and added
+jQuery 3.7.1 before DataTables 2.3.4. Included upstream MIT licenses, provenance,
+and SHA384 integrity values. The asset checker rejects external script and
+stylesheet references to catch this regression before desktop launch. No schema,
+IPC, or CSP change is required.
+
+Verification: seven local integrity hashes pass and git diff whitespace checks
+pass on the latest dev checkout. The identical frontend in the supplied ZIP
+built successfully and launched with no browser errors. Its full smoke test
+stopped at the stale authentication helper, which does not fill the newly added
+confirm-password field; later tests also refer to the previous contractor form.
+A full smoke pass is not claimed by this targeted asset repair.
