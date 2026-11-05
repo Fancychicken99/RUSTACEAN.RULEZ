@@ -7,6 +7,8 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 let checked = 0;
 for (const tag of html.matchAll(/<(?:script|link)\b[^>]*>/g)) {
   const integrity = tag[0].match(/\bintegrity="([^"]+)"/)?.[1];
+  const reference = tag[0].match(/\b(?:src|href)="([^"]+)"/)?.[1];
+  if (reference && /^(?:[a-z]+:|\/\/)/i.test(reference)) throw new Error('Runtime asset must be local: ' + reference);
   if (!integrity) continue;
   const relative = tag[0].match(/\b(?:src|href)="([^"]+)"/)?.[1];
   if (!relative || /^[a-z]+:/i.test(relative)) throw new Error('Integrity asset must be local.');
