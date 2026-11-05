@@ -52,7 +52,8 @@ function cdp(method, params = {}) {
   });
 }
 async function evaluate(expression) {
-  const value = await cdp('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true, userGesture: true });
+  const value = await cdp('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true, userGesture: true })
+    .catch(error => { throw new Error('Evaluation failed: ' + expression.slice(0, 240) + '\n' + error.message); });
   if (value.exceptionDetails) throw new Error(JSON.stringify(value.exceptionDetails));
   return value.result.value;
 }
@@ -423,9 +424,9 @@ async function verifyRealInactivity() {
   assert.equal(await evaluate("document.querySelectorAll('.contractor-row').length"), 10, 'The first DataTables page must contain ten rows.');
   assert.equal(await evaluate("new DataTable(document.getElementById('contractor-table-body').closest('table')).rows().count()"), 60, 'Pagination must retain every saved record.');
   const firstPageId = await evaluate("document.querySelector('.contractor-row').dataset.contractorId");
-  await evaluate("new DataTable(document.getElementById('contractor-table-body').closest('table')).page('next').draw('page')");
+  await evaluate("new DataTable(document.getElementById('contractor-table-body').closest('table')).page('next').draw('page'); void 0");
   assert.notEqual(await evaluate("document.querySelector('.contractor-row').dataset.contractorId"), firstPageId, 'Changing page must show different records.');
-  await evaluate("new DataTable(document.getElementById('contractor-table-body').closest('table')).page('first').draw('page')");
+  await evaluate("new DataTable(document.getElementById('contractor-table-body').closest('table')).page('first').draw('page'); void 0");
   await evaluate("window.realFilter = window.crmApi.filterContractors; window.crmApi = { ...window.crmApi, filterContractors: async request => { window.lastRegion = request.region; const records = await window.realFilter(request); window.lastRegionResult = records.length; return records; } }; window.observedApi = window.crmApi; document.getElementById('nav-contacts').click()");
   await directoryReady();
   assert.equal(await evaluate("(() => { const table = document.getElementById('contractor-table-body')?.closest('table'); return table && window.DataTable?.isDataTable(table) ? new DataTable(table).rows().count() : document.querySelectorAll('.contractor-row').length; })()"), 60);
