@@ -275,7 +275,13 @@ async function verifyRealInactivity() {
   assert.equal(await evaluate("document.getElementById('confirm-password').classList.contains('is-invalid')"), true);
   assert.equal(await evaluate("window.crmApi.getAuthStatus().then(status => status.admin_exists)"), false, 'Mismatched confirmation must not create an administrator.');
   await submit('short');
-  assert.match(await evaluate("document.getElementById('message').textContent"), /at least 12/);
+
+await until(
+  () => evaluate(
+    "document.getElementById('message').textContent.includes('at least 12')"
+  ),
+  'short password validation message'
+);
   await submit('fictional smoke password');
   assert.equal(await evaluate("document.getElementById('auth-heading').textContent"), 'Log in');
   await submit('incorrect');
