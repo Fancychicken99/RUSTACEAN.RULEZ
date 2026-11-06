@@ -4,7 +4,8 @@
   const navDashboard = document.getElementById('nav-dashboard');
   const navContacts = document.getElementById('nav-contacts');
   const navOrganizations = document.getElementById('nav-organizations');
-  if (!appContent || !contactsView || !navDashboard || !navContacts || !navOrganizations) return;
+  const navArchive = document.getElementById('nav-archive');
+  if (!appContent || !contactsView || !navDashboard || !navContacts || !navOrganizations || !navArchive) return;
   let directoryQuery = '';
 
 
@@ -95,6 +96,26 @@
     }
   }
 
+  async function changeOrganizationStatus(organization, select) {
+    const previous = organization.status;
+    const next = select.value;
+    if (next === previous) return;
+    select.disabled = true;
+    try {
+      const updated = await window.crmApi.setOrganizationStatus({ id: organization.id, status: next });
+      Object.assign(organization, updated);
+      const stored = organizations.find(item => item.id === organization.id);
+      if (stored) Object.assign(stored, updated);
+      document.getElementById('workspace-message').textContent = `${organization.name} marked ${next}.`;
+      renderOrganizations();
+    } catch (error) {
+      select.value = previous;
+      select.disabled = false;
+      document.getElementById('workspace-message').textContent = error.message;
+      if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
+    }
+  }
+
   function openEditContractorModal(id) {
     if (!window.crmSession?.authenticated) return false;
     const record = contractors.find(contractor => String(contractor.id) === String(id));
@@ -169,26 +190,15 @@
         row.appendChild(cell);
       });
       const statusCell = document.createElement('td');
-      const badge = document.createElement('span');
-      const active = String(contractor.status ?? '').toLowerCase() === 'active';
-      badge.className = `badge ${active ? 'bg-success' : 'bg-secondary'}`;
-      badge.textContent = contractor.status ?? '';
-      statusCell.appendChild(badge);
-      const canToggle = ['Active', 'Inactive'].includes(contractor.status);
-      const switchWrap = document.createElement('div');
-      switchWrap.className = 'form-check form-switch d-inline-flex align-items-center ms-2 mb-0';
-      const statusToggle = document.createElement('input');
-      statusToggle.className = 'form-check-input contractor-status-toggle';
-      statusToggle.type = 'checkbox';
-      statusToggle.role = 'switch';
-      statusToggle.checked = active;
-      statusToggle.disabled = !canToggle || pendingStatusIds.has(contractor.id);
-      statusToggle.setAttribute('aria-label', `Mark ${contractorName(contractor)} ${active ? 'inactive' : 'active'}`);
-      statusToggle.title = canToggle ? 'Toggle Active/Inactive' : 'Only Active and Inactive records can be toggled';
-      statusToggle.addEventListener('click', event => event.stopPropagation());
-      statusToggle.addEventListener('change', () => changeContractorStatus(contractor, statusToggle));
-      switchWrap.appendChild(statusToggle);
-      statusCell.appendChild(switchWrap);
+      const statusSelect = document.createElement('select');
+      statusSelect.className = 'form-select form-select-sm contractor-status-select';
+      statusSelect.setAttribute('aria-label', `Status for ${contractorName(contractor)}`);
+      ['Active', 'Inactive', 'Retired', 'Deceased'].forEach(value => statusSelect.add(new Option(value, value)));
+      statusSelect.value = contractor.status ?? 'Active';
+      statusSelect.disabled = pendingStatusIds.has(contractor.id);
+      statusSelect.addEventListener('click', event => event.stopPropagation());
+      statusSelect.addEventListener('change', () => changeContractorStatus(contractor, statusSelect.value, statusSelect));
+      statusCell.appendChild(statusSelect);
 
       const daysSinceContact = Number(contractor.days_since_last_contact);
       if (Number.isFinite(daysSinceContact) && daysSinceContact >= 30) {
@@ -345,6 +355,11 @@
           const related = source.find(record => String(record.id) === String(value.entity_id));
           content.textContent = related?.full_name || related?.name || `Related ${value.entity_type} #${value.entity_id}`;
         } else content.textContent = value && typeof value === 'object' ? (value.value ?? '—') : (value ?? '—');
+        if (value?.type === 'long_text') {
+          content.classList.remove('fw-semibold');
+          content.style.whiteSpace = 'pre-wrap';
+          content.style.overflowWrap = 'anywhere';
+        }
         column.append(caption, content); details.appendChild(column);
       });
     }
@@ -361,7 +376,48 @@
     archive.addEventListener('click', () => window.dispatchEvent(new CustomEvent('crm:archive-contractor', { detail: contractor })));
     actions.append(edit, archive);
     body.appendChild(actions);
+    const historySection = document.createElement('section');
+    historySection.className = 'border-top mt-4 pt-4';
+    const historyHeading = document.createElement('h3');
+    historyHeading.className = 'h5 mb-3';
+    historyHeading.textContent = 'Change History';
+    const historyList = document.createElement('ol');
+    historyList.className = 'list-group list-group-flush';
+    historyList.dataset.recordHistory = 'contractor';
+    historyList.textContent = 'Loading change history…';
+    historySection.append(historyHeading, historyList);
+    body.appendChild(historySection);
     profile.appendChild(body);
+    loadRecordHistory('contractor', contractor.id, historyList);
+  }
+
+  async function loadRecordHistory(entityType, id, list) {
+    try {
+      const history = await window.crmApi.getRecordHistory({ entity_type: entityType, id });
+      if (!list.isConnected) return;
+      list.replaceChildren();
+      if (!history.length) { list.textContent = 'No changes have been recorded yet.'; return; }
+      history.forEach(entry => {
+        const item = document.createElement('li');
+        item.className = 'list-group-item px-0';
+        const date = document.createElement('time');
+        date.className = 'small text-secondary d-block mb-1';
+        date.dateTime = entry.occurred_at;
+        const parsed = new Date(entry.occurred_at);
+        date.textContent = Number.isNaN(parsed.getTime()) ? entry.occurred_at : parsed.toLocaleString();
+        const title = document.createElement('strong');
+        title.textContent = entry.action;
+        const fields = document.createElement('div');
+        fields.className = 'small text-secondary';
+        fields.textContent = entry.changed_fields;
+        item.append(date, title, fields);
+        list.appendChild(item);
+      });
+    } catch (error) {
+      if (!list.isConnected) return;
+      list.textContent = error.message === 'Login required' ? 'Log in to view change history.' : error.message;
+      if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
+    }
   }
 
   function renderContactList() {
@@ -427,9 +483,9 @@
     showFilteredDirectory();
   }
 
-  async function changeContractorStatus(contractor, input) {
+  async function changeContractorStatus(contractor, nextStatus, input) {
     const previousStatus = contractor.status;
-    const nextStatus = input.checked ? 'Active' : 'Inactive';
+    if (nextStatus === previousStatus) return;
     pendingStatusIds.add(contractor.id);
     contractor.status = nextStatus;
     const index = contractors.findIndex(record => record.id === contractor.id);
@@ -449,6 +505,7 @@
       if (message) message.textContent = `${contractorName(contractor)} marked ${nextStatus.toLowerCase()}.`;
     } catch (error) {
       contractor.status = previousStatus;
+      if (input) input.value = previousStatus;
       if (index >= 0) contractors[index].status = previousStatus;
       updateDashboardMetricCounts();
       renderOrganizations();
@@ -699,22 +756,14 @@
       const count = document.createElement('td');
       count.textContent = String(activeContractors);
       const status = document.createElement('td');
-      const statusWrap = document.createElement('div');
-      statusWrap.className = 'form-check form-switch mb-0';
-      const statusToggle = document.createElement('input');
-      statusToggle.className = 'form-check-input';
-      statusToggle.type = 'checkbox';
-      statusToggle.role = 'switch';
-      statusToggle.disabled = true;
-      statusToggle.indeterminate = true;
-      statusToggle.setAttribute('aria-label', `${organization.name} status is not tracked`);
-      statusToggle.title = 'Organization Active/Inactive status is not supported by the current database';
-      statusWrap.appendChild(statusToggle);
-      const statusLabel = document.createElement('span');
-      statusLabel.className = 'small text-secondary';
-      statusLabel.textContent = 'Not tracked';
-      statusWrap.appendChild(statusLabel);
-      status.appendChild(statusWrap);
+      const statusSelect = document.createElement('select');
+      statusSelect.className = 'form-select form-select-sm organization-status-select';
+      statusSelect.setAttribute('aria-label', `Status for ${organization.name}`);
+      ['Active', 'Inactive', 'Out of Business'].forEach(value => statusSelect.add(new Option(value, value)));
+      statusSelect.value = organization.status ?? 'Active';
+      statusSelect.addEventListener('click', event => event.stopPropagation());
+      statusSelect.addEventListener('change', () => changeOrganizationStatus(organization, statusSelect));
+      status.appendChild(statusSelect);
       const actions = document.createElement('td');
       const rosterButton = document.createElement('button');
       rosterButton.className = 'btn btn-outline-primary mt-auto';
@@ -734,6 +783,17 @@
       editButton.type = 'button';
       editButton.innerHTML = '<i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Edit';
       editButton.addEventListener('click', () => openEditOrgModal(organization.id));
+      const historyButton = document.createElement('button');
+      historyButton.className = 'btn btn-outline-secondary mt-auto';
+      historyButton.type = 'button';
+      historyButton.innerHTML = '<i class="bi bi-clock-history me-1" aria-hidden="true"></i>History';
+      historyButton.addEventListener('click', () => {
+        const list = document.getElementById('organization-history-list');
+        document.getElementById('record-history-title').textContent = `${organization.name} · Change History`;
+        list.textContent = 'Loading change history…';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('record-history-modal')).show();
+        loadRecordHistory('organization', organization.id, list);
+      });
       const archiveButton = document.createElement('button');
       archiveButton.className = 'btn btn-warning mt-auto';
       archiveButton.type = 'button';
@@ -741,13 +801,59 @@
       archiveButton.addEventListener('click', () => archiveOrganization(organization.id));
       const actionGroup = document.createElement('div');
       actionGroup.className = 'd-flex flex-wrap gap-2';
-      actionGroup.append(rosterButton, editButton, archiveButton);
+      actionGroup.append(rosterButton, editButton, historyButton, archiveButton);
       actions.appendChild(actionGroup);
       row.append(name, region, count, status, actions);
       row.dataset.organizationId = String(organization.id);
       tableBody.appendChild(row);
     });
     window.crmDataTable?.(table);
+  }
+
+  async function renderArchive() {
+    const body = document.getElementById('archive-table-body');
+    if (!body) return;
+    body.replaceChildren();
+    const loadingRow = document.createElement('tr');
+    const loadingCell = document.createElement('td');
+    loadingCell.colSpan = 7;
+    loadingCell.className = 'text-secondary p-4';
+    loadingCell.textContent = 'Loading archived records…';
+    loadingRow.appendChild(loadingCell);
+    body.appendChild(loadingRow);
+    try {
+      const records = await window.crmApi.listArchivedRecords();
+      if (!body.isConnected || !window.crmSession?.authenticated) return;
+      body.replaceChildren();
+      if (!records.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 7;
+        cell.className = 'text-secondary p-4';
+        cell.textContent = 'No records have been archived.';
+        row.appendChild(cell); body.appendChild(row); return;
+      }
+      const format = value => {
+        if (!value) return '—';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+      };
+      records.forEach(record => {
+        const row = document.createElement('tr');
+        [record.entity_type, record.name, record.status, record.details || '—', format(record.created_at), format(record.updated_at), format(record.archived_at)]
+          .forEach(value => { const cell = document.createElement('td'); cell.textContent = value ?? '—'; row.appendChild(cell); });
+        body.appendChild(row);
+      });
+    } catch (error) {
+      body.replaceChildren();
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 7;
+      cell.className = 'text-danger p-4';
+      cell.textContent = error.message;
+      row.appendChild(cell); body.appendChild(row);
+      if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
+    }
   }
 
   function switchView(viewId, { contractorId = '', skipHistory = false, replaceHistory = false } = {}) {
@@ -760,6 +866,7 @@
         'view-dashboard': 'dashboard',
         'view-contacts': 'contacts',
         'view-organizations': 'organizations',
+        'view-pending-archive': 'archives',
         'view-contractor-profile': contractorId ? `contractors/${encodeURIComponent(contractorId)}` : 'contractors',
       };
       let route = routeNames[viewId] ?? viewId.replace(/^view-/, '');
@@ -786,12 +893,12 @@
       'view-dashboard': navDashboard,
       'view-contacts': navContacts,
       'view-organizations': navOrganizations,
+      'view-pending-archive': navArchive,
       'view-contractor-profile': navContacts,
       'view-deployments': navDashboard,
-      'view-pending-archive': navDashboard,
       'view-critical-alerts': navDashboard,
     };
-    [navDashboard, navContacts, navOrganizations].forEach((link) => {
+    [navDashboard, navContacts, navOrganizations, navArchive].forEach((link) => {
       link.classList.remove('active');
       link.removeAttribute('aria-current');
     });
@@ -845,6 +952,11 @@
       return;
     }
 
+    if (path === 'archives') {
+      switchView('view-pending-archive', { skipHistory: true });
+      return renderArchive();
+    }
+
     switchView('view-dashboard', { skipHistory: true });
   }
 
@@ -859,6 +971,11 @@
     renderOrganizations();
     switchView('view-organizations');
   });
+  navArchive.addEventListener('click', () => {
+    switchView('view-pending-archive');
+    renderArchive();
+  });
+  document.querySelector('[data-archive-refresh]')?.addEventListener('click', renderArchive);
   document.querySelectorAll('.metric-card').forEach((card) => {
     const applyMetricFilter = (e) => {
       e.preventDefault();
@@ -988,7 +1105,8 @@
     contactsView.replaceChildren();
     document.getElementById('organizations-table-body')?.replaceChildren();
     document.getElementById('contractor-profile-content').textContent = 'Select a contractor to view profile details.';
-    ['view-deployments', 'view-pending-archive', 'view-critical-alerts'].forEach(id => document.getElementById(id).replaceChildren());
+    ['view-deployments', 'view-critical-alerts'].forEach(id => document.getElementById(id).replaceChildren());
+    document.getElementById('archive-table-body')?.replaceChildren();
     clearContactFilters();
     updateFilterOptions();
     updateDashboardMetricCounts();

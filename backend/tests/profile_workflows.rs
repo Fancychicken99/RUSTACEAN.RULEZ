@@ -19,6 +19,7 @@ fn fields(name: &str) -> ProfileFields {
         role: Some("Engineer".to_string()),
         email: Some("test@example.com".to_string()),
         phone: Some("+12025550123".to_string()),
+        extra_information: serde_json::json!({}),
     }
 }
 
@@ -133,6 +134,7 @@ fn contractor_split_names_are_saved() -> Result<(), Box<dyn std::error::Error>> 
         role: Some("Engineer".into()),
         email: Some("fictional@example.com".into()),
         phone: Some("+12025550123".into()),
+        extra_information: serde_json::json!({}),
     };
 
     let contractor = create_profile(&mut conn, organization_id, profile)?;

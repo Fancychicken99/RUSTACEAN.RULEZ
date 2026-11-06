@@ -64,8 +64,11 @@ evidence, not substitutes for executable acceptance checks.
 
 - Contractor and organization create/read/update/archive workflows. No normal
   workflow permanently deletes entities. Support Active, Inactive, Retired,
-  and Deceased contractor statuses with clearly defined archive behavior.
-- Timestamped chronological history of organization transfers and status changes.
+  and Deceased contractor statuses, plus an Out of Business organization
+  status; retain those lifecycle states when records are archived.
+- Persist organization mailing addresses and primary/secondary contact details.
+- Timestamped chronological history of profile creation, changed fields,
+  contact notes, organization transfers, status changes, and archive actions.
 - Region, skill-set, and days-since-last-contact filtering; derive elapsed days
   from stored contact dates and define behavior for never-contacted records.
 - Local image/logo selection, validation, storage, retrieval, and display that

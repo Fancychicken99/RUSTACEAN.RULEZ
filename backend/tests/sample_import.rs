@@ -19,6 +19,7 @@ fn fields(name: &str) -> ProfileFields {
         role: Some("Engineer".to_string()),
         email: Some("manual@example.com".to_string()),
         phone: Some("+12025550123".to_string()),
+        extra_information: serde_json::json!({}),
     }
 }
 

@@ -141,6 +141,7 @@ pub fn get_contractors_by_skill(conn: &Connection, skill_name: &str) -> Result<V
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+            extra_information: None,
         })
     })?;
 

@@ -63,6 +63,7 @@ pub fn get_contractors_needing_followup(
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+            extra_information: None,
         })
     })?;
 

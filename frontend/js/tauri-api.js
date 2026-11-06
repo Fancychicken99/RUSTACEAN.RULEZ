@@ -9,17 +9,20 @@ window.crmApi = Object.freeze({
   logout: () => invokeCrm('logout'),
   listContractors: () => invokeCrm('list_contractors'),
   listOrganizations: () => invokeCrm('list_organizations'),
+  listArchivedRecords: () => invokeCrm('list_archived_records'),
   recordActivity: () => invokeCrm('record_activity'),
   createContractor: (request) => invokeCrm('create_contractor', { request }),
   updateContractor: (request) => invokeCrm('update_contractor', { request }),
   archiveContractor: (request) => invokeCrm('archive_contractor', { request }),
   setContractorStatus: (request) => invokeCrm('set_contractor_status', { request }),
+  setOrganizationStatus: (request) => invokeCrm('set_organization_status', { request }),
   recordContactNote: (request) => invokeCrm('record_contact_note', { request }),
   createOrganization: (request) => invokeCrm('create_organization', { request }),
   updateOrganization: (request) => invokeCrm('update_organization', { request }),
   archiveOrganization: (request) => invokeCrm('archive_organization', { request }),
   filterContractors: (request) => invokeCrm('filter_contractors', { request }),
   importSampleData: () => invokeCrm('import_sample_data'),
+  getRecordHistory: (request) => invokeCrm('get_record_history', { request }),
 });
 
 async function invokeCrm(command, args = {}) {

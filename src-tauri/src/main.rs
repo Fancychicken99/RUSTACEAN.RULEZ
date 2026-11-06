@@ -31,17 +31,20 @@ fn main() {
             commands::logout,
             commands::list_contractors,
             commands::list_organizations,
+            commands::list_archived_records,
             commands::record_activity,
             commands::create_contractor,
             commands::update_contractor,
             commands::archive_contractor,
             commands::set_contractor_status,
+            commands::set_organization_status,
             commands::create_organization,
             commands::update_organization,
             commands::archive_organization,
             commands::filter_contractors,
             commands::import_sample_data,
-            commands::record_contact_note
+            commands::record_contact_note,
+            commands::get_record_history
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start Hippo Harbor CRM");

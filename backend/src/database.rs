@@ -66,6 +66,7 @@ pub struct Contractor {
     pub role: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
+    pub extra_information: Option<serde_json::Value>,
     pub photo_path: Option<String>,
 }
 
@@ -86,7 +87,8 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
     c.first_name,
     c.middle_name,
     c.last_name,
-    c.suffix
+    c.suffix,
+    c.extra_information
  FROM contractors c
  LEFT JOIN organizations o
    ON c.organization_id = o.id
@@ -111,6 +113,7 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+            extra_information: row.get::<_, Option<String>>(15)?.and_then(|raw| serde_json::from_str(&raw).ok()),
         })
     })?;
 
@@ -138,7 +141,7 @@ pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> 
     conn.query_row(
         "SELECT c.id, c.full_name, o.name, o.region, c.status,
         c.role, c.email, c.phone, c.photo_path, c.organization_id,
-        c.prefix, c.first_name, c.middle_name, c.last_name, c.suffix
+        c.prefix, c.first_name, c.middle_name, c.last_name, c.suffix, c.extra_information
  FROM contractors c
  LEFT JOIN organizations o ON c.organization_id = o.id
  WHERE c.id = ?1 AND c.archived_at IS NULL",
@@ -160,6 +163,7 @@ pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> 
                 middle_name: row.get(12)?,
                 last_name: row.get(13)?,
                 suffix: row.get(14)?,
+                extra_information: row.get::<_, Option<String>>(15)?.and_then(|raw| serde_json::from_str(&raw).ok()),
             })
         },
     )
@@ -169,7 +173,8 @@ pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> 
 pub fn archive_contractor(conn: &Connection, contractor_id: i64) -> Result<bool> {
     let rows_updated = conn.execute(
         "UPDATE contractors
-         SET archived_at = CURRENT_TIMESTAMP
+         SET archived_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
+             updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
          WHERE id = ?1
          AND archived_at IS NULL",
         params![contractor_id],
@@ -179,6 +184,11 @@ pub fn archive_contractor(conn: &Connection, contractor_id: i64) -> Result<bool>
 }
 
 pub fn add_profile_fields(conn: &Connection) -> Result<()> {
+    ensure_contractor_profile_fields(conn)?;
+    add_organization_archive_field(conn)
+}
+
+fn ensure_contractor_profile_fields(conn: &Connection) -> Result<()> {
     // Check the database version
     let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
 
@@ -234,6 +244,8 @@ pub struct Organization {
     pub status: String,
 
     // Sprint 2 organization information
+    pub secondary_phone: Option<String>,
+    pub secondary_contact: Option<String>,
     pub secondary_email: Option<String>,
     pub street_address_1: Option<String>,
     pub street_address_2: Option<String>,
@@ -242,13 +254,59 @@ pub struct Organization {
     pub country: Option<String>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
+    pub archived_at: Option<String>,
+    pub out_of_business_at: Option<String>,
+    pub extra_information: Option<serde_json::Value>,
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct ArchivedRecord {
+    pub entity_type: String,
+    pub id: i64,
+    pub name: String,
+    pub status: String,
+    pub details: String,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub archived_at: String,
+}
+
+pub fn get_archived_records(conn: &Connection) -> Result<Vec<ArchivedRecord>> {
+    let mut stmt = conn.prepare(
+        "SELECT entity_type,id,name,status,details,created_at,updated_at,archived_at FROM (
+           SELECT 'Contractor' AS entity_type,c.id,c.full_name AS name,c.status,
+             trim(COALESCE(c.role,'') || CASE WHEN c.email IS NOT NULL THEN ' · '||c.email ELSE '' END || CASE WHEN c.phone IS NOT NULL THEN ' · '||c.phone ELSE '' END || CASE WHEN o.name IS NOT NULL THEN ' · '||o.name ELSE '' END),
+             c.created_at,c.updated_at,c.archived_at
+           FROM contractors c LEFT JOIN organizations o ON o.id=c.organization_id WHERE c.archived_at IS NOT NULL
+           UNION ALL
+           SELECT 'Organization',o.id,o.name,
+             CASE WHEN o.out_of_business_at IS NOT NULL THEN 'Out of Business' ELSE o.status END,
+             trim(COALESCE(o.phone,'') || CASE WHEN o.secondary_phone IS NOT NULL THEN ' · '||o.secondary_phone ELSE '' END || CASE WHEN o.email IS NOT NULL THEN ' · '||o.email ELSE '' END || CASE WHEN o.secondary_email IS NOT NULL THEN ' · '||o.secondary_email ELSE '' END || CASE WHEN o.secondary_contact IS NOT NULL THEN ' · '||o.secondary_contact ELSE '' END || CASE WHEN o.street_address_1 IS NOT NULL THEN ' · '||o.street_address_1 ELSE '' END || CASE WHEN o.street_address_2 IS NOT NULL THEN ' · '||o.street_address_2 ELSE '' END || CASE WHEN o.city IS NOT NULL THEN ' · '||o.city ELSE '' END || CASE WHEN o.state_province IS NOT NULL THEN ' · '||o.state_province ELSE '' END || CASE WHEN o.country IS NOT NULL THEN ' · '||o.country ELSE '' END),
+             o.created_at,o.updated_at,o.archived_at
+           FROM organizations o WHERE o.archived_at IS NOT NULL
+         ) ORDER BY archived_at DESC, entity_type, name"
+    )?;
+    let rows = stmt.query_map([], |row| {
+        Ok(ArchivedRecord {
+            entity_type: row.get(0)?,
+            id: row.get(1)?,
+            name: row.get(2)?,
+            status: row.get(3)?,
+            details: row.get(4)?,
+            created_at: row.get(5)?,
+            updated_at: row.get(6)?,
+            archived_at: row.get(7)?,
+        })
+    })?;
+    rows.collect()
 }
 
 pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, region, phone, email, notes, status,
-       secondary_email, street_address_1, street_address_2,
-       city, state_province, country, created_at, updated_at
+        "SELECT id, name, region, phone, email, notes,
+       CASE WHEN out_of_business_at IS NOT NULL THEN 'Out of Business' ELSE status END,
+       secondary_phone, secondary_contact, secondary_email, street_address_1, street_address_2,
+       city, state_province, country, created_at, updated_at, archived_at, out_of_business_at, extra_information
          FROM organizations
          WHERE archived_at IS NULL
          ORDER BY name",
@@ -263,14 +321,19 @@ pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
             email: row.get(4)?,
             notes: row.get(5)?,
             status: row.get(6)?,
-            secondary_email: row.get(7)?,
-            street_address_1: row.get(8)?,
-            street_address_2: row.get(9)?,
-            city: row.get(10)?,
-            state_province: row.get(11)?,
-            country: row.get(12)?,
-            created_at: row.get(13)?,
-            updated_at: row.get(14)?,
+            secondary_phone: row.get(7)?,
+            secondary_contact: row.get(8)?,
+            secondary_email: row.get(9)?,
+            street_address_1: row.get(10)?,
+            street_address_2: row.get(11)?,
+            city: row.get(12)?,
+            state_province: row.get(13)?,
+            country: row.get(14)?,
+            created_at: row.get(15)?,
+            updated_at: row.get(16)?,
+            archived_at: row.get(17)?,
+            out_of_business_at: row.get(18)?,
+            extra_information: row.get::<_, Option<String>>(19)?.and_then(|raw| serde_json::from_str(&raw).ok()),
         })
     })?;
 
@@ -304,7 +367,8 @@ pub fn update_organization_details(
     notes: Option<&str>,
 ) -> Result<bool> {
     let rows_updated = conn.execute(
-        "UPDATE organizations SET name = ?1, region = ?2, phone = ?3, email = ?4, notes = ?5
+        "UPDATE organizations SET name = ?1, region = ?2, phone = ?3, email = ?4, notes = ?5,
+         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
          WHERE id = ?6 AND archived_at IS NULL",
         params![name, region, phone, email, notes, organization_id],
     )?;
@@ -317,7 +381,7 @@ pub fn add_organization_profile_fields(conn: &Connection) -> Result<()> {
 
 pub fn add_organization_archive_field(conn: &Connection) -> Result<()> {
     // Make sure the first migration is completed
-    add_profile_fields(conn)?;
+    ensure_contractor_profile_fields(conn)?;
 
     // Check the database version
     let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
@@ -350,6 +414,20 @@ pub fn add_organization_archive_field(conn: &Connection) -> Result<()> {
         )?;
     }
 
+    // Keep this public initialization helper schema-current for callers that
+    // create an in-memory database and immediately use the expanded profile APIs.
+    migrate_sprint2(conn)?;
+    migrate_lifecycle(conn)?;
+    migrate_custom_fields(conn)?;
+
+    Ok(())
+}
+
+pub fn migrate_custom_fields(conn: &Connection) -> Result<()> {
+    let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+    if version >= 6 { return Ok(()); }
+    if version < 5 { return Err(rusqlite::Error::InvalidQuery); }
+    conn.execute_batch("BEGIN IMMEDIATE; ALTER TABLE contractors ADD COLUMN extra_information TEXT; ALTER TABLE organizations ADD COLUMN extra_information TEXT; PRAGMA user_version = 6; COMMIT;")?;
     Ok(())
 }
 
@@ -423,11 +501,32 @@ pub fn migrate_sprint2(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+/// Adds the company closure marker while preserving the older Active/Inactive constraint.
+pub fn migrate_lifecycle(conn: &Connection) -> Result<()> {
+    let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+    if version >= 5 {
+        return Ok(());
+    }
+    if version < 4 {
+        return Err(rusqlite::Error::InvalidQuery);
+    }
+    conn.execute_batch(
+        "BEGIN IMMEDIATE;
+         ALTER TABLE organizations ADD COLUMN out_of_business_at TEXT;
+         UPDATE contractors SET created_at = COALESCE(created_at, strftime('%Y-%m-%dT%H:%M:%fZ','now'));
+         UPDATE organizations SET created_at = COALESCE(created_at, strftime('%Y-%m-%dT%H:%M:%fZ','now'));
+         PRAGMA user_version = 5;
+         COMMIT;",
+    )?;
+    Ok(())
+}
+
 // Separate function for archiving organizations
 pub fn archive_organization(conn: &Connection, organization_id: i64) -> Result<bool> {
     let rows_updated = conn.execute(
         "UPDATE organizations
-         SET archived_at = CURRENT_TIMESTAMP
+         SET archived_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
+             updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
          WHERE id = ?1
          AND archived_at IS NULL",
         params![organization_id],

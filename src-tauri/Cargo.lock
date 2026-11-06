@@ -2657,6 +2657,7 @@ dependencies = [
  "rusqlite",
  "secure_crm_backend",
  "serde",
+ "serde_json",
  "tauri",
  "tauri-build",
  "tempfile",

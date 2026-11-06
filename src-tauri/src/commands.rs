@@ -2,7 +2,11 @@ use rusqlite::Connection;
 use secure_crm_backend::{
     admin::{admin_exists, create_first_admin},
     contacts,
-    database::{Contractor, Organization, archive_organization as archive_organization_record, get_organizations},
+    database::{
+        ArchivedRecord, Contractor, Organization,
+        archive_organization as archive_organization_record, get_archived_records,
+        get_organizations,
+    },
     profiles::{self, ProfileError, ProfileFields},
     protected::list_contractors_if_authenticated,
     search::search_contractors,
@@ -52,6 +56,10 @@ pub struct OrganizationRequest {
     phone: Option<String>,
     email: Option<String>,
     notes: Option<String>,
+    #[serde(default)]
+    contact: profiles::OrganizationContactFields,
+    #[serde(default)]
+    extra_information: serde_json::Value,
 }
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -62,6 +70,10 @@ pub struct UpdateOrganizationRequest {
     phone: Option<String>,
     email: Option<String>,
     notes: Option<String>,
+    #[serde(default)]
+    contact: profiles::OrganizationContactFields,
+    #[serde(default)]
+    extra_information: serde_json::Value,
 }
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -71,6 +83,12 @@ pub struct RecordRequest {
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ContractorStatusRequest {
+    id: i64,
+    status: String,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OrganizationStatusRequest {
     id: i64,
     status: String,
 }
@@ -86,6 +104,12 @@ pub struct ContactNoteRequest {
 #[serde(deny_unknown_fields)]
 pub struct ContractorFilter {
     region: Option<String>,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct HistoryRequest {
+    entity_type: String,
+    id: i64,
 }
 
 fn profile_error(error: ProfileError, fallback: &str) -> String {
@@ -186,6 +210,14 @@ impl AppState {
         get_organizations(&state.conn).map_err(|_| "Unable to load organizations".into())
     }
 
+    fn archived_records(&self) -> Result<Vec<ArchivedRecord>, String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        get_archived_records(&state.conn).map_err(|_| "Unable to load archived records".into())
+    }
+
     fn activity(&self) -> Result<(), String> {
         if !self.lock()?.session.authorize_action() {
             return Err("Login required".into());
@@ -229,13 +261,25 @@ impl AppState {
             .map_err(|e| profile_error(e, "Unable to update contractor status"))
     }
 
+    fn set_org_status(&self, request: OrganizationStatusRequest) -> Result<Organization, String> {
+        let state = self.lock()?;
+        if !state.session.authorize_action() {
+            return Err("Login required".into());
+        }
+        profiles::set_organization_status(&state.conn, request.id, &request.status)
+            .map_err(|e| profile_error(e, "Unable to update organization status"))
+    }
+
     fn save_contact_note(&self, request: ContactNoteRequest) -> Result<(), String> {
         let state = self.lock()?;
         if !state.session.authorize_action() {
             return Err("Login required".into());
         }
         profiles::validate_id(request.id).map_err(|e| e.to_string())?;
-        if !matches!(request.method.as_str(), "Email" | "Phone" | "SMS" | "Teams" | "Other") {
+        if !matches!(
+            request.method.as_str(),
+            "Email" | "Phone" | "SMS" | "Teams" | "Other"
+        ) {
             return Err("Select a valid contact method".into());
         }
         let note = request.note.trim();
@@ -259,8 +303,17 @@ impl AppState {
         if !state.session.authorize_action() {
             return Err("Login required".into());
         }
-        profiles::create_organization_profile(&mut state.conn, request.name, request.region, request.phone, request.email, request.notes)
-            .map_err(|e| profile_error(e, "Unable to save organization"))
+        profiles::create_organization_profile_complete(
+            &mut state.conn,
+            request.name,
+            request.region,
+            request.phone,
+            request.email,
+            request.notes,
+            request.contact,
+            request.extra_information,
+        )
+        .map_err(|e| profile_error(e, "Unable to save organization"))
     }
 
     fn update_org(&self, request: UpdateOrganizationRequest) -> Result<Organization, String> {
@@ -268,8 +321,18 @@ impl AppState {
         if !state.session.authorize_action() {
             return Err("Login required".into());
         }
-        profiles::update_organization_profile(&state.conn, request.id, request.name, request.region, request.phone, request.email, request.notes)
-            .map_err(|e| profile_error(e, "Unable to save organization"))
+        profiles::update_organization_profile_complete(
+            &state.conn,
+            request.id,
+            request.name,
+            request.region,
+            request.phone,
+            request.email,
+            request.notes,
+            request.contact,
+            request.extra_information,
+        )
+        .map_err(|e| profile_error(e, "Unable to save organization"))
     }
 
     fn archive_org(&self, request: RecordRequest) -> Result<(), String> {
@@ -279,11 +342,29 @@ impl AppState {
         }
         profiles::validate_id(request.id).map_err(|e| e.to_string())?;
         if !archive_organization_record(&state.conn, request.id)
-            .map_err(|_| "Unable to archive organization")? {
+            .map_err(|_| "Unable to archive organization")?
+        {
             return Err("Organization not found or archived".into());
         }
         Ok(())
     }
+}
+
+#[tauri::command]
+pub fn get_record_history(
+    request: HistoryRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Vec<secure_crm_backend::history::RecordChange>, String> {
+    let state = state.lock()?;
+    if !state.session.authorize_action() {
+        return Err("Login required".into());
+    }
+    profiles::validate_id(request.id).map_err(|e| e.to_string())?;
+    if !matches!(request.entity_type.as_str(), "contractor" | "organization") {
+        return Err("Record type must be contractor or organization".into());
+    }
+    secure_crm_backend::history::get_record_history(&state.conn, &request.entity_type, request.id)
+        .map_err(|_| "Unable to load record history".into())
 }
 
 #[tauri::command]
@@ -330,6 +411,13 @@ pub fn list_organizations(state: tauri::State<'_, AppState>) -> Result<Vec<Organ
 }
 
 #[tauri::command]
+pub fn list_archived_records(
+    state: tauri::State<'_, AppState>,
+) -> Result<Vec<ArchivedRecord>, String> {
+    state.archived_records()
+}
+
+#[tauri::command]
 pub fn record_activity(state: tauri::State<'_, AppState>) -> Result<(), String> {
     state.activity()
 }
@@ -361,6 +449,13 @@ pub fn set_contractor_status(
     state: tauri::State<'_, AppState>,
 ) -> Result<Contractor, String> {
     state.set_status(request)
+}
+#[tauri::command]
+pub fn set_organization_status(
+    request: OrganizationStatusRequest,
+    state: tauri::State<'_, AppState>,
+) -> Result<Organization, String> {
+    state.set_org_status(request)
 }
 #[tauri::command]
 pub fn record_contact_note(
@@ -465,6 +560,7 @@ mod tests {
             role: None,
             email: Some("bridge@example.com".into()),
             phone: None,
+            extra_information: serde_json::json!({}),
         }
     }
 
@@ -479,6 +575,8 @@ mod tests {
                 phone: None,
                 email: None,
                 notes: None,
+                contact: profiles::OrganizationContactFields::default(),
+                extra_information: serde_json::json!({}),
             })
             .unwrap_err(),
             "Login required"
@@ -512,6 +610,8 @@ mod tests {
                 phone: None,
                 email: None,
                 notes: None,
+                contact: profiles::OrganizationContactFields::default(),
+                extra_information: serde_json::json!({}),
             })
             .unwrap();
         let saved = app

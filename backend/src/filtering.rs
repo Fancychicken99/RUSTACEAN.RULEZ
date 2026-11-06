@@ -44,6 +44,7 @@ pub fn get_contractors_by_region(conn: &Connection, region: &str) -> Result<Vec<
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+            extra_information: None,
         })
     })?;
 

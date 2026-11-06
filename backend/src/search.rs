@@ -67,6 +67,7 @@ pub fn search_contractors(
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+            extra_information: None,
         })
     })?;
 

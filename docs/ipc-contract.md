@@ -95,9 +95,9 @@ later history/contact commands before implementation.
 
 ## Organization response and UI mapping
 
-Organization has id (integer), name (string), and region (string or null).
-Results exclude archived organizations and are ordered by name. No date fields
-are returned. Contractor responses now include organization_id in list, search,
+Organization responses include id, name, region, contact/address fields, status,
+creation/update/archive timestamps. Active-list results exclude archived
+organizations and are ordered by name. Contractor responses include organization_id in list, search,
 region, skill, follow-up, and single-record reads. Rosters, counts, filter values
 and form selections use IDs so duplicate names remain distinct.
 
@@ -121,23 +121,27 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 
 | Command / wrapper | request fields | Success |
 | --- | --- | --- |
-| create_organization / createOrganization | name: string; region, phone, email, notes: string or null (optional) | Persisted Organization |
-| update_organization / updateOrganization | id: integer; name: string; region, phone, email, notes: string or null | Persisted Organization |
+| create_organization / createOrganization | name: string; region, phone, email, notes: nullable; contact: OrganizationContactFields (optional); extra_information: object (optional) | Persisted Organization |
+| update_organization / updateOrganization | id: integer; name: string; region, phone, email, notes: nullable; contact: OrganizationContactFields (optional); extra_information: object (optional) | Persisted Organization |
 | archive_organization / archiveOrganization | id: integer | null after archive completes |
 | create_contractor / createContractor | organization_id: integer; profile: ProfileFields | Persisted Contractor |
 | update_contractor / updateContractor | id: integer; profile: ProfileFields | Persisted Contractor |
 | archive_contractor / archiveContractor | id: integer | null after archive completes |
-| set_contractor_status / setContractorStatus | id: integer; status: `Active` or `Inactive` | Persisted Contractor |
+| set_contractor_status / setContractorStatus | id: integer; status: `Active`, `Inactive`, `Retired`, or `Deceased` | Persisted Contractor |
 | record_contact_note / recordContactNote | id: integer; method: `Email`, `Phone`, `SMS`, `Teams`, or `Other`; note: string | null after insert |
 
 ProfileFields: full_name (required string), role/email/phone (optional string or
-null). Updates REPLACE these profile fields; omitted/blank optional values clear
+null), extra_information (optional object). Updates REPLACE these profile fields; omitted/blank optional values clear
 them to null. The UI submits all displayed fields. Name is not split/inferred.
+Additional information maps user-defined field names to typed objects, e.g.
+`{"Callsign":{"type":"text","value":"Harbor"}}`,
+`{"Notes":{"type":"long_text","value":"Longer details"}}`, or
+`{"Organization":{"type":"relation","entity_type":"organization","entity_id":1}}`.
+Text values may be up to 10000 characters; names up to 100 characters and 100
+fields per record are accepted. Values persist as JSON and are returned on profile records.
 Create requires an existing non-archived organization and starts Active. Editing
-preserves organization_id, status, photo, and history. Status changes use the
-separate set_contractor_status command and accept only Active/Inactive. Transfers
-remain a separate workflow. Organization active/inactive status is not modeled;
-archived_at remains a separate visibility action.
+preserves organization_id, status, photo, and history. Transfers remain a
+separate workflow. Organization status is changed through its dedicated command.
 Organization names need not be unique; IDs identify records. Blank region is null.
 Organization phone, email, and notes are trimmed and persisted; email receives the same basic plausibility validation as contractor email. Archiving an organization sets its `archived_at` timestamp in UTC and hides it from the active organization list. Existing contractors retain their records and organization association.
 
@@ -165,7 +169,7 @@ introduced. If saving succeeds but directory refresh fails, UI reports the save
 separately and instructs the user to reopen the workspace rather than resubmit.
 
 set_contractor_status requires an active session, a positive safe ID, and one of
-Active/Inactive. record_contact_note accepts the existing contact method set and
+Active, Inactive, Retired, or Deceased. record_contact_note accepts the existing contact method set and
 a nonempty note up to 5000 characters; SQLite supplies contacted_at in UTC.
 
 ## Region filter and fictional-data import
@@ -203,3 +207,28 @@ The JSON is embedded by Rust include_str! at build time, outside frontend assets
 serde_json is now declared in the backend; both Cargo lockfiles were updated.
 Preserve stable keys; updating a dataset version requires an explicit migration/
 import decision rather than silently replacing existing imported records.
+
+## Organization contact, lifecycle, archive, and change history
+
+Organization create/update requests now also accept `contact` with nullable
+`secondary_phone`, `secondary_contact`, `secondary_email`, `street_address_1`,
+`street_address_2`, `city`, `state_province`, and `country`. Blank values are
+stored as null. The frontend passes the whole contact object to Rust; it is no
+longer silently discarded. Organization responses include these values plus
+`created_at`, `updated_at`, `archived_at`, and `out_of_business_at`.
+
+`set_contractor_status` accepts Active, Inactive, Retired, or Deceased.
+`set_organization_status` accepts Active, Inactive, or Out of Business. Marking
+a record Out of Business does not delete or auto-archive it; use the existing
+archive action when it should leave the active directory. Its status is retained
+in the archive. `list_archived_records` returns retained contractor and
+organization summaries, statuses, details, and UTC creation/update/archive
+dates. No restore or delete action is exposed.
+
+`get_record_history({entity_type, id})` returns newest-first entries with
+`id`, `entity_type`, `entity_id`, `action`, `changed_fields`, and `occurred_at`
+(UTC ISO timestamp). SQLite triggers record profile creation, changed field
+groups, status and archive changes, and contact-note entry dates. Notes and
+field values are not duplicated into the audit table. History is available on
+contractor profiles and through the organization History action. Older edits
+that happened before audit tracking was installed cannot be reconstructed.
