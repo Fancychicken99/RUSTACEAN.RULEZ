@@ -72,3 +72,34 @@ pub fn search_contractors(
 
     contractors.collect()
 }
+
+pub fn search_contractors_by_name(conn: &Connection, name: &str) -> Result<Vec<Contractor>> {
+    let name = name.trim();
+
+    if name.is_empty() || name.chars().count() > 200 {
+        return Ok(Vec::new());
+    }
+
+    let mut stmt = conn.prepare(
+        "SELECT id
+         FROM contractors
+         WHERE archived_at IS NULL
+           AND (
+               full_name LIKE '%' || ?1 || '%'
+               OR soundex(full_name) = soundex(?1)
+               OR soundex(first_name) = soundex(?1)
+               OR soundex(last_name) = soundex(?1)
+           )
+         ORDER BY full_name",
+    )?;
+
+    let ids = stmt
+        .query_map([name], |row| row.get::<_, i64>(0))?
+        .collect::<Result<Vec<_>>>()?;
+
+    ids.into_iter()
+        .map(|id| {
+            crate::database::get_contractor(conn, id)?.ok_or(rusqlite::Error::QueryReturnedNoRows)
+        })
+        .collect()
+}

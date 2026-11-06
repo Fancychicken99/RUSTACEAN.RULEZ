@@ -55,3 +55,43 @@ fn test_combined_search() -> rusqlite::Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn sqlite_soundex_is_available() -> Result<(), Box<dyn std::error::Error>> {
+    let conn = rusqlite::Connection::open_in_memory()?;
+
+    let (smith, smyth): (String, String) =
+        conn.query_row("SELECT soundex('Smith'), soundex('Smyth')", [], |row| {
+            Ok((row.get(0)?, row.get(1)?))
+        })?;
+
+    assert_eq!(smith, smyth);
+
+    Ok(())
+}
+
+#[test]
+fn fuzzy_search_finds_similar_last_names() -> Result<(), Box<dyn std::error::Error>> {
+    use secure_crm_backend::{
+        database::add_organization, search::search_contractors_by_name, setup::initialize_database,
+    };
+
+    let conn = rusqlite::Connection::open_in_memory()?;
+    initialize_database(&conn)?;
+
+    let org_id = add_organization(&conn, "Fictional Test Organization", "North America")?;
+
+    conn.execute(
+        "INSERT INTO contractors
+         (full_name, first_name, last_name, organization_id)
+         VALUES (?1, ?2, ?3, ?4)",
+        rusqlite::params!["Fictional John Smith", "John", "Smith", org_id],
+    )?;
+
+    let results = search_contractors_by_name(&conn, "Smyth")?;
+
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].last_name.as_deref(), Some("Smith"));
+
+    Ok(())
+}

@@ -57,3 +57,31 @@ pub fn get_last_contact(conn: &Connection, contractor_id: i64) -> Result<Option<
         |row| row.get(0),
     )
 }
+#[derive(Debug, serde::Serialize)]
+pub struct ContactEvent {
+    pub id: i64,
+    pub contractor_id: i64,
+    pub method: String,
+    pub note: Option<String>,
+    pub contacted_at: String,
+}
+pub fn get_contact_history(conn: &Connection, contractor_id: i64) -> Result<Vec<ContactEvent>> {
+    let mut stmt = conn.prepare(
+        "SELECT id, contractor_id, method, note, contacted_at
+         FROM contact_events
+         WHERE contractor_id = ?1
+         ORDER BY contacted_at DESC, id DESC",
+    )?;
+
+    let events = stmt.query_map(params![contractor_id], |row| {
+        Ok(ContactEvent {
+            id: row.get(0)?,
+            contractor_id: row.get(1)?,
+            method: row.get(2)?,
+            note: row.get(3)?,
+            contacted_at: row.get(4)?,
+        })
+    })?;
+
+    events.collect()
+}
