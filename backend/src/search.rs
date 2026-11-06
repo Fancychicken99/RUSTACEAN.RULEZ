@@ -20,7 +20,12 @@ pub fn search_contractors(
             c.email,
             c.phone,
             c.photo_path,
-            c.organization_id
+            c.organization_id,
+            c.prefix,
+            c.first_name,
+            c.middle_name,
+            c.last_name,
+            c.suffix
          FROM contractors c
          LEFT JOIN organizations o
             ON c.organization_id = o.id
@@ -57,6 +62,11 @@ pub fn search_contractors(
             phone: row.get(7)?,
             photo_path: row.get(8)?,
             organization_id: row.get(9)?,
+            prefix: row.get(10)?,
+            first_name: row.get(11)?,
+            middle_name: row.get(12)?,
+            last_name: row.get(13)?,
+            suffix: row.get(14)?,
         })
     })?;
 

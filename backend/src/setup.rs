@@ -1,6 +1,6 @@
 use rusqlite::{Connection, Result};
 
-use crate::database::{add_organization_profile_fields, create_tables};
+use crate::database::{add_organization_profile_fields, create_tables, migrate_sprint2};
 
 use crate::admin::create_admin_table;
 use crate::contacts::create_contact_table;
@@ -19,6 +19,9 @@ pub fn initialize_database(conn: &Connection) -> Result<()> {
 
     // Create skill management tables
     create_skill_tables(conn)?;
+
+    // Sprint 2: preserve existing rows and add new structured fields.
+    migrate_sprint2(conn)?;
 
     // Create communication tracking table
     create_contact_table(conn)?;

@@ -47,15 +47,51 @@ pub fn add_skill(conn: &Connection, name: &str) -> Result<i64> {
 
 // Assign a skill to a contractor
 
-pub fn assign_skill(conn: &Connection, contractor_id: i64, skill_id: i64) -> Result<bool> {
-    let rows_added = conn.execute(
-        "INSERT OR IGNORE INTO contractor_skills
-         (contractor_id, skill_id)
-         VALUES (?1, ?2)",
+pub fn assign_organization_skill(
+    conn: &Connection,
+    organization_id: i64,
+    skill_id: i64,
+) -> rusqlite::Result<()> {
+    conn.execute(
+        "INSERT OR IGNORE INTO organization_skills
+         (organization_id, skill_id)
+         SELECT o.id, s.id
+         FROM organizations o
+         CROSS JOIN skills s
+         WHERE o.id = ?1
+           AND o.archived_at IS NULL
+           AND s.id = ?2",
+        params![organization_id, skill_id],
+    )?;
+
+    Ok(())
+}
+pub fn remove_contractor_skill(
+    conn: &Connection,
+    contractor_id: i64,
+    skill_id: i64,
+) -> rusqlite::Result<bool> {
+    let changed = conn.execute(
+        "DELETE FROM contractor_skills
+         WHERE contractor_id = ?1 AND skill_id = ?2",
         params![contractor_id, skill_id],
     )?;
 
-    Ok(rows_added > 0)
+    Ok(changed > 0)
+}
+
+pub fn remove_organization_skill(
+    conn: &Connection,
+    organization_id: i64,
+    skill_id: i64,
+) -> rusqlite::Result<bool> {
+    let changed = conn.execute(
+        "DELETE FROM organization_skills
+         WHERE organization_id = ?1 AND skill_id = ?2",
+        params![organization_id, skill_id],
+    )?;
+
+    Ok(changed > 0)
 }
 
 pub fn get_contractors_by_skill(conn: &Connection, skill_name: &str) -> Result<Vec<Contractor>> {
@@ -70,7 +106,12 @@ pub fn get_contractors_by_skill(conn: &Connection, skill_name: &str) -> Result<V
             c.email,
             c.phone,
             c.photo_path,
-            c.organization_id
+            c.organization_id,
+            c.prefix,
+            c.first_name,
+            c.middle_name,
+            c.last_name,
+            c.suffix    
          FROM contractors c
          JOIN contractor_skills cs
            ON c.id = cs.contractor_id
@@ -95,8 +136,32 @@ pub fn get_contractors_by_skill(conn: &Connection, skill_name: &str) -> Result<V
             phone: row.get(7)?,
             photo_path: row.get(8)?,
             organization_id: row.get(9)?,
+            prefix: row.get(10)?,
+            first_name: row.get(11)?,
+            middle_name: row.get(12)?,
+            last_name: row.get(13)?,
+            suffix: row.get(14)?,
         })
     })?;
 
     contractors.collect()
+}
+pub fn assign_skill(
+    conn: &Connection,
+    contractor_id: i64,
+    skill_id: i64,
+) -> rusqlite::Result<bool> {
+    let changed = conn.execute(
+        "INSERT OR IGNORE INTO contractor_skills
+         (contractor_id, skill_id)
+         SELECT c.id, s.id
+         FROM contractors c
+         CROSS JOIN skills s
+         WHERE c.id = ?1
+           AND c.archived_at IS NULL
+           AND s.id = ?2",
+        params![contractor_id, skill_id],
+    )?;
+
+    Ok(changed > 0)
 }
