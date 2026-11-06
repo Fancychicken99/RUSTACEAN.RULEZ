@@ -44,5 +44,5 @@ fn main() {
             commands::record_contact_note
         ])
         .run(tauri::generate_context!())
-        .expect("Unable to start Rustacean CRM");
+        .expect("Unable to start Hippo Harbor CRM");
 }

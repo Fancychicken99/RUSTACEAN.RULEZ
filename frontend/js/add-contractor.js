@@ -34,27 +34,62 @@
   function fullName({ prefix, first, middle, last, suffix }) {
     return [prefix, first, middle, last, suffix].map(value => value.trim()).filter(Boolean).join(' ');
   }
-  function addCustomFieldRow(kind, name = '', value = '') {
+  function customFieldValueControl(row, type, saved = {}) {
+    const holder = row.querySelector('[data-custom-field-control]');
+    holder.replaceChildren();
+    const value = saved.value ?? (typeof saved === 'string' ? saved : '');
+    if (type === 'long_text') {
+      const input = document.createElement('textarea'); input.className = 'form-control'; input.rows = 3;
+      input.placeholder = 'Enter additional details'; input.dataset.customFieldValue = ''; input.value = value; holder.appendChild(input);
+    } else if (type === 'relation') {
+      const wrap = document.createElement('div'); wrap.className = 'd-flex gap-2';
+      const entity = document.createElement('select'); entity.className = 'form-select'; entity.dataset.customFieldEntity = '';
+      [['contractor','Contractor'],['organization','Organization']].forEach(([v,l]) => entity.add(new Option(l,v)));
+      entity.value = saved.entity_type || 'contractor';
+      const target = document.createElement('select'); target.className = 'form-select'; target.dataset.customFieldValue = '';
+      const refresh = () => {
+        const records = entity.value === 'organization' ? window.crmDirectory.organizations : window.crmDirectory.contractors;
+        target.replaceChildren(new Option('Select related record', ''));
+        (records || []).forEach(record => target.add(new Option(record.full_name || record.name || `Record #${record.id}`, String(record.id))));
+        target.value = saved.entity_id == null ? '' : String(saved.entity_id);
+      };
+      entity.addEventListener('change', () => { saved = {}; refresh(); });
+      refresh(); wrap.append(entity, target); holder.appendChild(wrap);
+    } else {
+      const input = document.createElement('input'); input.className = 'form-control'; input.type = 'text';
+      input.placeholder = 'Enter a value'; input.dataset.customFieldValue = ''; input.value = value; holder.appendChild(input);
+    }
+  }
+  function addCustomFieldRow(kind, name = '', saved = '') {
     const list = document.querySelector(`[data-custom-fields="${kind}"]`);
-    const row = document.createElement('div');
-    row.className = 'row g-2 align-items-end mb-2 custom-field-row';
-    const nameColumn = document.createElement('div'); nameColumn.className = 'col-md-5';
+    const row = document.createElement('div'); row.className = 'row g-2 align-items-end mb-3 custom-field-row';
+    const nameColumn = document.createElement('div'); nameColumn.className = 'col-lg-3';
     const nameLabel = document.createElement('label'); nameLabel.className = 'form-label'; nameLabel.textContent = 'Field Name';
     const nameInput = document.createElement('input'); nameInput.className = 'form-control'; nameInput.type = 'text'; nameInput.dataset.customFieldName = ''; nameInput.placeholder = 'e.g., Callsign'; nameInput.value = name;
     nameLabel.appendChild(nameInput); nameColumn.appendChild(nameLabel);
-    const valueColumn = document.createElement('div'); valueColumn.className = 'col-md-5';
+    const typeColumn = document.createElement('div'); typeColumn.className = 'col-lg-3';
+    const typeLabel = document.createElement('label'); typeLabel.className = 'form-label'; typeLabel.textContent = 'Field Type';
+    const typeSelect = document.createElement('select'); typeSelect.className = 'form-select'; typeSelect.dataset.customFieldType = '';
+    [['text','Short text'],['long_text','Long text'],['relation','Relation']].forEach(([v,l]) => typeSelect.add(new Option(l,v)));
+    typeSelect.value = typeof saved === 'object' && saved?.type ? saved.type : 'text'; typeLabel.appendChild(typeSelect); typeColumn.appendChild(typeLabel);
+    const valueColumn = document.createElement('div'); valueColumn.className = 'col-lg-5';
     const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = 'Field Value';
-    const valueInput = document.createElement('input'); valueInput.className = 'form-control'; valueInput.type = 'text'; valueInput.dataset.customFieldValue = ''; valueInput.placeholder = 'Enter a value'; valueInput.value = value;
-    valueLabel.appendChild(valueInput); valueColumn.appendChild(valueLabel);
-    const actionColumn = document.createElement('div'); actionColumn.className = 'col-md-2';
+    const holder = document.createElement('div'); holder.dataset.customFieldControl = ''; valueLabel.appendChild(holder); valueColumn.appendChild(valueLabel);
+    typeSelect.addEventListener('change', () => customFieldValueControl(row, typeSelect.value));
+    customFieldValueControl(row, typeSelect.value, saved);
+    const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-1';
     const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
-    actionColumn.appendChild(remove); row.append(nameColumn, valueColumn, actionColumn); list.appendChild(row);
+    actionColumn.appendChild(remove); row.append(nameColumn, typeColumn, valueColumn, actionColumn); list.appendChild(row);
   }
   function customFields(kind) {
     return [...document.querySelectorAll(`[data-custom-fields="${kind}"] .custom-field-row`)].reduce((result, row) => {
       const name = row.querySelector('[data-custom-field-name]').value.trim();
-      const value = row.querySelector('[data-custom-field-value]').value.trim();
-      if (name && value) result[name] = value;
+      const control = row.querySelector('[data-custom-field-value]');
+      const type = row.querySelector('[data-custom-field-type]').value;
+      const value = control.value.trim();
+      if (name && value) result[name] = type === 'relation'
+        ? { type, entity_type: row.querySelector('[data-custom-field-entity]').value, entity_id: Number(value) }
+        : { type, value };
       return result;
     }, {});
   }

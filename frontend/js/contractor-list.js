@@ -55,13 +55,13 @@
       <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
     </div>
     <p id="directory-message" class="text-secondary" role="status" aria-live="polite"></p>
-    <div class="d-flex justify-content-end align-items-center gap-2 mb-3"><label class="form-label mb-0" for="alert-level-filter">Alert Level</label><select id="alert-level-filter" class="form-select form-select-sm" style="max-width: 12rem"><option value="All">All</option><option value="30">Yellow 30+</option><option value="60">Orange 60+</option><option value="90">Red 90+</option></select></div>
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-3"><label class="form-label mb-0" for="alert-level-filter">Alert Level</label><select id="alert-level-filter" class="form-select form-select-sm alert-level-select"><option value="All">All</option><option value="30">Yellow 30+</option><option value="60">Orange 60+</option><option value="90">Red 90+</option></select></div>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
       <div id="contact-active-filters" class="active-filter-pills px-3 pt-3" aria-live="polite"></div>
       <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th><th scope="col">Notes</th><th scope="col">Actions</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
     </section>
-    <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
+    <footer class="page-footer">© 2026 Hippo Harbor CRM <span>·</span> Secure, on-device workspace</footer>
   `;
 
   function contractorName(contractor) {
@@ -339,7 +339,12 @@
       Object.entries(contractor.extra_information).forEach(([label, value]) => {
         const column = document.createElement('div'); column.className = 'col-12 col-sm-6';
         const caption = document.createElement('div'); caption.className = 'small text-secondary mb-1'; caption.textContent = label;
-        const content = document.createElement('div'); content.className = 'fw-semibold'; content.textContent = value ?? '—';
+        const content = document.createElement('div'); content.className = 'fw-semibold';
+        if (value && typeof value === 'object' && value.type === 'relation') {
+          const source = value.entity_type === 'organization' ? organizations : contractors;
+          const related = source.find(record => String(record.id) === String(value.entity_id));
+          content.textContent = related?.full_name || related?.name || `Related ${value.entity_type} #${value.entity_id}`;
+        } else content.textContent = value && typeof value === 'object' ? (value.value ?? '—') : (value ?? '—');
         column.append(caption, content); details.appendChild(column);
       });
     }
@@ -362,23 +367,13 @@
   function renderContactList() {
     contactsView.innerHTML = contactListHtml;
     if (contactsView.classList.contains('d-none')) switchView('view-contacts');
-    document.getElementById('alert-level-filter').addEventListener('change', () => {
-      filterLoading = false;
-      filterError = null;
-      renderTable(filterContractors(readContactFilters(), contractors));
-    });
+    document.getElementById('alert-level-filter').addEventListener('change', loadFilteredDirectory);
     document.getElementById('btn-reset-destination').addEventListener('click', () => {
       document.getElementById('destination-title').innerText = 'Contractor Directory';
       document.getElementById('btn-reset-destination').classList.add('d-none');
       clearContactFilters();
       loadFilteredDirectory();
     });
-    if (loaded) {
-      filterLoading = false;
-      filterError = null;
-      renderTable(filterContractors(readContactFilters(), contractors));
-      return Promise.resolve(true);
-    }
     return loadFilteredDirectory();
   }
 
@@ -892,13 +887,9 @@
   const filterForm = document.getElementById('contractor-filter-form');
   const filterPanel = document.getElementById('contractor-filter-panel');
   const showFilteredDirectory = () => {
-    if (contactsView.classList.contains('d-none')) renderContactList();
-    else {
-      filterLoading = false;
-      filterError = null;
-      renderTable(filterContractors(readContactFilters(), contractors));
-      switchView('view-contacts', { replaceHistory: true });
-    }
+    if (contactsView.classList.contains('d-none')) return renderContactList();
+    switchView('view-contacts', { replaceHistory: true });
+    return loadFilteredDirectory();
   };
 
   globalSearch?.addEventListener('input', () => {
@@ -1088,6 +1079,7 @@
   window.crmDirectory = Object.freeze({
     refresh: refreshSavedData,
     get organizations() { return organizations.map(organization => ({ ...organization })); },
+    get contractors() { return contractors.map(contractor => ({ ...contractor })); },
     showProfile(id) {
       const record = contractors.find(contractor => contractor.id === id);
       if (!record || !window.crmSession?.authenticated) return false;

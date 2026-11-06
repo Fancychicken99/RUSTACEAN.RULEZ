@@ -4,19 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f4f5fa">
-  <title>CRM | Dashboard</title>
+  <title>Hippo Harbor CRM | Dashboard</title>
+  <link rel="icon" type="image/png" href="assets/branding/hippo-harbor-mark.png">
   <script src="js/theme-init.js"></script>
   <link href="vendor/bootstrap/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link href="vendor/hope-ui/css/hope-ui.min.css" rel="stylesheet">
   <link href="vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-  <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="vendor/datatables/dataTables.bootstrap5.min.css" rel="stylesheet" integrity="sha384-zmMNeKbOwzvUmxN8Z/VoYM+i+cwyC14+U9lq4+ZL0Ro7p1GMoh8uq8/HvIBgnh9+" crossorigin="anonymous">
   <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
   <section id="auth" class="auth-overlay" aria-labelledby="auth-heading">
     <div class="card auth-panel"><div class="card-body p-4">
-      <div class="auth-brand-mark mb-3" aria-hidden="true"><i class="bi bi-compass-fill"></i></div>
-      <h1 class="h4">Northstar CRM</h1>
+      <img class="auth-brand-logo-mark mb-3" src="assets/branding/hippo-harbor-mark.png" alt="Hippo Harbor CRM logo" width="1254" height="1254">
+      <h1 class="h4">Hippo Harbor CRM</h1>
       <h2 class="h5" id="auth-heading">Connecting…</h2>
       <p id="message" class="text-secondary" role="status" aria-live="polite">Checking local authentication.</p>
       <form id="auth-form" hidden>
@@ -35,9 +36,9 @@
   </section>
   <div id="workspace" class="app-shell d-flex" hidden inert>
     <aside class="sidebar d-flex flex-column" id="sidebar" aria-label="Main navigation">
-      <a class="brand d-flex align-items-center gap-2" href="#dashboard" aria-label="CRM home">
-        <span class="brand-mark"><i class="bi bi-compass-fill" aria-hidden="true"></i></span>
-        <span class="brand-name">Northstar<span>CRM</span></span>
+      <a class="brand d-flex align-items-center gap-2" href="#dashboard" aria-label="Hippo Harbor CRM home">
+        <img class="brand-logo-mark" src="assets/branding/hippo-harbor-mark.png" alt="" aria-hidden="true" width="1254" height="1254">
+        <span class="brand-name">Hippo Harbor<span>CRM</span></span>
       </a>
 
       <div class="nav-section-label">WORKSPACE</div>
@@ -125,7 +126,7 @@
               </article>
             </div>
           </section>
-          <footer class="page-footer">© 2026 Northstar CRM <span>·</span> Secure, on-device workspace</footer>
+          <footer class="page-footer">© 2026 Hippo Harbor CRM <span>·</span> Secure, on-device workspace</footer>
         </div>
         <div id="view-contacts" class="d-none"></div>
         <div id="view-organizations" class="d-none">
@@ -157,7 +158,7 @@
         <div class="modal-header"><h2 class="modal-title h5" id="add-contractor-title">Add contractor</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4">
           <p id="contractor-form-message" role="status" aria-live="polite" class="text-secondary"></p>
-          <ul class="nav nav-tabs mb-3" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="contractor-basic-tab" data-bs-toggle="tab" data-bs-target="#contractor-basic-pane" type="button" role="tab" aria-controls="contractor-basic-pane" aria-selected="true">Basic Details</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="contractor-contact-tab" data-bs-toggle="tab" data-bs-target="#contractor-contact-pane" type="button" role="tab" aria-controls="contractor-contact-pane" aria-selected="false">Location &amp; Contact</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="contractor-extra-tab" data-bs-toggle="tab" data-bs-target="#contractor-extra-pane" type="button" role="tab" aria-controls="contractor-extra-pane" aria-selected="false">Extra Information</button></li></ul>
+          <ul class="nav nav-tabs mb-3" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="contractor-basic-tab" data-bs-toggle="tab" data-bs-target="#contractor-basic-pane" type="button" role="tab" aria-controls="contractor-basic-pane" aria-selected="true">Basic Details</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="contractor-contact-tab" data-bs-toggle="tab" data-bs-target="#contractor-contact-pane" type="button" role="tab" aria-controls="contractor-contact-pane" aria-selected="false">Location &amp; Contact</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="contractor-extra-tab" data-bs-toggle="tab" data-bs-target="#contractor-extra-pane" type="button" role="tab" aria-controls="contractor-extra-pane" aria-selected="false">Additional Info</button></li></ul>
           <fieldset id="contractor-fields"><legend class="visually-hidden">Contractor details</legend><div class="tab-content"><div class="tab-pane fade show active" id="contractor-basic-pane" role="tabpanel" aria-labelledby="contractor-basic-tab"><div class="row g-3">
             <div class="col-sm-3"><label class="form-label" for="contractor-prefix">Prefix</label><select class="form-select" id="contractor-prefix" name="prefix"><option value="">None</option><option>Dr.</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Prof.</option></select></div>
             <div class="col-sm-9"><label class="form-label" for="contractor-first-name">First name</label><input class="form-control" id="contractor-first-name" name="first_name" type="text" maxlength="100" required autocomplete="given-name"></div>
@@ -179,7 +180,7 @@
       <form id="organization-form">
         <div class="modal-header"><h2 id="organization-title" class="modal-title h5">Add organization</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4"><p id="organization-form-message" role="status" aria-live="polite" class="text-secondary"></p>
-          <ul class="nav nav-tabs mb-3" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="organization-basic-tab" data-bs-toggle="tab" data-bs-target="#organization-basic-pane" type="button" role="tab" aria-controls="organization-basic-pane" aria-selected="true">Basic Details</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="organization-contact-tab" data-bs-toggle="tab" data-bs-target="#organization-contact-pane" type="button" role="tab" aria-controls="organization-contact-pane" aria-selected="false">Location &amp; Contact</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="organization-extra-tab" data-bs-toggle="tab" data-bs-target="#organization-extra-pane" type="button" role="tab" aria-controls="organization-extra-pane" aria-selected="false">Extra Information</button></li></ul>
+          <ul class="nav nav-tabs mb-3" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="organization-basic-tab" data-bs-toggle="tab" data-bs-target="#organization-basic-pane" type="button" role="tab" aria-controls="organization-basic-pane" aria-selected="true">Basic Details</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="organization-contact-tab" data-bs-toggle="tab" data-bs-target="#organization-contact-pane" type="button" role="tab" aria-controls="organization-contact-pane" aria-selected="false">Location &amp; Contact</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="organization-extra-tab" data-bs-toggle="tab" data-bs-target="#organization-extra-pane" type="button" role="tab" aria-controls="organization-extra-pane" aria-selected="false">Additional Info</button></li></ul>
           <fieldset id="organization-fields"><legend class="visually-hidden">Organization details</legend><div class="tab-content"><div class="tab-pane fade show active" id="organization-basic-pane" role="tabpanel" aria-labelledby="organization-basic-tab">
             <label class="form-label" for="organization-name">Name</label><input class="form-control mb-3" id="organization-name" name="name" type="text" maxlength="200" required>
             <label class="form-label" for="organization-region">Primary Region</label><input class="form-control mb-3" id="organization-region" name="region" type="text" maxlength="120">
@@ -247,12 +248,13 @@
   </div>
 
   <script src="vendor/bootstrap/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+  <script src="vendor/jquery/jquery.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
+  <script src="vendor/datatables/dataTables.min.js" integrity="sha384-n+4gDsCQ+x0o5YCJeYqFY1Yl+qgW41qmMAilIyF/bJwIUeTK00QB845/VijT5pQq" crossorigin="anonymous"></script>
+  <script src="vendor/datatables/dataTables.bootstrap5.min.js" integrity="sha384-G85lmdZCo2WkHaZ8U1ZceHekzKcg37sFrs4St2+u/r2UtfvSDQmQrkMsEx4Cgv/W" crossorigin="anonymous"></script>
   <script src="js/global-ui.js"></script>
   <script src="js/theme-toggle.js"></script>
   <script src="js/tauri-api.js"></script>
-  <script src="https://unpkg.com/imask@7.6.1/dist/imask.min.js"></script>
+  <script src="vendor/imask/imask.min.js" integrity="sha384-UO8YwPv//GjwHj93ZlwXcDNjv3BSxdBFUB2jtiOuL3d/a0kS9E8sYvHjTBkQI8u8" crossorigin="anonymous"></script>
   <script src="js/contractor-list.js"></script>
   <script src="js/add-contractor.js"></script>
   <script src="js/sample-data.js"></script>

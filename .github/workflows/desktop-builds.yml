@@ -67,14 +67,14 @@ jobs:
       - name: Preserve macOS app metadata
         if: runner.os == 'macOS'
         run: |
-          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app" "src-tauri/target/universal-apple-darwin/release/bundle/Rustacean-CRM-macos-universal.zip"
-          lipo "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app/Contents/MacOS/rustacean_crm" -verify_arch arm64 x86_64
-          codesign --verify --deep --strict "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app"
+          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app" "src-tauri/target/universal-apple-darwin/release/bundle/Hippo-Harbor-CRM-macos-universal.zip"
+          lipo "src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app/Contents/MacOS/rustacean_crm" -verify_arch arm64 x86_64
+          codesign --verify --deep --strict "src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app"
       - name: macOS packaged process launch
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          "src-tauri/target/universal-apple-darwin/release/bundle/macos/Rustacean CRM.app/Contents/MacOS/rustacean_crm" > macos-launch.log 2>&1 &
+          "src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app/Contents/MacOS/rustacean_crm" > macos-launch.log 2>&1 &
           app_pid=$!
           trap 'kill "$app_pid" 2>/dev/null || true' EXIT
           sleep 10
@@ -87,7 +87,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: Rustacean-CRM-${{ matrix.platform }}-${{ github.sha }}
+          name: Hippo-Harbor-CRM-${{ matrix.platform }}-${{ github.sha }}
           if-no-files-found: error
           path: |
             src-tauri/target/release/rustacean_crm.exe
@@ -96,7 +96,7 @@ jobs:
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: Rustacean-CRM-${{ matrix.platform }}-${{ github.sha }}
+          name: Hippo-Harbor-CRM-${{ matrix.platform }}-${{ github.sha }}
           if-no-files-found: error
           path: |
             src-tauri/target/universal-apple-darwin/release/bundle/*.zip

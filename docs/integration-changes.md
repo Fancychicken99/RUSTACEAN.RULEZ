@@ -288,3 +288,39 @@ directories. Full evidence/links/hashes: docs/mvp-build-evidence.md. CI policy
 guard also verified to refuse local/self-hosted use before registry access.
 Only evidence/docs change after this build; no new runtime code. Physical Mac UI,
 offline/sleep and fresh-machine/release-CRUD acceptance still pending.
+
+## Offline table asset repair — November 5, 2026
+
+Replaced DataTables and IMask CDN references with pinned local assets and added
+jQuery 3.7.1 before DataTables 2.3.4. Included upstream MIT licenses, provenance,
+and SHA384 integrity values. The asset checker rejects external script and
+stylesheet references to catch this regression before desktop launch. No schema,
+IPC, or CSP change is required.
+
+Verification: seven local integrity hashes pass and git diff whitespace checks
+pass on the latest dev checkout. The identical frontend in the supplied ZIP
+built successfully and launched with no browser errors. Its full smoke test
+stopped at the stale authentication helper, which does not fill the newly added
+confirm-password field; later tests also refer to the previous contractor form.
+A full smoke pass is not claimed by this targeted asset repair.
+
+## Repair current Windows smoke regression — November 5, 2026
+
+Updated the desktop smoke runner for setup confirmation, split names, required
+role/email/phone, native save confirmations, the organization table, the public
+directory refresh API and DataTables pagination. Counts now inspect all DataTables
+rows while separate assertions test visible page size and page navigation. Removed
+the Alert Level dropdown's inline style in favor of a local CSS class. Retained
+backend validation, real saves/restarts, archive, duplicate submission and
+simulated stale-response/failure assertions. No backend/schema change.
+
+Local syntax, asset integrity and whitespace checks pass. Windows Application
+Control blocks the native build helper (error 4551); native CI outcome must be
+checked after publication. No machine policy was changed or ordinary DB opened.
+
+CI follow-up: the updated suite exposed a real region-filter regression: loaded
+records bypassed loadFilteredDirectory and filtered only cached arrays. Restored
+the existing protected SQLite filter path for directory renders and filter/search
+changes, including Alert Level changes. Existing error and stale-response checks
+remain enabled. The prior pagination protocol error was fixed by returning no
+value from page-changing actions; assertions still verify the resulting page.
