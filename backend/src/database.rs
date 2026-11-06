@@ -51,6 +51,14 @@ pub fn add_contractor(conn: &Connection, full_name: &str, organization_id: i64) 
 pub struct Contractor {
     pub id: i64,
     pub full_name: String,
+
+    // Sprint 2: Individual name fields
+    pub prefix: Option<String>,
+    pub first_name: Option<String>,
+    pub middle_name: Option<String>,
+    pub last_name: Option<String>,
+    pub suffix: Option<String>,
+
     pub organization_id: Option<i64>,
     pub organization_name: Option<String>,
     pub region: Option<String>,
@@ -64,21 +72,26 @@ pub struct Contractor {
 pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
     let mut stmt = conn.prepare(
         "SELECT
-            c.id,
-            c.full_name,
-            o.name,
-            o.region,
-            c.status,
-            c.role,
-            c.email,
-            c.phone,
-            c.photo_path,
-            c.organization_id
-         FROM contractors c
-         LEFT JOIN organizations o
-         ON c.organization_id = o.id
-         WHERE c.archived_at IS NULL
-         ORDER BY c.full_name",
+    c.id,
+    c.full_name,
+    o.name,
+    o.region,
+    c.status,
+    c.role,
+    c.email,
+    c.phone,
+    c.photo_path,
+    c.organization_id,
+    c.prefix,
+    c.first_name,
+    c.middle_name,
+    c.last_name,
+    c.suffix
+ FROM contractors c
+ LEFT JOIN organizations o
+   ON c.organization_id = o.id
+ WHERE c.archived_at IS NULL
+ ORDER BY c.full_name",
     )?;
 
     let contractors = stmt.query_map([], |row| {
@@ -93,6 +106,11 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
             phone: row.get(7)?,
             photo_path: row.get(8)?,
             organization_id: row.get(9)?,
+            prefix: row.get(10)?,
+            first_name: row.get(11)?,
+            middle_name: row.get(12)?,
+            last_name: row.get(13)?,
+            suffix: row.get(14)?,
         })
     })?;
 
@@ -119,10 +137,11 @@ pub fn update_contractor_name(
 pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> {
     conn.query_row(
         "SELECT c.id, c.full_name, o.name, o.region, c.status,
-                c.role, c.email, c.phone, c.photo_path, c.organization_id
-         FROM contractors c
-         LEFT JOIN organizations o ON c.organization_id = o.id
-         WHERE c.id = ?1 AND c.archived_at IS NULL",
+        c.role, c.email, c.phone, c.photo_path, c.organization_id,
+        c.prefix, c.first_name, c.middle_name, c.last_name, c.suffix
+ FROM contractors c
+ LEFT JOIN organizations o ON c.organization_id = o.id
+ WHERE c.id = ?1 AND c.archived_at IS NULL",
         [id],
         |row| {
             Ok(Contractor {
@@ -136,6 +155,11 @@ pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> 
                 phone: row.get(7)?,
                 photo_path: row.get(8)?,
                 organization_id: row.get(9)?,
+                prefix: row.get(10)?,
+                first_name: row.get(11)?,
+                middle_name: row.get(12)?,
+                last_name: row.get(13)?,
+                suffix: row.get(14)?,
             })
         },
     )
@@ -207,11 +231,24 @@ pub struct Organization {
     pub phone: Option<String>,
     pub email: Option<String>,
     pub notes: Option<String>,
+    pub status: String,
+
+    // Sprint 2 organization information
+    pub secondary_email: Option<String>,
+    pub street_address_1: Option<String>,
+    pub street_address_2: Option<String>,
+    pub city: Option<String>,
+    pub state_province: Option<String>,
+    pub country: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
 }
 
 pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, region, phone, email, notes
+        "SELECT id, name, region, phone, email, notes, status,
+       secondary_email, street_address_1, street_address_2,
+       city, state_province, country, created_at, updated_at
          FROM organizations
          WHERE archived_at IS NULL
          ORDER BY name",
@@ -225,6 +262,15 @@ pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
             phone: row.get(3)?,
             email: row.get(4)?,
             notes: row.get(5)?,
+            status: row.get(6)?,
+            secondary_email: row.get(7)?,
+            street_address_1: row.get(8)?,
+            street_address_2: row.get(9)?,
+            city: row.get(10)?,
+            state_province: row.get(11)?,
+            country: row.get(12)?,
+            created_at: row.get(13)?,
+            updated_at: row.get(14)?,
         })
     })?;
 
@@ -304,6 +350,76 @@ pub fn add_organization_archive_field(conn: &Connection) -> Result<()> {
         )?;
     }
 
+    Ok(())
+}
+
+/// Sprint 2 migration. Adds nullable fields so existing records remain readable.
+/// Keep the legacy full_name and existing status fields during UI transition.
+pub fn migrate_sprint2(conn: &Connection) -> Result<()> {
+    let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+    if version >= 4 {
+        return Ok(());
+    }
+    // Prior migrations are responsible for bringing the schema to version 3.
+    if version < 3 {
+        return Err(rusqlite::Error::InvalidQuery);
+    }
+    conn.execute_batch(
+        "BEGIN IMMEDIATE;
+         ALTER TABLE contractors ADD COLUMN prefix TEXT;
+         ALTER TABLE contractors ADD COLUMN first_name TEXT;
+         ALTER TABLE contractors ADD COLUMN middle_name TEXT;
+         ALTER TABLE contractors ADD COLUMN last_name TEXT;
+         ALTER TABLE contractors ADD COLUMN suffix TEXT;
+         ALTER TABLE contractors ADD COLUMN street_address_1 TEXT;
+         ALTER TABLE contractors ADD COLUMN street_address_2 TEXT;
+         ALTER TABLE contractors ADD COLUMN city TEXT;
+         ALTER TABLE contractors ADD COLUMN state_province TEXT;
+         ALTER TABLE contractors ADD COLUMN country TEXT;
+         ALTER TABLE contractors ADD COLUMN created_at TEXT;
+         ALTER TABLE contractors ADD COLUMN updated_at TEXT;
+         ALTER TABLE organizations ADD COLUMN secondary_phone TEXT;
+         ALTER TABLE organizations ADD COLUMN secondary_contact TEXT;
+         ALTER TABLE organizations ADD COLUMN secondary_email TEXT;
+         ALTER TABLE organizations ADD COLUMN street_address_1 TEXT;
+         ALTER TABLE organizations ADD COLUMN street_address_2 TEXT;
+         ALTER TABLE organizations ADD COLUMN city TEXT;
+         ALTER TABLE organizations ADD COLUMN state_province TEXT;
+         ALTER TABLE organizations ADD COLUMN country TEXT;
+         ALTER TABLE organizations ADD COLUMN status TEXT NOT NULL DEFAULT 'Active'
+             CHECK (status IN ('Active', 'Inactive'));
+         ALTER TABLE organizations ADD COLUMN created_at TEXT;
+         ALTER TABLE organizations ADD COLUMN updated_at TEXT;
+         CREATE TABLE IF NOT EXISTS tags (
+             id INTEGER PRIMARY KEY,
+             name TEXT NOT NULL COLLATE NOCASE UNIQUE
+                 CHECK(length(trim(name)) > 0)
+         );
+         CREATE TABLE IF NOT EXISTS contractor_tags (
+             contractor_id INTEGER NOT NULL REFERENCES contractors(id),
+             tag_id INTEGER NOT NULL REFERENCES tags(id),
+             PRIMARY KEY(contractor_id, tag_id)
+         );
+         CREATE TABLE IF NOT EXISTS organization_tags (
+             organization_id INTEGER NOT NULL REFERENCES organizations(id),
+             tag_id INTEGER NOT NULL REFERENCES tags(id),
+             PRIMARY KEY(organization_id, tag_id)
+         );
+         CREATE TABLE IF NOT EXISTS organization_skills (
+             organization_id INTEGER NOT NULL REFERENCES organizations(id),
+             skill_id INTEGER NOT NULL REFERENCES skills(id),
+             PRIMARY KEY(organization_id, skill_id)
+         );
+         CREATE INDEX IF NOT EXISTS idx_contractor_tags_tag ON contractor_tags(tag_id);
+         CREATE INDEX IF NOT EXISTS idx_organization_tags_tag ON organization_tags(tag_id);
+         CREATE INDEX IF NOT EXISTS idx_organization_skills_skill ON organization_skills(skill_id);
+         UPDATE contractors SET created_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+             WHERE created_at IS NULL;
+         UPDATE organizations SET created_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+             WHERE created_at IS NULL;
+         PRAGMA user_version = 4;
+         COMMIT;",
+    )?;
     Ok(())
 }
 

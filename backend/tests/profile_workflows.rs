@@ -10,10 +10,15 @@ use secure_crm_backend::{
 
 fn fields(name: &str) -> ProfileFields {
     ProfileFields {
-        full_name: name.into(),
-        role: Some(" Engineer ".into()),
-        email: Some("rowan@example.com".into()),
-        phone: None,
+        full_name: name.to_string(),
+        prefix: None,
+        first_name: None,
+        middle_name: None,
+        last_name: None,
+        suffix: None,
+        role: Some("Engineer".to_string()),
+        email: Some("test@example.com".to_string()),
+        phone: Some("+12025550123".to_string()),
     }
 }
 
@@ -98,4 +103,157 @@ fn validation_archived_organizations_and_write_failures_do_not_leave_partial_pro
     conn.execute_batch("DROP TRIGGER reject_details;").unwrap();
     archive_organization(&conn, org.id).unwrap();
     assert!(create_profile(&mut conn, org.id, fields("Fictional Archived Org")).is_err());
+}
+#[test]
+fn contractor_split_names_are_saved() -> Result<(), Box<dyn std::error::Error>> {
+    use rusqlite::Connection;
+    use secure_crm_backend::profiles::{ProfileFields, create_profile};
+    use secure_crm_backend::setup::initialize_database;
+
+    let directory = tempfile::tempdir()?;
+    let path = directory.path().join("split_names.db");
+
+    let mut conn = Connection::open(&path)?;
+    initialize_database(&conn)?;
+
+    conn.execute(
+        "INSERT INTO organizations (name, region) VALUES (?1, ?2)",
+        rusqlite::params!["Fictional Test Organization", "North America"],
+    )?;
+
+    let organization_id = conn.last_insert_rowid();
+
+    let profile = ProfileFields {
+        full_name: String::new(),
+        prefix: Some("Dr.".into()),
+        first_name: Some("Fictional".into()),
+        middle_name: Some("Rowan".into()),
+        last_name: Some("Finch".into()),
+        suffix: Some("Jr.".into()),
+        role: Some("Engineer".into()),
+        email: Some("fictional@example.com".into()),
+        phone: Some("+12025550123".into()),
+    };
+
+    let contractor = create_profile(&mut conn, organization_id, profile)?;
+
+    drop(conn);
+
+    let conn = Connection::open(&path)?;
+
+    let names: (
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+    ) = conn.query_row(
+        "SELECT prefix, first_name, middle_name, last_name, suffix
+             FROM contractors WHERE id = ?1",
+        [contractor.id],
+        |row| {
+            Ok((
+                row.get(0)?,
+                row.get(1)?,
+                row.get(2)?,
+                row.get(3)?,
+                row.get(4)?,
+            ))
+        },
+    )?;
+
+    assert_eq!(names.0.as_deref(), Some("Dr."));
+    assert_eq!(names.1.as_deref(), Some("Fictional"));
+    assert_eq!(names.2.as_deref(), Some("Rowan"));
+    assert_eq!(names.3.as_deref(), Some("Finch"));
+    assert_eq!(names.4.as_deref(), Some("Jr."));
+
+    Ok(())
+}
+#[test]
+fn organization_status_can_be_toggled() -> Result<(), Box<dyn std::error::Error>> {
+    use rusqlite::Connection;
+    use secure_crm_backend::profiles::set_organization_status;
+    use secure_crm_backend::setup::initialize_database;
+
+    let conn = Connection::open_in_memory()?;
+    initialize_database(&conn)?;
+
+    conn.execute(
+        "INSERT INTO organizations (name, region)
+         VALUES (?1, ?2)",
+        rusqlite::params!["Fictional Test Organization", "North America"],
+    )?;
+
+    let id = conn.last_insert_rowid();
+
+    set_organization_status(&conn, id, "Inactive")?;
+
+    let status: String = conn.query_row(
+        "SELECT status FROM organizations WHERE id = ?1",
+        [id],
+        |row| row.get(0),
+    )?;
+
+    assert_eq!(status, "Inactive");
+
+    set_organization_status(&conn, id, "Active")?;
+
+    let status: String = conn.query_row(
+        "SELECT status FROM organizations WHERE id = ?1",
+        [id],
+        |row| row.get(0),
+    )?;
+
+    assert_eq!(status, "Active");
+
+    Ok(())
+}
+#[test]
+fn organization_extra_fields_survive_reopen() -> Result<(), Box<dyn std::error::Error>> {
+    use secure_crm_backend::profiles::{OrganizationExtraFields, update_organization_extra};
+
+    let directory = tempfile::tempdir()?;
+    let path = directory.path().join("organization_extra.db");
+
+    let conn = rusqlite::Connection::open(&path)?;
+    initialize_database(&conn)?;
+
+    conn.execute(
+        "INSERT INTO organizations (name, region)
+         VALUES (?1, ?2)",
+        rusqlite::params!["Fictional Test Organization", "North America"],
+    )?;
+
+    let id = conn.last_insert_rowid();
+
+    update_organization_extra(
+        &conn,
+        id,
+        OrganizationExtraFields {
+            secondary_email: Some("contact@example.com".into()),
+            street_address_1: Some("123 Example Street".into()),
+            street_address_2: Some("Suite 200".into()),
+            city: Some("Nashville".into()),
+            state_province: Some("Tennessee".into()),
+            country: Some("USA".into()),
+        },
+    )?;
+
+    drop(conn);
+
+    let conn = rusqlite::Connection::open(&path)?;
+
+    let (email, city, country): (Option<String>, Option<String>, Option<String>) = conn.query_row(
+        "SELECT secondary_email, city, country
+             FROM organizations WHERE id = ?1",
+        [id],
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+    )?;
+
+    assert_eq!(email.as_deref(), Some("contact@example.com"));
+    assert_eq!(city.as_deref(), Some("Nashville"));
+    assert_eq!(country.as_deref(), Some("USA"));
+
+    Ok(())
 }

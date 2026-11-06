@@ -10,10 +10,15 @@ use secure_crm_backend::{
 
 fn fields(name: &str) -> ProfileFields {
     ProfileFields {
-        full_name: name.into(),
-        role: None,
-        email: Some("manual@example.com".into()),
-        phone: None,
+        full_name: name.to_string(),
+        prefix: None,
+        first_name: None,
+        middle_name: None,
+        last_name: None,
+        suffix: None,
+        role: Some("Engineer".to_string()),
+        email: Some("manual@example.com".to_string()),
+        phone: Some("+12025550123".to_string()),
     }
 }
 
