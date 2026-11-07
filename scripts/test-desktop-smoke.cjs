@@ -135,6 +135,7 @@ async function chooseRegion(region) {
   await directoryReady();
 }
 async function importSamples(added, skipped) {
+  await evaluate("document.getElementById('settings-button').click()"); await modalShown('settings-modal');
   await evaluate("document.getElementById('sample-import-button').click()"); await modalShown('sample-import-modal');
   await fillForm('sample-import-form', {});
   await savedMessage(`Sample import complete: ${added} contractors and ${added ? 6 : 0} organizations added; ${skipped} contractors and ${skipped ? 6 : 0} organizations skipped.`);
@@ -420,6 +421,7 @@ await until(
   database.close();
   assert.equal(retained.full_name, editedName); assert.ok(retained.archived_at);
   await launch(); await submit('fictional smoke password'); await waitForRecords();
+  await evaluate("document.getElementById('settings-button').click()"); await modalShown('settings-modal');
   await evaluate("document.getElementById('sample-import-button').click()"); await modalShown('sample-import-modal');
   await evaluate("document.querySelector('#sample-import-modal [data-bs-dismiss]').click()"); await modalClosed('sample-import-modal');
   assert.equal(await evaluate("window.crmApi.listContractors().then(records => records.length)"), 0, 'Cancel import must not write records.');
@@ -453,7 +455,7 @@ await until(
   await evaluate("document.getElementById('filter-status').value = 'Deceased'; document.getElementById('filter-status').dispatchEvent(new Event('change', { bubbles: true }))"); await directoryReady();
   assert.equal(await evaluate("(() => { const table = document.getElementById('contractor-table-body')?.closest('table'); return table && window.DataTable?.isDataTable(table) ? new DataTable(table).rows().count() : document.querySelectorAll('.contractor-row').length; })()"), 6);
   await evaluate("document.getElementById('clear-contractor-filters').click()"); await directoryReady();
-  assert.equal(await evaluate("(() => { const bounds = document.getElementById('sample-import-button').getBoundingClientRect(); return bounds.top >= 0 && bounds.bottom <= innerHeight; })()"), true, 'Import action must remain reachable alongside a long directory.');
+  assert.equal(await evaluate("(() => { const bounds = document.getElementById('settings-button').getBoundingClientRect(); return bounds.top >= 0 && bounds.bottom <= innerHeight; })()"), true, 'Settings must remain reachable alongside a long directory.');
   const sampleScreenshot = await cdp('Page.captureScreenshot', { format: 'png' });
   fs.writeFileSync(path.join(testDirectory, 'imported-directory.png'), Buffer.from(sampleScreenshot.data, 'base64'));
   // Simulated filter failure must not display cached data as a successful result.

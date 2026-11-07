@@ -190,3 +190,12 @@ HANDOFF OUT requested at the end of this session. Development/learning agreement
 Option/HashMap introduction, verified filter/import behavior and acceptance
 backlog captured in checkpoint. Continue brief Python-grounded lessons during
 work; no routine quizzes or inference of independent proficiency from tests.
+
+## Release planning and Settings — November 6, 2026
+
+Clarified Whisper as the speech-to-text engine within a full voice-input flow
+(record/capture, conversion, transcription, review and save). Distinguished
+portable application data import/export from developer Git handoffs. Added a
+Bootstrap Settings modal for sample import; no new Rust syntax lesson or user
+coding exercise occurred. No proficiency claim. Next implementation retains the
+short Python-grounded develop-and-learn workflow in broughnut-workflow.md.

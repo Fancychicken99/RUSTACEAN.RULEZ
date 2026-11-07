@@ -324,3 +324,16 @@ the existing protected SQLite filter path for directory renders and filter/searc
 changes, including Alert Level changes. Existing error and stale-response checks
 remain enabled. The prior pagination protocol error was fixed by returning no
 value from page-changing actions; assertions still verify the resulting page.
+
+## Sample import moved to Settings — November 6, 2026
+
+frontend/index.html now exposes Settings in the sidebar and places the existing
+sample-import action in a labeled Settings modal. sample-data.js guards Settings
+against unauthenticated opening; existing lock handling closes it. The import
+confirmation, authenticated command, repeat-import rules and refresh are unchanged.
+Updated scripts/test-desktop-smoke.cjs to open Settings before import and check
+Settings remains reachable beside a long directory. No IPC or schema changes.
+
+Verification: JavaScript syntax, seven asset integrity declarations and whitespace
+checks passed. Native desktop flow was not rerun. Existing committed merge-conflict
+markers in index.html branding were observed and left outside this change.

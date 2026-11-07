@@ -1,5 +1,52 @@
 # Session handoff
 
+## Latest checkpoint — November 6, 2026
+
+Broughnut explicitly requested HANDOFF OUT to continue on the desktop. Branch:
+`dev`; base for this session's changes is c172964. This section supersedes older
+checkpoint status below. The commit containing this section carries all pending
+session files; verify remote synchronization rather than relying on old hashes.
+
+Delivered in this handoff:
+- docs/sprint2-release-plan.md: source audit and ordered whole-product release
+  plan for downloadable Windows setup exe/macOS app+DMG. Broughnut owns all
+  remaining work. Existing UI/backend features are partial until integrated and
+  verified; this was planning, not broad feature implementation.
+- Added required portable data import/export (records, relationships, archived
+  records, notes/history, tags/skills, photos/logos). Choose merge versus workspace
+  restore and encryption/credential handling before implementation. Sample import
+  and developer Git handoff are separate features.
+- Sample-data import moved from sidebar into Settings. Confirmation, authentication,
+  duplicate-safe import and refresh behavior retained. Updated smoke runner to
+  navigate Settings; added authenticated Settings modal guard. Files: frontend/
+  index.html, frontend/js/sample-data.js, scripts/test-desktop-smoke.cjs.
+- Recorded the change in docs/integration-changes.md. No IPC/schema changes.
+
+Confirmed requirements: phone OR email (both allowed, neither rejected); supplied
+values validated; color-coded accessible tags; retired/deceased last in default
+order with explicit sorting overriding; system theme; local Whisper voice input.
+Whisper remains deferred until full input inventory and dictation field selection.
+Do not install an engine/model or assume notes-only scope before that step.
+
+Checks: JavaScript syntax, seven local UI asset integrity declarations and diff
+whitespace passed for this change. No current full backend/native desktop suite,
+Settings UI smoke, or installed-release acceptance was rerun. Earlier tests/build
+claims below refer to earlier sources and are not verification of this handoff.
+
+Known pre-existing defect: frontend/index.html already contains committed conflict
+markers in two branding sections at c172964. These were NOT introduced or resolved
+by the Settings change. This handoff transfers development work, not a release-ready
+build; resolve those sections before native visual acceptance/release. Also note
+existing incomplete media handoff, stale IPC docs, dropped extended form fields,
+US-only phone masking, absent general import/export and absent Whisper runtime.
+
+Next: HANDOFF IN on desktop; read docs/broughnut-workflow.md, this section and the
+release plan. Verify actual branch/status and local tooling. Start with the input/
+contract inventory and resolve branding conflict markup, then implement complete
+small slices in plan order with Python-grounded Rust explanations. Do not defer
+required fixes to teammates, assume test results imply Rust proficiency, offer
+handoffs automatically, or publish without new authorization.
+
 Personal to Broughnut. Updated October 31, 2026. Branch: dev.
 
 ## Current verified milestone

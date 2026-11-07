@@ -3,6 +3,13 @@
   const message = document.getElementById('sample-import-message');
   let busy = false;
   let generation = 0;
+  const settings = document.getElementById('settings-modal');
+  settings.addEventListener('show.bs.modal', event => {
+    if (!window.crmSession?.authenticated) event.preventDefault();
+  });
+  settings.addEventListener('shown.bs.modal', () => {
+    if (!window.crmSession?.authenticated) bootstrap.Modal.getInstance(settings)?.hide();
+  });
   function setBusy(value) {
     busy = value;
     modal.querySelectorAll('button').forEach(button => { button.disabled = value; });
