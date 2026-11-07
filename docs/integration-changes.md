@@ -507,3 +507,15 @@ exercised the no-photo state. Source formatting was normalized with cargo fmt.
 The native workflow shares the Cargo target directory to avoid duplicate crypto
 builds and distributes the Windows installer rather than an incomplete loose
 executable; the macOS voice binary targets the app's minimum macOS 13 version.
+# Public installer downloads — November 7, 2026
+
+User authorized publishing the built Windows/macOS installers as a GitHub Release
+and adding homepage download buttons. README links target versioned binary assets,
+installation instructions and checksums. The default main branch has a separate
+homepage README, so its download section is updated directly with a reviewed
+content/SHA check while the working checkout stays on dev. No frontend, Rust,
+database or IPC behavior changes in this publication step. Both native jobs in
+run 42373955371 succeeded. App/device acceptance limits remain in release notes.
+Release v0.2.0 is now public/latest. Main homepage commit 337d0e4 contains the two
+direct download badges. Verified all four public asset URLs returned HTTP 200 and
+GitHub sizes/digests matched reviewed files; both badge images returned SVG/200.

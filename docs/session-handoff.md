@@ -1,9 +1,20 @@
 # Session handoff
 
+## Public download publication — November 7, 2026
+
+User explicitly authorized a GitHub Release and homepage download buttons.
+v0.2.0 is published at https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/tag/v0.2.0
+with both installers, INSTALL.md and SHA256SUMS.txt. Default main README updated
+in commit 337d0e4 with direct Windows/Mac download badges. Development README
+also contains those links. No branch switch or source merge. Public HTTP 200,
+asset hashes/sizes, badge SVG responses and latest-release/default-homepage links
+were verified. Both native jobs in run 42373955371 succeeded. See
+final-submission-verification.md for evidence and remaining manual acceptance.
+
 ## Latest continuation — November 7, 2026
 
-Full final Sprint 2 scope remains active, not MVP. dev has extensive uncommitted
-0.2.0 work. User authorized completing both installers, including publishing the reviewed source to trigger native builds. All 49 backend and six bridge/
+Full final Sprint 2 scope remains active, not MVP. Source and installer delivery
+notes are published on dev. User authorized completing both installers, including publishing the reviewed source to trigger native builds. All 49 backend and six bridge/
 voice tests passed, including real SQLCipher transfer/recovery and native offline
 transcription. Full real-WebView2 suite now PASSED, including CRUD/import/restart,
 international masking, new media/taxonomy persistence and fake-device dictation
@@ -18,8 +29,8 @@ Windows/Mac run 42373955371: Mac job SUCCEEDED, including backend/bridge tests,
 actual Whisper transcription, universal app/DMG, architecture/signature checks and
 packaged process launch. Mac artifact 13575700414 downloaded and digest verified.
 Both local installers are in src-tauri/target/installers/ with INSTALL.md and
-SHA256SUMS.txt. Windows CI backend/bridge/full UI passed; release packaging is
-still running. Local Windows installer/release checks already passed. No full
+SHA256SUMS.txt. Windows CI also SUCCEEDED: backend/bridge/full UI, release packaging
+and release startup passed. Local Windows installer/release checks passed. No full
 Mac UI acceptance yet; app is ad-hoc signed, not Developer ID notarized.
 Installer/fresh-device/physical mic/native picker
 and manual accessibility checks remain explicit.

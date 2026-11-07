@@ -1,5 +1,13 @@
 # Rust learning log
 
+## GitHub download delivery — November 7, 2026
+
+Release assets are versioned installer files; source ZIPs are different and do not
+contain the built installer. Repository homepage buttons link directly to the
+release assets. The default main README and development README are separate files
+on separate branches, so both need the download links. This publication work does
+not change Rust behavior or establish additional coding proficiency.
+
 ## Native installer delivery — November 7, 2026
 
 Windows executables and macOS executable app bundles must be packaged on their

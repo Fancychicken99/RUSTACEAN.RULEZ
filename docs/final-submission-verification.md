@@ -60,8 +60,8 @@ passed backend and bridge/voice tests on both Windows and macOS. The clean Windo
 runner also passed the full executable UI regression. The Mac job SUCCEEDED:
 universal .app and DMG generated, arm64/x86_64 architectures checked, deep/strict
 ad-hoc signature verified, and packaged process alive after ten seconds. The
-Windows CI release-package build is still running; the local Windows installer
-and release startup already passed. Mac tests include bundled-engine transcription; these
+Windows CI job also SUCCEEDED, including NSIS generation and release startup;
+both platform jobs completed successfully. Mac tests include bundled-engine transcription; these
 do not establish physical microphone permissions, Gatekeeper acceptance or Mac UI
 operation. Draft-SOW Linux delivery remains an explicit unresolved target; no
 Linux completion claim is made.
@@ -109,7 +109,8 @@ src-tauri/target/release/bundle/nsis/Hippo Harbor CRM_0.2.0_x64-setup.exe
 Installer SHA-256:
 50933fd7519f58d92a19202543425d4f4e6d128b76d7e7eab05b0cdd35d2f75a.
 This ignored build output does not travel through a source Git commit; native CI
-uploads the installer after an authorized push. It has not been published here.
+uploads the installer after an authorized push. Public release delivery is now
+available as documented below.
 
 ## Ready-to-install delivery folder
 
@@ -127,3 +128,26 @@ artifact ZIP was verified against GitHub's upload digest
 51d07aed0fbdd1bd69e6625e017a7e4a8e8ccd5c9e0e0f580fe87f66e4a89071.
 The DMG was copied unchanged into the delivery folder. See installation.md for
 Windows setup, Mac drag-to-Applications and the ad-hoc signing/first-open boundary.
+
+## Public GitHub downloads
+
+User authorized release publication and homepage download buttons. Published
+[Hippo Harbor CRM 0.2.0](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/tag/v0.2.0)
+as the latest release, tagged at documentation-only source commit 0686729 (the
+binaries use code from 4cf8cec). Release assets:
+
+- Hippo-Harbor-CRM-0.2.0-Windows-x64-setup.exe
+- Hippo-Harbor-CRM-0.2.0-macOS-universal.dmg
+- INSTALL.md
+- SHA256SUMS.txt
+
+The default main homepage README has direct Windows/Mac download badges, release
+notes and installation links. Main README commit:
+337d0e4a761dd3e00ec0b351e8f26f10656ff611. The development README has the same
+installer buttons. The checkout remained on dev; no main source merge occurred.
+
+Verified unauthenticated public download HEAD responses returned HTTP 200 for
+all four assets; GitHub asset sizes and SHA-256 digests match the reviewed files.
+Both badge images returned HTTP 200 SVG responses. The main README contains both
+direct installer URLs, and GitHub's latest-release endpoint resolves to v0.2.0.
+Documentation/link-only changes require no additional application regression.
