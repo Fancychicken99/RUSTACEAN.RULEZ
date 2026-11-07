@@ -22,6 +22,8 @@ pub fn initialize_database(conn: &Connection) -> Result<()> {
 
     // Sprint 2: preserve existing rows and add new structured fields.
     migrate_sprint2(conn)?;
+    crate::details::migrate_details(conn)?;
+    crate::workspace::migrate(conn)?;
 
     // Create communication tracking table
     create_contact_table(conn)?;

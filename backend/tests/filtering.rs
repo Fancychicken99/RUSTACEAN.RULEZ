@@ -1,17 +1,15 @@
 use rusqlite::Connection;
 
-use secure_crm_backend::database::{
-    add_contractor, add_organization, add_organization_archive_field, create_tables,
-};
+use secure_crm_backend::database::{add_contractor, add_organization};
 
 use secure_crm_backend::filtering::get_contractors_by_region;
+use secure_crm_backend::setup::initialize_database;
 
 #[test]
 fn test_filter_by_region() -> rusqlite::Result<()> {
     let conn = Connection::open_in_memory()?;
 
-    create_tables(&conn)?;
-    add_organization_archive_field(&conn)?;
+    initialize_database(&conn)?;
 
     // Create two fictional organizations
     let org1 = add_organization(&conn, "Example Defense LLC", "East Nairobi")?;

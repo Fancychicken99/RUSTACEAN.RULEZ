@@ -58,6 +58,17 @@ impl SessionManager {
     }
 
     // Check login status without resetting the timer
+    // Only call after password/recovery-backed vault authentication succeeds.
+    pub fn begin_verified_session(&self) -> bool {
+        if let Ok(mut last) = self.last_activity.lock() {
+            *last = Some(ActivityTime::now());
+            true
+        } else {
+            false
+        }
+    }
+
+    // Check login status without resetting the timer
     pub fn is_authenticated(&self) -> bool {
         match self.last_activity.lock() {
             Ok(mut last) => match *last {

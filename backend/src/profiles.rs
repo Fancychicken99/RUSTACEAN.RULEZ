@@ -51,6 +51,7 @@ pub struct ProfileFields {
     pub role: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
+    pub details: Option<crate::details::RecordDetails>,
 }
 
 pub fn validate_id(id: i64) -> Result<(), ProfileError> {
@@ -84,8 +85,70 @@ fn text(
     Ok(Some(value.to_owned()))
 }
 
+pub(crate) fn validate_email(email: &str) -> Result<(), ProfileError> {
+    let parts: Vec<_> = email.split('@').collect();
+    if parts.len() != 2
+        || parts[0].is_empty()
+        || parts[1].is_empty()
+        || !parts[1].contains('.')
+        || parts[1].starts_with('.')
+        || parts[1].ends_with('.')
+        || email.chars().any(char::is_whitespace)
+    {
+        return Err(ProfileError::InvalidInput(
+            "Enter an email such as name@example.com".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn notes_text(value: Option<String>) -> Result<Option<String>, ProfileError> {
+    let value = value.unwrap_or_default();
+    let value = value.trim();
+    if value.is_empty() {
+        return Ok(None);
+    }
+    if value.chars().count() > 5_000
+        || value
+            .chars()
+            .any(|c| c.is_control() && c != '\n' && c != '\r' && c != '\t')
+    {
+        return Err(ProfileError::InvalidInput(
+            "Notes must be at most 5000 characters without unsupported control characters".into(),
+        ));
+    }
+    Ok(Some(value.replace("\r\n", "\n").replace('\r', "\n")))
+}
+
+pub(crate) fn validate_phone(phone: &str) -> Result<(), ProfileError> {
+    let digits = phone.chars().filter(char::is_ascii_digit).count();
+    let mut depth = 0;
+    let valid = phone.chars().enumerate().all(|(index, ch)| match ch {
+        '0'..='9' | ' ' | '-' => true,
+        '+' => index == 0,
+        '(' if depth == 0 => {
+            depth = 1;
+            true
+        }
+        ')' if depth == 1 => {
+            depth = 0;
+            true
+        }
+        _ => false,
+    });
+    let country_prefix_ok =
+        !phone.starts_with('+') || matches!(phone.as_bytes().get(1), Some(b'1'..=b'9'));
+    if !valid || depth != 0 || !(7..=15).contains(&digits) || !country_prefix_ok {
+        return Err(ProfileError::InvalidInput(
+                    "Enter a phone number with 7 to 15 digits; use an optional leading +, spaces, hyphens or balanced parentheses".into(),
+                ));
+    }
+    Ok(())
+}
+
 impl ProfileFields {
     pub(crate) fn validated(self) -> Result<Self, ProfileError> {
+        let has_split_name = self.first_name.is_some() || self.last_name.is_some();
         let prefix = text(self.prefix.unwrap_or_default(), "Prefix", 20, false)?;
         let first_name = text(
             self.first_name.unwrap_or_default(),
@@ -101,8 +164,6 @@ impl ProfileFields {
         )?;
         let last_name = text(self.last_name.unwrap_or_default(), "Last name", 100, false)?;
         let suffix = text(self.suffix.unwrap_or_default(), "Suffix", 20, false)?;
-
-        let has_split_name = first_name.is_some() || last_name.is_some();
 
         let full_name = if has_split_name {
             if first_name.is_none() || last_name.is_none() {
@@ -129,19 +190,15 @@ impl ProfileFields {
         let email = text(self.email.unwrap_or_default(), "Email", 254, false)?;
         let phone = text(self.phone.unwrap_or_default(), "Phone", 80, false)?;
         if let Some(email) = &email {
-            let parts: Vec<_> = email.split('@').collect();
-            if parts.len() != 2
-                || parts[0].is_empty()
-                || parts[1].is_empty()
-                || !parts[1].contains('.')
-                || parts[1].starts_with('.')
-                || parts[1].ends_with('.')
-                || email.chars().any(char::is_whitespace)
-            {
-                return Err(ProfileError::InvalidInput(
-                    "Enter an email such as name@example.com".into(),
-                ));
-            }
+            validate_email(email)?;
+        }
+        if email.is_none() && phone.is_none() {
+            return Err(ProfileError::InvalidInput(
+                "Enter a phone number or email address".into(),
+            ));
+        }
+        if let Some(phone) = &phone {
+            validate_phone(phone)?;
         }
         Ok(Self {
             full_name,
@@ -153,6 +210,7 @@ impl ProfileFields {
             role,
             email,
             phone,
+            details: self.details,
         })
     }
 }
@@ -165,6 +223,17 @@ pub fn create_profile(
     validate_id(organization_id)?;
     let profile = profile.validated()?;
     let tx = conn.transaction()?;
+    let saved = insert_profile(&tx, organization_id, profile)?;
+    tx.commit()?;
+    Ok(saved)
+}
+
+// Caller owns the transaction; reuse this inside the combined organization save.
+fn insert_profile(
+    tx: &Connection,
+    organization_id: i64,
+    profile: ProfileFields,
+) -> Result<Contractor, ProfileError> {
     let active: bool = tx.query_row(
         "SELECT EXISTS(SELECT 1 FROM organizations WHERE id = ?1 AND archived_at IS NULL)",
         [organization_id],
@@ -200,9 +269,11 @@ pub fn create_profile(
      WHERE id = ?4",
         params![profile.role, profile.email, profile.phone, id,],
     )?;
+    if let Some(details) = profile.details {
+        crate::details::save_record(&tx, id, false, details)?;
+    }
     let saved = get_contractor(&tx, id)?
         .ok_or(ProfileError::NotFound("Contractor not found or archived"))?;
-    tx.commit()?;
     Ok(saved)
 }
 
@@ -245,6 +316,9 @@ pub fn update_profile(
         return Err(ProfileError::NotFound("Contractor not found or archived"));
     }
 
+    if let Some(details) = profile.details {
+        crate::details::save_record(&tx, id, false, details)?;
+    }
     let saved = get_contractor(&tx, id)?
         .ok_or(ProfileError::NotFound("Contractor not found or archived"))?;
 
@@ -266,9 +340,9 @@ pub fn set_contractor_status(
     status: &str,
 ) -> Result<Contractor, ProfileError> {
     validate_id(id)?;
-    if !matches!(status, "Active" | "Inactive") {
+    if !matches!(status, "Active" | "Inactive" | "Retired" | "Deceased") {
         return Err(ProfileError::InvalidInput(
-            "Status must be Active or Inactive".into(),
+            "Status must be Active, Inactive, Retired or Deceased".into(),
         ));
     }
     let changed = conn.execute(
@@ -297,51 +371,44 @@ pub fn create_organization_profile(
     email: Option<String>,
     notes: Option<String>,
 ) -> Result<Organization, ProfileError> {
+    create_organization_with_contractor(conn, name, region, phone, email, notes, None)
+}
+
+pub fn create_organization_with_contractor(
+    conn: &mut Connection,
+    name: String,
+    region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
+    contractor: Option<ProfileFields>,
+) -> Result<Organization, ProfileError> {
+    create_organization_complete(conn, name, region, phone, email, notes, contractor, None)
+}
+
+pub fn create_organization_complete(
+    conn: &mut Connection,
+    name: String,
+    region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
+    contractor: Option<ProfileFields>,
+    details: Option<crate::details::OrganizationDetails>,
+) -> Result<Organization, ProfileError> {
+    let contractor = contractor.map(ProfileFields::validated).transpose()?;
     let name = text(name, "Organization name", 200, true)?.unwrap();
     let region = text(region.unwrap_or_default(), "Region", 120, false)?;
     let email = text(email.unwrap_or_default(), "Email", 254, false)?;
 
     let phone = text(phone.unwrap_or_default(), "Phone", 80, false)?;
 
-    let notes = text(notes.unwrap_or_default(), "Notes", 5_000, false)?;
+    let notes = notes_text(notes)?;
     if let Some(phone) = &phone {
-        let digits: String = phone.chars().filter(|c| c.is_ascii_digit()).collect();
-
-        if digits.len() < 7 || digits.len() > 15 {
-            return Err(ProfileError::InvalidInput(
-                "Phone must contain 7 to 15 digits".into(),
-            ));
-        }
-
-        if !phone
-            .chars()
-            .all(|c| c.is_ascii_digit() || matches!(c, '+' | '-' | '(' | ')' | ' ' | '.'))
-        {
-            return Err(ProfileError::InvalidInput(
-                "Phone contains invalid characters".into(),
-            ));
-        }
-
-        if phone.matches('+').count() > 1 || (phone.contains('+') && !phone.starts_with('+')) {
-            return Err(ProfileError::InvalidInput(
-                "Country code must appear at the beginning".into(),
-            ));
-        }
+        validate_phone(phone)?;
     }
     if let Some(email) = &email {
-        let parts: Vec<_> = email.split('@').collect();
-        if parts.len() != 2
-            || parts[0].is_empty()
-            || parts[1].is_empty()
-            || !parts[1].contains('.')
-            || parts[1].starts_with('.')
-            || parts[1].ends_with('.')
-            || email.chars().any(char::is_whitespace)
-        {
-            return Err(ProfileError::InvalidInput(
-                "Enter an email such as name@example.com".into(),
-            ));
-        }
+        validate_email(email)?;
     }
     let tx = conn.transaction()?;
     tx.execute(
@@ -350,10 +417,16 @@ pub fn create_organization_profile(
     )?;
     let id = tx.last_insert_rowid();
     validate_id(id)?;
+    if let Some(details) = details {
+        crate::details::save_organization(&tx, id, details)?;
+    }
     let saved = get_organizations(&tx)?
         .into_iter()
         .find(|org| org.id == id)
         .ok_or(ProfileError::NotFound("Organization not found"))?;
+    if let Some(profile) = contractor {
+        insert_profile(&tx, id, profile)?;
+    }
     tx.commit()?;
     Ok(saved)
 }
@@ -372,21 +445,12 @@ pub fn update_organization_profile(
     let region = text(region.unwrap_or_default(), "Region", 120, false)?;
     let phone = text(phone.unwrap_or_default(), "Phone", 80, false)?;
     let email = text(email.unwrap_or_default(), "Email", 254, false)?;
-    let notes = text(notes.unwrap_or_default(), "Notes", 5_000, false)?;
+    let notes = notes_text(notes)?;
+    if let Some(phone) = &phone {
+        validate_phone(phone)?;
+    }
     if let Some(email) = &email {
-        let parts: Vec<_> = email.split('@').collect();
-        if parts.len() != 2
-            || parts[0].is_empty()
-            || parts[1].is_empty()
-            || !parts[1].contains('.')
-            || parts[1].starts_with('.')
-            || parts[1].ends_with('.')
-            || email.chars().any(char::is_whitespace)
-        {
-            return Err(ProfileError::InvalidInput(
-                "Enter an email such as name@example.com".into(),
-            ));
-        }
+        validate_email(email)?;
     }
     if !update_organization_details(
         conn,
@@ -433,6 +497,27 @@ pub fn set_organization_status(
         .into_iter()
         .find(|org| org.id == id)
         .ok_or(ProfileError::NotFound("Organization not found"))
+}
+
+pub fn set_organization_region(
+    conn: &Connection,
+    id: i64,
+    region: Option<String>,
+) -> Result<Organization, ProfileError> {
+    validate_id(id)?;
+    let region = text(region.unwrap_or_default(), "Region", 120, false)?;
+    let changed = conn.execute(
+        "UPDATE organizations SET region=?1,
+        updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?2 AND archived_at IS NULL",
+        params![region, id],
+    )?;
+    if changed == 0 {
+        return Err(ProfileError::NotFound("Organization not found or archived"));
+    }
+    get_organizations(conn)?
+        .into_iter()
+        .find(|org| org.id == id)
+        .ok_or(ProfileError::NotFound("Organization not found or archived"))
 }
 #[derive(Debug, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -512,4 +597,28 @@ pub fn update_organization_extra(
         .into_iter()
         .find(|org| org.id == id)
         .ok_or(ProfileError::NotFound("Organization not found"))
+}
+
+/// Combined update: core fields and optional details commit together.
+pub fn update_organization_complete(
+    conn: &mut Connection,
+    id: i64,
+    name: String,
+    region: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
+    details: Option<crate::details::OrganizationDetails>,
+) -> Result<Organization, ProfileError> {
+    let tx = conn.transaction()?;
+    update_organization_profile(&tx, id, name, region, phone, email, notes)?;
+    if let Some(details) = details {
+        crate::details::save_organization(&tx, id, details)?;
+    }
+    let saved = get_organizations(&tx)?
+        .into_iter()
+        .find(|org| org.id == id)
+        .ok_or(ProfileError::NotFound("Organization not found or archived"))?;
+    tx.commit()?;
+    Ok(saved)
 }

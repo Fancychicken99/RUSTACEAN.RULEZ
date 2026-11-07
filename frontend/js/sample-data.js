@@ -31,7 +31,7 @@
     const token = generation;
     const current = () => token === generation && window.crmSession?.authenticated;
     setBusy(true);
-    message.textContent = 'Importing fictional records…';
+    message.textContent = 'Importing sample records…';
     try {
       const report = await window.crmApi.importSampleData();
       if (!current()) return;
@@ -41,7 +41,7 @@
       const refreshed = await window.crmDirectory.refresh();
       if (!current()) return;
       const result = `Sample import complete: ${report.contractors_added} contractors and ${report.organizations_added} organizations added; ${report.contractors_skipped} contractors and ${report.organizations_skipped} organizations skipped.`;
-      document.getElementById('workspace-message').textContent = result + (refreshed ? '' : ' The list could not update automatically; reopen the workspace to reload.');
+      window.crmNotify(result + (refreshed ? '' : ' The list could not update automatically; reopen the workspace to reload.'), refreshed ? 'success' : 'error');
     } catch (error) {
       if (!current()) return;
       message.textContent = error.message;

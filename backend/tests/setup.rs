@@ -38,7 +38,7 @@ fn test_initialize_database() -> rusqlite::Result<()> {
     // Confirm the database migration version
     let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
 
-    assert_eq!(version, 4);
+    assert_eq!(version, 6);
 
     Ok(())
 }

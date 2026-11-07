@@ -1,5 +1,17 @@
 # Sprint 2: finished-product plan
 
+November 7 user update: use sprint2-user-requirements.md for the reconciled laptop
+checklist. User confirmed name plus phone OR email and explicitly required
+database encryption and offline password recovery. Current source batch implements
+details persistence (v5), security/recovery, country-aware phone formatting,
+organization-region editing, system theme/toasts/pagination/login/logo fixes.
+Final testing is now active: 49 backend and six bridge/voice tests pass. Windows
+0.2.0 release compiled and an NSIS installer was generated; final source/package
+alignment and UI accessibility are being checked. See
+final-submission-verification.md for current evidence and remaining native Mac,
+installed-build and manual accessibility checks. No ordinary app data migrated.
+The source-audit table below is historical, not the current completion matrix.
+
 Audit date: November 6, 2026. Local source: c172964 on dev; clean at audit start.
 Broughnut owns the remaining frontend, backend, bridge, testing, and delivery
 work. Earlier teammate ownership does not block authorized implementation.
@@ -29,9 +41,9 @@ documentation records earlier native build evidence, not current release proof.
 | Packaging | Windows NSIS/offline WebView2 and macOS universal app/DMG scripts plus native CI | Build latest finished source, test fresh installations/upgrades and installed workflows, provide stable downloads/version/checksums; decide release signing/notarization. |
 | Branding/tables | Hippo Harbor assets; locally vendored DataTables, jQuery, IMask | Check every requested layout, filter, notification, empty-state and pagination behavior in both themes; remove stale wording. |
 | Theme | Saved manual light/dark toggle | Implement system preference initialization and live system-theme changes. |
-| Contractor fields | UI collects split name and additional fields; Rust ProfileFields supports split names | Stop discarding split fields in add-contractor.js IPC construction; inventory and persist all agreed fields. |
-| Contact rules | UI contains US-specific phone validation; backend validates email but allows both contact fields empty | Require email OR phone at both boundaries; country-aware formatting/numeric/length validation; keep other agreed optional fields optional. |
-| Organizations | Create/update/archive commands; backend additional-field functions; inline contractor UI | Persist secondary contacts/extra fields currently omitted from request; define atomic organization/inline-contractor save; organization status control. |
+| Contractor fields | Separate names now save/reopen; legacy full names preserved with explicit conversion; additional fields inventoried | Persist remaining agreed address/custom/media fields; requiredness decisions beyond current rules remain pending. |
+| Contact rules | Standalone/inline contractors and Rust now require phone OR email; each provided value validated; US mask removed | Country-specific numbering validation awaits connected geography; organization/secondary-contact rules remain to define. |
+| Organizations | Create/update/archive commands; backend additional-field functions; atomic organization/optional-inline-contractor creation | Persist secondary contacts/extra fields currently omitted from request; organization status control. |
 | Media | Backend copy functions; frontend file selectors collect filenames | Implement actual file content/selection handoff, validation, local storage, protected display, replacement and restart checks for photos/logos. |
 | Status/order/archive | Contractor Active/Inactive command; archive path; existing retired/deceased seed statuses | Support full intended statuses, audited changes, retired/deceased-last default ordering across pagination; verify explicit-sort/reset behavior; archive browsing/restore per agreed scope. |
 | Tags/skills | Backend tables/functions/tests | Authenticated commands, UI assignment/removal, organization and contractor filtering, consistent accessible tag colors. |
@@ -80,6 +92,17 @@ Each feature is developed as a small frontend-to-database slice and tested when
 implemented. Bridging and testing happen throughout; the final pass consolidates
 regression and installed-release evidence. Explain Rust with short Python
 comparisons while developing; do not infer proficiency from agent-written code.
+
+November 6 implementation start: input-contract-inventory.md now lists all 44
+static controls plus generated and planned inputs/actions, validation/persistence
+gaps, sensitivity and provisional voice suitability. IPC docs audited against
+the 17 actual commands and structured-name/organization responses. Inventory is
+not field-selection approval: Whisper remains deferred. Baseline Rust/SQL/branding
+repairs are recorded in integration-changes.md; next is reliable saved records.
+Structured-name and either-contact slice now passes 45 backend/four bridge tests
+plus real Windows UI/restart checks. Remaining reliable-save work includes
+addresses/custom fields. Organization-plus-inline-contractor creation now uses
+one transaction and retains the form draft after failed saves.
 
 ## Release acceptance
 

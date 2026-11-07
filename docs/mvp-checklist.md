@@ -1,5 +1,11 @@
 # Proposed Sprint 1 MVP evidence checklist
 
+November 7: the MVP has already been demonstrated. Current work targets the full
+final Sprint 2 submission. This checklist is historical; use
+final-submission-verification.md for current source evidence and platform limits.
+All 49 backend and six bridge/voice tests pass; final UI/package checks continue.
+
+
 Updated October 31, 2026. Broughnut now requires Windows AND macOS for MVP.
 See mvp-distribution.md for build outputs and per-platform demo steps.
 This maps the proposed revised SOW to current evidence;

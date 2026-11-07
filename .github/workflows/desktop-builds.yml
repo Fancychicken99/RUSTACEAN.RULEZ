@@ -1,4 +1,4 @@
-name: Windows and macOS MVP builds
+name: Windows and macOS final submission builds
 
 on:
   workflow_dispatch:
@@ -21,6 +21,8 @@ jobs:
             platform: macos-universal
             script: package:macos
     runs-on: ${{ matrix.os }}
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/src-tauri/target
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +38,12 @@ jobs:
         if: runner.os == 'macOS'
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Prepare Windows crypto build tools
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: . ./scripts/prepare-windows-build.ps1
+      - name: Prepare pinned offline dictation resources
+        run: npm run prepare:voice
       - name: Verify packaged UI asset integrity
         run: node scripts/check-ui-assets.cjs
       - name: Backend tests
@@ -90,7 +98,6 @@ jobs:
           name: Hippo-Harbor-CRM-${{ matrix.platform }}-${{ github.sha }}
           if-no-files-found: error
           path: |
-            src-tauri/target/release/rustacean_crm.exe
             src-tauri/target/release/bundle/nsis/*-setup.exe
       - name: Upload macOS packages
         if: runner.os == 'macOS'

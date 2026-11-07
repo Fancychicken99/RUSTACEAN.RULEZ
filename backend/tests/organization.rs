@@ -1,9 +1,9 @@
 use rusqlite::Connection;
 
 use secure_crm_backend::database::{
-    add_organization, add_organization_archive_field, archive_organization, create_tables,
-    get_organizations, update_organization,
+    add_organization, archive_organization, get_organizations, update_organization,
 };
+use secure_crm_backend::setup::initialize_database;
 
 #[test]
 fn test_get_organizations() {
@@ -11,8 +11,7 @@ fn test_get_organizations() {
     let conn = Connection::open_in_memory().unwrap();
 
     // Create the database tables
-    create_tables(&conn).unwrap();
-    add_organization_archive_field(&conn).unwrap();
+    initialize_database(&conn).unwrap();
 
     // Add two fictional organizations
     add_organization(&conn, "Example Defense LLC", "East Nairobi").unwrap();
@@ -38,8 +37,7 @@ fn test_update_organization() {
     // Create temporary database
     let conn = Connection::open_in_memory().unwrap();
 
-    create_tables(&conn).unwrap();
-    add_organization_archive_field(&conn).unwrap();
+    initialize_database(&conn).unwrap();
 
     // Add fictional organization
     let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi").unwrap();
@@ -66,8 +64,7 @@ fn test_archive_organization() {
     // Create temporary database
     let conn = Connection::open_in_memory().unwrap();
 
-    create_tables(&conn).unwrap();
-    add_organization_archive_field(&conn).unwrap();
+    initialize_database(&conn).unwrap();
 
     // Add a fictional organization
     let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi").unwrap();

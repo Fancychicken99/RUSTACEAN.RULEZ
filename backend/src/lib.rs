@@ -3,9 +3,11 @@ pub mod auth;
 pub mod contacts;
 pub mod database;
 pub mod decay;
+pub mod details;
 pub mod filtering;
 pub mod history;
 pub mod images;
+pub mod media;
 pub mod profiles;
 pub mod protected;
 pub mod search;
@@ -14,6 +16,9 @@ pub mod session;
 pub mod setup;
 pub mod skills;
 pub mod tags;
+pub mod transfer_dialog;
+pub mod vault;
+pub mod workspace;
 #[cfg(test)]
 mod tests {
     use super::database::{

@@ -10,6 +10,7 @@ use secure_crm_backend::{
 
 fn fields(name: &str) -> ProfileFields {
     ProfileFields {
+        details: None,
         full_name: name.to_string(),
         prefix: None,
         first_name: None,
@@ -40,7 +41,7 @@ fn repeated_import_preserves_user_records_edits_archives_skills_and_contact_date
         (report.organizations_added, report.contractors_added),
         (6, 60)
     );
-    assert_eq!(get_contractors(&conn).unwrap().len(), 61);
+    assert_eq!(get_contractors(&conn).unwrap().len(), 57);
     let imported_id: i64 = conn
         .query_row(
             "SELECT contractor_id FROM synthetic_contractors WHERE record_key='contractor-001'",
@@ -98,7 +99,7 @@ fn repeated_import_preserves_user_records_edits_archives_skills_and_contact_date
             .as_deref(),
         Some("manual@example.com")
     );
-    assert_eq!(get_contractors(&conn).unwrap().len(), 60);
+    assert_eq!(get_contractors(&conn).unwrap().len(), 56);
     assert_eq!(
         conn.query_row("SELECT COUNT(*) FROM contact_events", [], |r| r
             .get::<_, i64>(0))
@@ -115,7 +116,8 @@ fn repeated_import_preserves_user_records_edits_archives_skills_and_contact_date
 
 #[test]
 fn invalid_late_record_and_database_failure_roll_back_the_whole_import() {
-    let mut conn = Connection::open_in_memory().unwrap();
+    let directory = tempfile::tempdir().unwrap();
+    let mut conn = Connection::open(directory.path().join("sample-rollback.db")).unwrap();
     initialize_database(&conn).unwrap();
     let mut dataset: serde_json::Value = serde_json::from_str(SAMPLE_DATA).unwrap();
     dataset["contractors"][59]["profile"]["email"] = "not-real@invalid.test".into();

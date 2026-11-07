@@ -1,8 +1,7 @@
 use rusqlite::Connection;
 
-use secure_crm_backend::database::{
-    add_contractor, add_organization, add_profile_fields, create_tables,
-};
+use secure_crm_backend::database::{add_contractor, add_organization, create_tables};
+use secure_crm_backend::setup::initialize_database;
 
 use secure_crm_backend::skills::{
     add_skill, assign_skill, create_skill_tables, get_contractors_by_skill,
@@ -48,9 +47,7 @@ fn test_filter_contractors_by_skill() -> rusqlite::Result<()> {
     let conn = Connection::open_in_memory()?;
 
     // Create tables and contractor profile fields
-    create_tables(&conn)?;
-    add_profile_fields(&conn)?;
-    create_skill_tables(&conn)?;
+    initialize_database(&conn)?;
 
     // Create fictional organization
     let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi")?;

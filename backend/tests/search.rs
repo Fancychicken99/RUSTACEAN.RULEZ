@@ -1,10 +1,9 @@
 use rusqlite::Connection;
 
-use secure_crm_backend::database::{
-    add_contractor, add_organization, add_organization_archive_field, create_tables,
-};
+use secure_crm_backend::database::{add_contractor, add_organization};
 
-use secure_crm_backend::skills::{add_skill, assign_skill, create_skill_tables};
+use secure_crm_backend::setup::initialize_database;
+use secure_crm_backend::skills::{add_skill, assign_skill};
 
 use secure_crm_backend::search::search_contractors;
 
@@ -12,9 +11,7 @@ use secure_crm_backend::search::search_contractors;
 fn test_combined_search() -> rusqlite::Result<()> {
     let conn = Connection::open_in_memory()?;
 
-    create_tables(&conn)?;
-    add_organization_archive_field(&conn)?;
-    create_skill_tables(&conn)?;
+    initialize_database(&conn)?;
 
     let east = add_organization(&conn, "Example Defense LLC", "East Nairobi")?;
 

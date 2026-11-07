@@ -3,6 +3,7 @@ param(
     [switch]$Release
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'prepare-windows-build.ps1')
 $cargoCommand = Get-Command cargo -ErrorAction SilentlyContinue
 $cargoPath = if ($cargoCommand) { $cargoCommand.Source } else { Join-Path $env:USERPROFILE '.cargo\bin\cargo.exe' }
 if (-not (Test-Path -LiteralPath $cargoPath)) { throw 'Cargo was not found. See docs/rust-development.md.' }
@@ -13,6 +14,8 @@ if ($Action -eq 'Package') {
     $env:PATH = (Split-Path $cargoPath) + [IO.Path]::PathSeparator + $env:PATH
     Push-Location $projectRoot
     try {
+        & node (Join-Path $PSScriptRoot 'prepare-voice.cjs')
+        if ($LASTEXITCODE -ne 0) { throw 'Offline voice resource preparation failed.' }
         & node $cli build --bundles nsis -- --locked
         if ($LASTEXITCODE -ne 0) { throw "Desktop packaging failed (exit $LASTEXITCODE)." }
     } finally { Pop-Location }

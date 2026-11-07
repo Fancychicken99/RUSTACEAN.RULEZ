@@ -1,5 +1,79 @@
 # MVP integration changes
 
+## Laptop requirements, details, security and UI — November 7 (UNVERIFIED)
+
+User authorized development with testing deferred, branch review and visual
+polish; supplied laptop requirements, required encryption/recovery, confirmed
+name plus phone OR email and reported an oversized logo. All fetched branches
+are already contained in dev. No merge, branch switch, commit or push.
+
+- Backend/Josseline files: new details.rs and setup.rs/database.rs implement
+  transactional v5 custom JSON and bounded address/secondary-contact persistence.
+  profiles.rs saves details within core/inline transactions, shares contact
+  validation, normalizes multiline notes and adds organization-region setter.
+  search.rs/filtering.rs/decay.rs/skills.rs return the same new fields in all
+  Contractor read paths so filtered edits preserve details.
+- Backend: new vault.rs plus session.rs/lib.rs implement SQLCipher, random key,
+  separate password/recovery wrapping, atomic metadata, process lock, verified
+  migration and guarded cleanup. See security-and-recovery.md for boundaries.
+- Bridge/Broughnut: commands.rs/main.rs add optional details, new auth/setup
+  responses and five recovery/password/cleanup/region commands (22 total).
+  Logout/observed expiry closes real DB connection; credentials cleared best
+  effort; authentication failures receive bounded in-process cooldowns.
+- Frontend/Connor: add-contractor.js sends/reloads details and secondary contacts,
+  rejects duplicate/incomplete/reserved custom fields, preserves archived links,
+  fixes custom-row initialization order and labels relation selectors. Optional
+  role; Basic Details defaults; explicit region editor preserves contractor draft
+  and explains that organization region affects all linked contractors.
+- phone-input.js adds offline country suggestions and national-number calling
+  code normalization when possible; preserves explicit + numbers and empty fields.
+- security-lock.js/index.html add key acknowledgement, recovery/password-change
+  forms, migration notice/cleanup, Harbor copy, remove Private workspace tag and
+  unavailable-logo messages. Correct logo attributes from 1254px to 140/54px.
+- theme-init.js/theme-toggle.js/global-ui.js/styles.css unify OS-driven theme,
+  add manual Settings modes, bounded auth/logo layout, dark pagination and bottom
+  left success toasts (fade/pause/dismiss). Persistent errors remain available.
+  contractor-list.js/sample-data.js route notifications; global City labels and
+  saved-field country/city filters replace stale unavailable behavior.
+- Manifests/lockfiles pin SQLCipher/vendored crypto, AES-GCM, random/zeroize/SHA256/
+  locking/tempfile dependencies. .gitignore excludes vault metadata/locks/journals.
+  Existing fixture constructors/version assertion updated for details/schema5.
+
+NO compile/tests/build/launch/new visual review or actual migration for this batch.
+Rust formatting and dependency resolution are not verification. Earlier 46 backend/
+four bridge/Windows smoke passes cover earlier source only. All work uncommitted;
+normal user DB untouched. Final checks must adapt Node plaintext SQLite smoke
+inspection and setup-key acknowledgement, add new feature/security regressions,
+resolve vendored crypto prerequisites (Perl/NASM not on PATH here), and verify
+native installations/WCAG 2.2 AA. No security/accessibility/Mac acceptance claim.
+Remaining: media, full statuses/history/archive, tags/skills/Soundex, samples,
+native actions, portable transfer and final release. Whisper remains deferred.
+
+
+## Atomic organization and optional contractor — November 7, 2026
+
+Broughnut authorized continuing development. Backend (Josseline-owned)
+profiles.rs shares a private contractor insertion helper between standalone
+and combined creation. The caller owns one transaction; validation/write/commit
+failure prevents partial records. Existing create_organization_profile delegates
+with no contractor for compatibility.
+
+Bridge commands.rs adds optional contractor: ProfileFields to OrganizationRequest
+and calls the combined operation after the session check. No new command/schema/
+dependency. Response stays Organization. Frontend (Connor-owned)
+add-contractor.js sends one createOrganization request, removing the second
+createContractor call and partial-success path. Errors keep draft/modal for retry.
+tauri-api.js documents the field; IPC/inventory/release/continuity docs updated.
+
+Checks: 46 backend/four bridge tests PASS; Windows debug build PASS; JS syntax,
+seven UI integrity declarations and diff whitespace PASS. Backend regression and
+real-window smoke inject SQLite failure after organization insertion, verify no
+partial records, then retry/reopen to verify exactly one linked pair. UI preserves
+draft on failure. Full smoke passed; latest artifacts nNgvxO in Windows temp.
+Sandbox WebView2 launch timed out; outside-sandbox rerun passed with isolated DB.
+No ordinary user DB touched; no Mac/installed-package acceptance. Unsupported
+address/secondary-contact/custom/media fields remain pending. Uncommitted.
+
 ## Ownership and recording rule — October 29, 2026
 
 Broughnut explicitly owns all remaining work needed to achieve the MVP, including
@@ -337,3 +411,99 @@ Settings remains reachable beside a long directory. No IPC or schema changes.
 Verification: JavaScript syntax, seven asset integrity declarations and whitespace
 checks passed. Native desktop flow was not rerun. Existing committed merge-conflict
 markers in index.html branding were observed and left outside this change.
+
+## Sprint 2 baseline repair and input inventory — November 6, 2026
+
+User authorized starting development after HANDOFF IN at e506cdd. Local changes,
+not committed/pushed. Inventory precedes new saved-field or voice implementation.
+
+| Files | What and why |
+| --- | --- |
+| frontend/index.html (Connor's UI); docs/branding.md | Removed both committed conflict alternatives; retained current-branch compact mark + live Hippo Harbor text, preserving artwork assets. Branding docs reflect the actual chosen markup. |
+| backend/src/decay.rs, filtering.rs (Josseline's queries) | Added missing comma after organization_id before new structured-name columns; fixes real SQLite prepare errors in follow-up and region reads. No schema migration or query-filter behavior change. |
+| backend/tests/decay.rs, filtering.rs, organization.rs, search.rs, skills.rs | Read-test setups now apply the same initialize_database migrations as the executable; old schemas lacked split-name/status columns. Existing query/archive assertions retained. No missing columns hidden by removing query fields. |
+| src-tauri/src/commands.rs | Filled the five new optional-name fields in the existing legacy full_name test helper, restoring test compilation. No production request or command changes. |
+| docs/input-contract-inventory.md | Audits 43 static native controls plus generated and planned inputs/actions: types, requiredness, limits, persistence/IPC destination, sensitivity and provisional voice suitability. Records dropped fields, contact-rule mismatch, non-atomic inline creation and missing transfer/media/history contracts. |
+| docs/ipc-contract.md | Corrected stale command count (17), supported split-name request/response fields, organization responses/status model, timestamps and current vs intended rules. Existing implementations documented; no new IPC fields introduced by this slice. |
+| Release/voice plans and personal notes | Inventory linked, Whisper remains deferred until actual field/model selection; next reliable-save slice and evidence recorded. |
+
+Checks on current local source: all 43 backend and four bridge tests PASS;
+locked Windows debug build PASS; full real UI smoke PASS, including authenticated
+Settings/sample confirmation/import/repeat and existing CRUD/filter/restart flows.
+Seven asset-integrity declarations, marker scan and diff whitespace passed.
+Imported-directory screenshot inspected at temporary smoke directory 2POtZa;
+disposable DB only, no ordinary records imported/reset. Controlled UI transport
+failure tests remain simulations. No new Mac/release-installed acceptance claim.
+
+Still incomplete: structured-name UI payload, phone-or-email/country-aware phone
+rules, address/custom/secondary-contact/media persistence and remaining release
+plan features. Inventory is not implementation or approval of voice field scope.
+
+## Structured contractor names and phone-or-email — November 6, 2026
+
+Authorized by user continuation; local changes remain uncommitted with the prior
+baseline slice. No migrations/dependencies/new commands in this change.
+
+| Files | What changed and why |
+| --- | --- |
+| backend/src/profiles.rs (Josseline's workflows) | First/last request presence now requires a valid pair even if full_name exists. Contractor create/update require phone or email, validate every supplied value, and accept documented international-format phone syntax instead of arbitrary text. Validation precedes DB writes. |
+| frontend/js/add-contractor.js, index.html (Connor's forms) | Send every supported name part; Rust derives full_name. Legacy full names get a dedicated editor and explicit conversion, preserving all words. Preserve existing prefix/suffix values beyond presets. Remove US-only mask; contact alternatives/validation work for standalone and inline contractors. Inline hidden fieldset disabled, required flags limited to actual mandatory controls. Invalid-tab fields are revealed before native validation/focus. Full payload console logging removed. |
+| backend/tests/profile_workflows.rs | Added contact alternatives/invalid supplied values/count invariants and rejected-edit preservation, plus structured/legacy name edits, explicit clearing, rejected partial names and reopen checks. Existing SQL rollback tests retained. |
+| scripts/test-desktop-smoke.cjs | Form-fill helper dispatches input/change as typing/selecting does. Actual email-only create, international phone-only edit, all name parts after restart, contact errors, legacy-name preservation/conversion and inline email-only restart. Existing CRUD/filter/import/lock coverage retained. |
+| IPC/inventory/release/learning/checkpoint docs | Records implemented rules, full replacement semantics, legacy mode and exact verification. National numbering validation, organization contact rules and unrelated persistence remain explicit gaps. |
+
+Checks: 45 backend tests/four bridge tests PASS; locked Windows debug build PASS;
+expanded real-window smoke PASS against disposable SQLite, including existing
+Settings/sample import and rollback/lock-related regressions. Seven local UI asset
+integrity declarations and JS syntax pass. No ordinary DB changes, Mac execution,
+release installer or installed-build acceptance claim. Latest temp smoke i7YgHN; legacy editor screenshot inspected.
+
+Phone syntax is an application policy (7–15 ASCII digits, optional leading + with
+nonzero next digit, spaces/hyphens/balanced parentheses), not a verified active
+number or country-specific numbering-plan check. Inline org+contractor save is
+still two calls and can partially commit on a backend failure; atomic save is next.
+Address/custom/secondary-contact/media fields remain to integrate. Whisper not
+installed or activated; field scope remains pending.
+
+Final preservation review also found existing role values outside UI presets
+displayed blank. Editor now retains them as safe temporary select options, with
+the same cleanup as custom prefix/suffix values. Smoke saves a legacy record
+with a contact-only change and checks exact name, optional name metadata and
+original nonpreset role after restart. No role-requiredness change introduced.
+
+### International phone formatting — November 7, 2026
+
+Authorized by Broughnut's request for an international mask. Frontend ownership
+edits: index.html replaces the unused US-mask script include with a pinned local
+libphonenumber-js bundle and phone-input.js. The new controller formats all four
+phone controls from their + calling code, preserves digits, leaves local/invalid
+text visible, and handles caret/range edits and separator deletion. Vendor license,
+source, SHA512 package verification and shipped SRI are recorded alongside it.
+No external runtime requests or Rust/schema/IPC changes. Secondary organization
+phone persistence remains pending.
+
+Checks: Windows debug build and full real-window smoke PASS, covering UK/France/
+India/US native typing, bulk insertion, middle/range replacement, Backspace/Delete,
+local/invalid text, organization/inline controls and formatted phone after restart.
+Latest isolated smoke artifacts: rustacean-desktop-smoke-ylDkQj in Windows temp.
+JS syntax and seven asset integrity declarations pass. Prior 45 backend/four
+bridge test results unchanged; no new Mac/installed-release verification claimed.
+# Final verification continuation — November 7, 2026
+
+Frontend changes to Connor's UI: darker light-theme navigation/shortcut text and
+warning button colors address actual axe contrast failures; brand link uses its
+visible name to avoid an accessible-name mismatch. On lock, global-ui.js clears
+DataTables caches and workspace-tools.js clears hidden classification/status/
+organization options and history, preventing retained private record text.
+No database reset or ordinary user-data migration was performed. Expanded real
+native tests are running; full results and platform limitations are maintained
+in final-submission-verification.md. Backend/bridge verification: 49 and six
+tests respectively passed, including actual encryption and native transcription.
+
+Follow-up scans also drove populated-input, dark heading/table/outline-button and
+empty-photo caption contrast fixes. Record-tools scroll regions are keyboard
+focusable. Ten focused light/dark scans passed; the full-suite path additionally
+exercised the no-photo state. Source formatting was normalized with cargo fmt.
+The native workflow shares the Cargo target directory to avoid duplicate crypto
+builds and distributes the Windows installer rather than an incomplete loose
+executable; the macOS voice binary targets the app's minimum macOS 13 version.

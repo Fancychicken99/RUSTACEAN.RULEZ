@@ -67,6 +67,10 @@ struct SeedOrganization {
     key: String,
     name: String,
     region: String,
+    details: Option<crate::details::OrganizationDetails>,
+    phone: Option<String>,
+    email: Option<String>,
+    notes: Option<String>,
 }
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -77,6 +81,8 @@ struct SeedContractor {
     status: String,
     skills: Vec<String>,
     last_contact_at: Option<String>,
+    #[serde(default)]
+    archived: bool,
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -140,7 +146,7 @@ pub fn import_dataset(conn: &mut Connection, json: &str) -> Result<ImportReport,
     let mut organizations = HashMap::new();
     for org in dataset.organizations {
         if !valid_key(&org.key)
-            || !org.name.starts_with("Fictional ")
+            || org.name.trim().is_empty()
             || org.name.chars().count() > 200
             || org.name.chars().any(char::is_control)
             || org.region.trim().is_empty()
@@ -169,11 +175,27 @@ pub fn import_dataset(conn: &mut Connection, json: &str) -> Result<ImportReport,
             id
         } else {
             tx.execute(
-                "INSERT INTO organizations(name, region) VALUES (?1, ?2)",
+                "INSERT INTO organizations(name, region,created_at) VALUES (?1, ?2,strftime('%Y-%m-%dT%H:%M:%fZ','now'))",
                 params![org.name.trim(), org.region.trim()],
             )?;
             let id = tx.last_insert_rowid();
             validate_id(id)?;
+            crate::profiles::update_organization_profile(
+                &tx,
+                id,
+                org.name.clone(),
+                Some(org.region.clone()),
+                org.phone,
+                org.email,
+                org.notes,
+            )?;
+            let mut details = org.details.unwrap_or_default();
+            details.image = Some(sample_image(id as u8)?);
+            crate::details::save_organization(&tx, id, details)?;
+            let tag = crate::tags::add_tag(&tx, "Demonstration")?;
+            crate::tags::assign_organization_tag(&tx, id, tag)?;
+            let skill = crate::skills::add_skill(&tx, "Logistics")?;
+            crate::skills::assign_organization_skill(&tx, id, skill)?;
             tx.execute(
                 "INSERT INTO synthetic_organizations VALUES (?1, ?2, ?3)",
                 params![dataset.dataset_id, org.key, id],
@@ -187,7 +209,7 @@ pub fn import_dataset(conn: &mut Connection, json: &str) -> Result<ImportReport,
     for record in dataset.contractors {
         if !valid_key(&record.key)
             || !keys.insert(record.key.clone())
-            || !record.profile.full_name.starts_with("Fictional ")
+            || record.profile.full_name.trim().is_empty()
             || !matches!(
                 record.status.as_str(),
                 "Active" | "Inactive" | "Retired" | "Deceased"
@@ -250,12 +272,35 @@ pub fn import_dataset(conn: &mut Connection, json: &str) -> Result<ImportReport,
         tx.execute("INSERT INTO contractors(full_name, organization_id, status, role, email, phone) VALUES (?1,?2,?3,?4,?5,?6)", params![profile.full_name, organization_id, record.status, profile.role, profile.email, profile.phone])?;
         let id = tx.last_insert_rowid();
         validate_id(id)?;
+        tx.execute("UPDATE contractors SET prefix=?1,first_name=?2,middle_name=?3,last_name=?4,suffix=?5,created_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?6",params![profile.prefix,profile.first_name,profile.middle_name,profile.last_name,profile.suffix,id])?;
+        let mut details = profile.details.unwrap_or_default();
+        details.image = Some(sample_image(id as u8)?);
+        details.extra_information.insert(
+            "Organization link".into(),
+            crate::details::CustomField::Relation {
+                entity_type: crate::details::EntityType::Organization,
+                entity_id: organization_id,
+            },
+        );
+        crate::details::save_record(&tx, id, false, details)?;
+        let tag = crate::tags::add_tag(
+            &tx,
+            if record.archived {
+                "Archived example"
+            } else {
+                "Demonstration"
+            },
+        )?;
+        crate::tags::assign_contractor_tag(&tx, id, tag)?;
         for skill in record.skills {
             let skill_id = add_skill(&tx, &skill)?;
             assign_skill(&tx, id, skill_id)?;
         }
         if let Some(date) = record.last_contact_at {
-            tx.execute("INSERT INTO contact_events(contractor_id, method, note, contacted_at) VALUES (?1, 'Other', 'Fictional sample contact', ?2)", params![id, date])?;
+            tx.execute("INSERT INTO contact_events(contractor_id, method, note, contacted_at) VALUES (?1, 'Other', 'Synthetic demonstration contact', ?2)", params![id, date])?;
+        }
+        if record.archived {
+            tx.execute("UPDATE contractors SET archived_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?1",[id])?;
         }
         tx.execute(
             "INSERT INTO synthetic_contractors VALUES (?1, ?2, ?3)",
@@ -265,4 +310,32 @@ pub fn import_dataset(conn: &mut Connection, json: &str) -> Result<ImportReport,
     }
     tx.commit()?;
     Ok(report)
+}
+
+// Procedural synthetic placeholder, never a photograph of a real person.
+fn sample_image(seed: u8) -> Result<crate::media::ImageUpload, SeedError> {
+    let color = [
+        24u8.saturating_add(seed % 70),
+        90u8.saturating_add(seed % 60),
+        130u8.saturating_add(seed % 70),
+        255,
+    ];
+    let image = image::RgbaImage::from_fn(64, 64, |x, y| {
+        let dx = x as i32 - 32;
+        let dy = y as i32 - 23;
+        let silhouette = dx * dx + dy * dy < 100
+            || (y > 36 && y < 59 && (x as i32 - 32).abs() < 18 - (y as i32 - 45).abs() / 3);
+        image::Rgba(if silhouette {
+            [240, 246, 250, 255]
+        } else {
+            color
+        })
+    });
+    let mut bytes = std::io::Cursor::new(Vec::new());
+    image::DynamicImage::ImageRgba8(image)
+        .write_to(&mut bytes, image::ImageFormat::Png)
+        .map_err(|_| invalid("Unable to generate synthetic image"))?;
+    Ok(crate::media::ImageUpload {
+        bytes: bytes.into_inner(),
+    })
 }

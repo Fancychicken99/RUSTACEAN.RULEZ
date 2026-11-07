@@ -2,13 +2,17 @@
 
 synthetic-contractors-v1.json is a reusable, entirely fictional dataset generated
 for this project. No real contractor records or images are used. All names and
-organizations are labeled Fictional, emails use example.com, and phone numbers
+organizations are synthetic (without a repeated Fictional display prefix), emails use example.com, and phone numbers
 use the fictional 202-555-0100–0159 range. No credentials are included.
 
-Version fictional-crm-v1 is fixed as of October 30, 2026: 60 profiles, six
+Version fictional-crm-v1 retains stable provenance keys: 60 profiles (56 active
+directory records and four archived examples), six
 organizations/regions, four statuses, six skills, 48 UTC contact timestamps and
 12 never-contacted profiles. Contact dates are stored, not elapsed-day counters;
-elapsed time should be derived from those dates. There are no media paths.
+elapsed time is derived from those dates. Samples include split names, addresses,
+custom fields, secondary organization contacts, tags/skills and generated
+synthetic portraits/logos. Images are created locally during explicit import;
+there are no developer-specific absolute image paths in the dataset.
 
 The explicit authenticated Import fictional samples action embeds this file at
 build time. No automatic startup import and no arbitrary file/path access.

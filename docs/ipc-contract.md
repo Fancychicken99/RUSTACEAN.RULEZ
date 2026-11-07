@@ -1,7 +1,145 @@
-# Initial IPC contract
+# Implemented IPC contract
 
-Updated November 4, 2026. Implemented read/auth and contractor mutation contract.
-JavaScript wrappers exist in frontend/js/tauri-api.js. All fifteen commands below
+## Final Sprint 2 contract — November 7, 2026
+
+31 registered commands in current source. All 49 backend and six bridge/voice
+tests pass, including actual encrypted temporary workspaces and offline engine
+transcription. Native UI/package acceptance is tracked separately in
+final-submission-verification.md. Ordinary installed data was not migrated.
+
+New final commands (all authenticated; frontend calls remain in tauri-api.js):
+
+| Command | Request | Result |
+| --- | --- | --- |
+| workspace_snapshot | {} | {meta,archives,history,contacts,tags,skills} |
+| workspace_action | {request: action object} | null after commit |
+| search_records | {request: search object} | Contractor[] |
+| load_record_image | {request:{kind,id}} | PNG data URI or null |
+| export_workspace | {request:{password,new_password:null}} | export counts or null on native cancellation |
+| import_workspace | {request:{password,new_password}} | {recovery_key,backup_name} or null on native cancellation |
+| open_contact_action | {request:{id,method}} | null after native handoff |
+| transcribe_audio | {request:{audio:number[]}} | recognized text for explicit review |
+| cancel_dictation | {} | null |
+
+kind is contractor or organization; positive IDs are database record IDs.
+workspace_action is tagged by action: taxonomy {kind,id,tags,skills}, restore
+{kind,id}, transfer {id,organization_id}, or organization_status {id,status}.
+Contractor status uses the existing set_contractor_status command; organizations
+support Active/Inactive and contractors additionally support Retired/Deceased.
+Audit history records archive/restore, status changes and organization transfers.
+Snapshot meta contains {kind,id,tags,skills}; archives contain
+{kind,id,name,archived_at}; history contains {kind,id,event,detail,at}.
+
+Search fields are optional/null: region,country,city,organization_id,status,
+query,tag,skill,due_days. Text/phonetic, geography, taxonomy and age filters combine
+in SQL. due_days includes never-contacted records. Archived records are excluded.
+Contractor responses append last_contact_at (UTC timestamp or null) and
+days_since_last_contact (derived nonnegative integer or null).
+
+Profile/organization payloads support a details object with address,
+extra_information and optional image:{bytes:number[]}. Organization details also
+include secondary_phone, secondary_contact and secondary_email. Omitted/null
+details preserve existing details on update; a supplied object replaces the group.
+Custom fields are typed text, long_text or validated relation references. Media
+selection sends actual file bytes; reads use record IDs, never frontend paths.
+All new request types reject unknown fields. See backend/src/details.rs for bounds.
+
+Native transfer dialogs choose paths; import previews counts and asks before
+replacing the workspace. The new password becomes the imported workspace login
+credential; source credentials are excluded. Recovery keys are shown once.
+Native contact method is tel, sms or teams and uses validated stored values;
+handoff does not send a message automatically. Voice accepts canonical mono
+16-bit 16 kHz WAV, at most 120 seconds. Cancellation/locking invalidates results.
+Transcription never automatically saves a record. Errors reject IPC promises;
+UI success is emitted only after committed operations. Dates are UTC SQL
+YYYY-MM-DD HH:MM:SS unless an existing API explicitly documents ISO format.
+
+The security commands below remain part of the 31-command contract.
+
+get_auth_status still accepts {} and does not renew activity. It now returns
+`{ admin_exists: boolean, authenticated: boolean, database_encrypted: boolean,
+legacy_copy_present: boolean }`. admin_exists comes from vault/legacy metadata;
+database_encrypted describes the active configured store, not an integrity
+attestation. Legacy original presence is surfaced until explicit cleanup.
+
+setup_admin still accepts top-level `{password: string}`. Response is now
+`{recovery_key: string}` instead of null. It provisions encryption and returns
+the one-time recovery code; login remains a separate action. Password minimum
+12 Rust characters/max 1024 UTF-8 bytes, untrimmed. login still returns boolean;
+on first successful legacy migration it queues a one-time recovery code.
+
+| Command / JS method | Arguments | Response / behavior |
+| --- | --- | --- |
+| take_recovery_key / takeRecoveryKey | {} | Authenticated; string or null. Consumes pending legacy-migration recovery code. |
+| recover_password / recoverPassword | {request:{recovery_key:string,new_password:string}} | Available locked; {recovery_key:string} for new replacement code; original code/password superseded; data retained, session locked. |
+| change_password / changePassword | {request:{current_password:string,new_password:string}} | Requires login/current password; {recovery_key:string}; replaces password/code, locks session. |
+| remove_original_database / removeOriginalDatabase | {} | Requires login and UI cleanup confirmation; null. Integrity-check encrypted DB, check unchanged original/no sidecars, remove original copy only. |
+| set_organization_region / setOrganizationRegion | {request:{id:positive safe integer,region:string or null}} | Requires login; persisted Organization. Region trim/max120/no controls, blank/null clears. Affects all linked contractors; does not create a contractor. |
+
+Recovery code format: 64 hex characters, displayed as eight groups of eight with
+hyphens. Input max128 bytes; spaces/hyphens ignored and hex case normalized.
+Authentication/recovery failures have bounded in-process cooldowns; errors include
+Please wait before trying again, Invalid recovery key, Incorrect current password,
+encryption/metadata/file errors and Login required. No keys/hashes in auth status;
+only issued recovery code crosses IPC. Missing/corrupt vault metadata refuses
+silent initialization over existing encrypted files. Underlying encrypted key
+must be available before database operations; lock/observed expiry closes it.
+
+Country-driven formatting is frontend-only using offline metadata, not new IPC.
+Stored country remains optional free text. Known country enables national-number
+formatting and calling-code normalization once possible; explicit + numbers keep
+their code, country changes do not rewrite them. Unknown country preserves local
+input. Backend still applies numeric/length/syntax policy, not live-number checks.
+Country/city UI filters narrow saved SQL-region results locally; not full SQL
+combined filtering yet. Region is still organization-derived.
+
+## November 7 details extension — implemented, verification deferred
+
+Per user request, this development batch has not been compiled or tested yet.
+Prior passing checks cover the earlier atomic-save slice only.
+
+ProfileFields adds optional `details: RecordDetails | null`. Organization create
+and update requests add optional `details: OrganizationDetails | null`.
+Omitted/null preserves existing details on update; on create defaults remain.
+An object replaces the entire details group: omitted/blank address fields clear
+to null and omitted extra_information defaults to {}. The current UI sends the
+whole group. Core profile replacement semantics remain unchanged.
+
+RecordDetails: `address` object (optional/default {}), `extra_information` object
+(optional/default {}). Address keys: street_address_1, street_address_2 (optional
+string/null, max 200 each), city, state_province, country (max 100 each). Values
+are trimmed; control characters rejected. OrganizationDetails adds optional
+secondary_phone (max 80), secondary_contact (max 200), secondary_email (max 254).
+Secondary phone/email use contractor syntax validation but are not required.
+Organization main phone now shares that same syntax on create AND update.
+
+extra_information maps unique trimmed names (1–80 characters, no controls) to
+one of these tagged objects (unknown fields/types rejected):
+
+- `{ "type": "text", "value": "..." }`: required trimmed text, max 500, no controls.
+- `{ "type": "long_text", "value": "..." }`: required trimmed text, max 5000;
+  CRLF/CR normalized to LF, LF/tab allowed, other controls rejected.
+- `{ "type": "relation", "entity_type": "contractor" | "organization", "entity_id": positive safe integer }`:
+  target must exist; archived targets allowed to preserve existing links.
+
+At most 30 fields and 65536 serialized UTF-8 bytes total. Duplicate names after
+trimming rejected. Reserved names __proto__, prototype, constructor rejected.
+Frontend rejects incomplete/duplicate/reserved rows instead of silently dropping
+or overwriting them; wholly blank rows are ignored. Relation selectors preserve
+saved archived IDs as labelled options. No automatic relation remapping on import.
+
+Schema version 5 adds JSON-object extra_information columns with {} defaults;
+existing address/secondary columns reused. Migration is transactional. Contractor
+list/single/search/region/skill/follow-up responses all include flat address fields
+and extra_information. Organization response also includes secondary_phone and
+secondary_contact. Details writes are inside the same transaction as core fields
+and optional inline contractor; SQL failures remain generic save errors, validation
+messages remain useful. No new IPC command or filesystem permissions.
+
+Audited November 6, 2026. Implemented read/auth and supported mutation contract.
+Input-to-storage gaps and proposed rules are in input-contract-inventory.md;
+displayed form fields do not establish implemented persistence.
+JavaScript wrappers exist in frontend/js/tauri-api.js. All seventeen commands below
 are implemented in src-tauri/src/commands.rs and registered in main.rs.
 frontend/index.html now uses them in the original CRM layout, without fixtures.
 The Windows debug executable has real UI/IPC smoke coverage for authentication,
@@ -26,8 +164,8 @@ An empty array is success. Option fields serialize to explicit nulls.
 
 | Command / wrapper | Request | Success | Backend and access |
 | --- | --- | --- | --- |
-| get_auth_status / getAuthStatus | {} | { admin_exists: boolean, authenticated: boolean } | admin::admin_exists and session::is_authenticated. Available before login; does not renew activity. |
-| setup_admin / setupAdmin | { password: string } | null | admin::create_first_admin. One-time only; reject if admin exists. Does not automatically log in. |
+| get_auth_status / getAuthStatus | {} | { admin_exists: boolean, authenticated: boolean, database_encrypted: boolean, legacy_copy_present: boolean } | Vault status and session::is_authenticated. Available before login; does not renew activity. |
+| setup_admin / setupAdmin | { password: string } | {recovery_key:string} | Vault provisioning. One-time only; reject if configured. Does not automatically log in. |
 | login / login | { password: string } | boolean | session::login. True starts session; false is invalid credentials and locks session. |
 | logout / logout | {} | null | session::logout. Safe when already locked; database-state lock failures reject. |
 | list_contractors / listContractors | {} | Contractor[] | protected::list_contractors_if_authenticated. Requires active session. |
@@ -65,6 +203,7 @@ wake timing still need system verification.
 | --- | --- | --- |
 | id | integer | SQLite ID, not a prototype UUID. |
 | full_name | string | Stored name; do not infer first/last name splits. |
+| prefix, first_name, middle_name, last_name, suffix | string or null each | Stored structured name parts; null for older full-name-only records. |
 | organization_id | integer or null | Stable organization ID; null only for legacy/unassociated records. |
 | organization_name | string or null | Joined organization name. |
 | region | string or null | Organization region in the current schema. |
@@ -73,6 +212,8 @@ wake timing still need system verification.
 | email | string or null | Email. |
 | phone | string or null | Phone. |
 | photo_path | string or null | Stored reference; does not grant webview access. |
+| street_address_1, street_address_2, city, state_province, country | string or null each | Stored optional address fields. |
+| extra_information | object | Named typed custom fields; empty object for existing records after migration. |
 
 List results exclude archived contractors and are ordered by full_name. IDs must
 remain within JavaScript's safe integer range. Mutation IDs are validated as
@@ -95,9 +236,17 @@ later history/contact commands before implementation.
 
 ## Organization response and UI mapping
 
-Organization has id (integer), name (string), and region (string or null).
-Results exclude archived organizations and are ordered by name. No date fields
-are returned. Contractor responses now include organization_id in list, search,
+Organization has id (integer), name/status (strings), and nullable strings:
+region, phone, email, notes, secondary_phone, secondary_contact, secondary_email, street_address_1, street_address_2,
+city, state_province, country, created_at, updated_at. Organization status defaults
+to Active and is constrained to Active/Inactive in the schema, but its UI switch
+is disabled and no status mutation command is exposed. extra_information is an
+object of typed custom fields. Logo content is not returned in this contract.
+Results exclude archived organizations and are ordered by name. Migration
+backfills created_at as UTC ISO YYYY-MM-DDTHH:MM:SS.sssZ for existing rows;
+ordinary create/update workflows currently leave timestamp values unset/stale.
+Do not present these dates as complete lifecycle auditing.
+Contractor responses include organization_id in list, search,
 region, skill, follow-up, and single-record reads. Rosters, counts, filter values
 and form selections use IDs so duplicate names remain distinct.
 
@@ -109,8 +258,9 @@ search/status/organization filters operate locally on the backend region-query
 results. Region selection and clearing both query SQLite. Dashboard totals and
 region distribution remain based on the full list. No fixtures are loaded.
 
-Skill/decay command filtering, organization update/archive, contact/history,
-media, and native quick actions need later contracts and registered commands.
+Organization update/archive and contact-note insert commands are implemented
+below. Skill/decay/Soundex filtering, contact/history reads, media and native
+quick actions still need commands/contracts. Backend helper existence is not IPC.
 Both index.html and the earlier integration.html use the same IPC wrapper.
 
 ## Contractor mutations and organization creation
@@ -121,7 +271,7 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 
 | Command / wrapper | request fields | Success |
 | --- | --- | --- |
-| create_organization / createOrganization | name: string; region, phone, email, notes: string or null (optional) | Persisted Organization |
+| create_organization / createOrganization | name: string; region, phone, email, notes: string or null (optional); contractor: ProfileFields or null (optional) | Persisted Organization, after both inserts commit |
 | update_organization / updateOrganization | id: integer; name: string; region, phone, email, notes: string or null | Persisted Organization |
 | archive_organization / archiveOrganization | id: integer | null after archive completes |
 | create_contractor / createContractor | organization_id: integer; profile: ProfileFields | Persisted Contractor |
@@ -130,14 +280,26 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 | set_contractor_status / setContractorStatus | id: integer; status: `Active` or `Inactive` | Persisted Contractor |
 | record_contact_note / recordContactNote | id: integer; method: `Email`, `Phone`, `SMS`, `Teams`, or `Other`; note: string | null after insert |
 
-ProfileFields: full_name (required string), role/email/phone (optional string or
-null). Updates REPLACE these profile fields; omitted/blank optional values clear
-them to null. The UI submits all displayed fields. Name is not split/inferred.
+ProfileFields: full_name (string, defaults to empty when omitted); prefix,
+first_name, middle_name, last_name, suffix, role, email, phone (optional string
+or null). With either first_name or last_name supplied as non-null text, both
+must be nonblank after trimming (even when a fallback full_name was supplied);
+full_name is derived by joining the validated name parts in order. Otherwise a
+nonempty legacy full_name is required. Prefix/suffix max 20, first/last max 100,
+middle max 150; combined full_name max 200. Updates REPLACE these fields;
+omitted/null/blank optional values clear them to null. The frontend now submits
+all supported name/contact fields explicitly; full_name is empty for structured
+saves and Rust derives it. Legacy full-name-only records open with an editable
+full-name field and null first/last parts, preserving any stored optional
+prefix/middle/suffix metadata. Conversion to separate fields is explicit rather
+than automatic parsing. Existing prefix/suffix/role values absent from
+the dropdown presets are retained as selectable values. Address/custom/media
+fields remain outside the supported profile request and are still dropped.
 Create requires an existing non-archived organization and starts Active. Editing
 preserves organization_id, status, photo, and history. Status changes use the
 separate set_contractor_status command and accept only Active/Inactive. Transfers
-remain a separate workflow. Organization active/inactive status is not modeled;
-archived_at remains a separate visibility action.
+remain a separate workflow. Organization active/inactive status is stored but
+its status command/UI remains unconnected; archived_at is separate visibility.
 Organization names need not be unique; IDs identify records. Blank region is null.
 Organization phone, email, and notes are trimmed and persisted; email receives the same basic plausibility validation as contractor email. Archiving an organization sets its `archived_at` timestamp in UTC and hides it from the active organization list. Existing contractors retain their records and organization association.
 
@@ -146,8 +308,38 @@ and at most 200 Unicode scalar values; role/region max 120, email max 254, phone
 max 80. Normalized strings may not contain control characters. Optional blanks
 become null. Provided email must have one @, nonempty local/domain portions, a
 dotted domain without leading/trailing dot, and no whitespace. This is a basic
-plausibility check, not complete RFC validation. Phone is free text within its
-length/control limits. Region comes from organization, not a contractor input.
+plausibility check, not complete RFC validation. Contractor saves require at
+least one phone OR email, with each supplied value validated independently.
+Phone accepts 7 to 15 ASCII digits with an optional leading +, ASCII spaces,
+hyphens and balanced non-nested parentheses; a leading + must be followed by
+a nonzero digit. Formatting is preserved after outer whitespace trimming.
+Letters/extensions, extra plus signs, invalid parentheses and too few/many
+digits reject, even if email is valid. Error for neither is
+Enter a phone number or email address. Existing bad contact values need explicit
+correction/clearing when saving, not silent database rewriting.
+Frontend standalone/inline contractor forms enforce the same contact rule and
+show the tab containing an invalid field before reporting native validity.
+The frontend formats numbers beginning with + using locally bundled
+libphonenumber-js 1.13.15 metadata. No country is assumed for local input.
+All four phone controls use it; digit content is preserved during formatting and
+invalid text stays visible for validation. No new request/response fields or
+backend rules. Secondary organization phone persistence remains pending.
+There is no forced US phone mask. This is international-format syntax validation,
+not active-number verification or country-specific numbering-plan validation.
+Country-aware rules await connected geography data. Organization contact
+requiredness/validation is not expanded by this contractor slice.
+Region comes from organization, not a contractor input.
+Organization notes max 5000 currently use the same control-character
+rejection, so multiline textarea content needs a deliberate normalization fix.
+
+Organization creation optionally accepts `contractor` using the existing
+ProfileFields names, nullability and validation. Omitted/null means no inline
+contractor; an object must pass the same validation as standalone creation.
+The organization ID is assigned by the backend; no organization_id inside this
+object. Both records are saved in one transaction; any validation/write/commit
+failure returns an error and leaves neither record. Response stays Organization;
+the normal directory refresh retrieves its linked contractor. UpdateOrganization
+does not accept contractor. No new command, date fields or naming convention.
 
 Inputs are validated again in backend profiles.rs. Contractor create/update use
 transactions and return only after commit; partial field saves roll back. Errors

@@ -1,6 +1,6 @@
 [package]
 name = "rustacean_crm"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [build-dependencies]
@@ -9,8 +9,10 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
-rusqlite = { version = "0.41.0", features = ["bundled"] }
+rusqlite = { version = "0.41.0", features = ["bundled-sqlcipher-vendored-openssl"] }
 secure_crm_backend = { path = "../backend" }
+zeroize = "1"
+tempfile = "3"
 
 [features]
 default = ["custom-protocol"]

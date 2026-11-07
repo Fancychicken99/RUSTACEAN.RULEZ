@@ -67,6 +67,14 @@ pub struct Contractor {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub photo_path: Option<String>,
+    pub last_contact_at: Option<String>,
+    pub days_since_last_contact: Option<i64>,
+    pub street_address_1: Option<String>,
+    pub street_address_2: Option<String>,
+    pub city: Option<String>,
+    pub state_province: Option<String>,
+    pub country: Option<String>,
+    pub extra_information: serde_json::Value,
 }
 
 pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
@@ -86,12 +94,12 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
     c.first_name,
     c.middle_name,
     c.last_name,
-    c.suffix
+    c.suffix, c.street_address_1, c.street_address_2, c.city, c.state_province, c.country, c.extra_information, (SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id), CAST(MAX(0,julianday('now')-julianday((SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id))) AS INTEGER)
  FROM contractors c
  LEFT JOIN organizations o
    ON c.organization_id = o.id
  WHERE c.archived_at IS NULL
- ORDER BY c.full_name",
+ ORDER BY CASE WHEN c.status IN ('Retired','Deceased') THEN 1 ELSE 0 END, c.full_name",
     )?;
 
     let contractors = stmt.query_map([], |row| {
@@ -111,6 +119,14 @@ pub fn get_contractors(conn: &Connection) -> Result<Vec<Contractor>> {
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+            street_address_1: row.get(15)?,
+            street_address_2: row.get(16)?,
+            city: row.get(17)?,
+            state_province: row.get(18)?,
+            country: row.get(19)?,
+            extra_information: crate::details::read_custom(row, 20)?,
+            last_contact_at: row.get(21)?,
+            days_since_last_contact: row.get(22)?,
         })
     })?;
 
@@ -138,7 +154,7 @@ pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> 
     conn.query_row(
         "SELECT c.id, c.full_name, o.name, o.region, c.status,
         c.role, c.email, c.phone, c.photo_path, c.organization_id,
-        c.prefix, c.first_name, c.middle_name, c.last_name, c.suffix
+        c.prefix, c.first_name, c.middle_name, c.last_name, c.suffix, c.street_address_1, c.street_address_2, c.city, c.state_province, c.country, c.extra_information, (SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id), CAST(MAX(0,julianday('now')-julianday((SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id))) AS INTEGER)
  FROM contractors c
  LEFT JOIN organizations o ON c.organization_id = o.id
  WHERE c.id = ?1 AND c.archived_at IS NULL",
@@ -160,6 +176,14 @@ pub fn get_contractor(conn: &Connection, id: i64) -> Result<Option<Contractor>> 
                 middle_name: row.get(12)?,
                 last_name: row.get(13)?,
                 suffix: row.get(14)?,
+                street_address_1: row.get(15)?,
+                street_address_2: row.get(16)?,
+                city: row.get(17)?,
+                state_province: row.get(18)?,
+                country: row.get(19)?,
+                extra_information: crate::details::read_custom(row, 20)?,
+                last_contact_at: row.get(21)?,
+                days_since_last_contact: row.get(22)?,
             })
         },
     )
@@ -234,6 +258,9 @@ pub struct Organization {
     pub status: String,
 
     // Sprint 2 organization information
+    pub secondary_phone: Option<String>,
+    pub secondary_contact: Option<String>,
+    pub extra_information: serde_json::Value,
     pub secondary_email: Option<String>,
     pub street_address_1: Option<String>,
     pub street_address_2: Option<String>,
@@ -248,7 +275,7 @@ pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
     let mut stmt = conn.prepare(
         "SELECT id, name, region, phone, email, notes, status,
        secondary_email, street_address_1, street_address_2,
-       city, state_province, country, created_at, updated_at
+       city, state_province, country, created_at, updated_at, secondary_phone, secondary_contact, extra_information
          FROM organizations
          WHERE archived_at IS NULL
          ORDER BY name",
@@ -271,6 +298,9 @@ pub fn get_organizations(conn: &Connection) -> Result<Vec<Organization>> {
             country: row.get(12)?,
             created_at: row.get(13)?,
             updated_at: row.get(14)?,
+            secondary_phone: row.get(15)?,
+            secondary_contact: row.get(16)?,
+            extra_information: crate::details::read_custom(row, 17)?,
         })
     })?;
 

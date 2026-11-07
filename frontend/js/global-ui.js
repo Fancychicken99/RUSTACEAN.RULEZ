@@ -1,16 +1,36 @@
 (() => {
-  const root = document.documentElement;
-  const storedTheme = (() => { try { return localStorage.getItem('northstar-crm-theme'); } catch { return null; } })();
-
-  window.applyTimeBasedTheme = function applyTimeBasedTheme() {
-    const hour = new Date().getHours();
-    const darkByClock = hour >= 18 || hour < 6;
-    const theme = storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : (darkByClock ? 'dark' : 'light');
-    root.dataset.bsTheme = theme;
-    document.body?.setAttribute('data-bs-theme', theme);
-    return theme;
+  const notification = document.getElementById('workspace-notification');
+  const notificationText = document.getElementById('workspace-message');
+  let notificationTimer;
+  let notificationGeneration = 0;
+  let transient = false;
+  function scheduleDismiss() {
+    clearTimeout(notificationTimer);
+    if (!transient || notification.matches(':hover, :focus-within')) return;
+    const generation = notificationGeneration;
+    notificationTimer = setTimeout(() => {
+      notification.classList.add('notification-leaving');
+      notificationTimer = setTimeout(() => {
+        if (generation === notificationGeneration) window.crmNotify('');
+      }, 200);
+    }, 6000);
+  }
+  window.crmNotify = (text, kind = 'success') => {
+    ++notificationGeneration;
+    clearTimeout(notificationTimer);
+    notification.classList.remove('notification-leaving');
+    notification.hidden = !text;
+    notification.dataset.kind = kind;
+    notificationText.textContent = text;
+    transient = kind === 'success';
+    scheduleDismiss();
   };
-  window.applyTimeBasedTheme();
+  notification.addEventListener('mouseenter', () => { clearTimeout(notificationTimer); notification.classList.remove('notification-leaving'); });
+  notification.addEventListener('focusin', () => { clearTimeout(notificationTimer); notification.classList.remove('notification-leaving'); });
+  notification.addEventListener('mouseleave', scheduleDismiss);
+  notification.addEventListener('focusout', () => setTimeout(scheduleDismiss, 0));
+  document.getElementById('dismiss-notification').addEventListener('click', () => window.crmNotify(''));
+  window.addEventListener('crm:locked', () => window.crmNotify(''));
 
   const sidebar = document.getElementById('sidebar');
   const toggle = document.getElementById('sidebar-toggle');
@@ -23,13 +43,32 @@
     toggle.querySelector('i')?.classList.replace(expanded ? 'bi-chevron-left' : 'bi-chevron-right', expanded ? 'bi-chevron-right' : 'bi-chevron-left');
   });
 
+  window.crmDestroyTable = table => {
+    if (!table || !window.DataTable?.isDataTable(table)) return;
+    const api = new DataTable(table);
+    if (table.dataset.resetOrder) delete table.dataset.manualOrder;
+    else { const order = api.order(); if (order.length) table.dataset.manualOrder = JSON.stringify(order); }
+    api.destroy();
+  };
   window.crmDataTable = function crmDataTable(table) {
     if (!table || !window.DataTable) return;
-    if (DataTable.isDataTable(table)) new DataTable(table).destroy();
+    window.crmDestroyTable(table);
     if (table.querySelectorAll('tbody tr').length && !table.querySelector('tbody td[colspan]')) {
-      new DataTable(table, { pageLength: 10, lengthChange: true, ordering: true, searching: false, autoWidth: false });
+      let order = []; try { if (!table.dataset.resetOrder) order = JSON.parse(table.dataset.manualOrder || '[]'); } catch {}
+      delete table.dataset.resetOrder;
+      new DataTable(table, { order, pageLength: 10, lengthChange: true, ordering: true, searching: false, autoWidth: false });
     }
   };
+  window.addEventListener('crm:locked', () => {
+    document.querySelectorAll('table').forEach(table => {
+      if (window.DataTable?.isDataTable(table)) {
+        const api = new DataTable(table);
+        api.clear();
+        api.destroy();
+        table.querySelector('tbody')?.replaceChildren();
+      }
+    });
+  });
 
   const buttonIcons = [
     [/^(add|save|import)/i, 'bi-plus-circle'], [/^(apply|filter)/i, 'bi-funnel'],

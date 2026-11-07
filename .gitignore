@@ -4,10 +4,15 @@
 *.db
 *.db-shm
 *.db-wal
+*.db-journal
+*.vault.json
+*.vault.lock
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
 node_modules/
+/src-tauri/resources/whisper/
+/src-tauri/resources/voice/
 .env
 .env.local
 .DS_Store
