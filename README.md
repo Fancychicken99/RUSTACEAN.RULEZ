@@ -11,6 +11,7 @@ Windows package status and remaining Mac/manual acceptance. The earlier
 [MVP build evidence](docs/mvp-build-evidence.md) documents older artifacts and
 does not establish that the current final source passed on macOS.
 Use the [final demonstration guide](docs/final-demo-guide.md) for the presentation.
+For end users, follow the [Windows/macOS installation guide](docs/installation.md).
 
 ## Repository layout
 

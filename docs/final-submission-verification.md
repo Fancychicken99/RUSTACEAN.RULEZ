@@ -54,12 +54,17 @@ simulated transcript verified no automatic insertion/save and explicit reviewed
 insertion. This does not prove physical microphone capture or recognition quality;
 the separate real engine test verifies bundled speech recognition on a pinned sample.
 
-The native CI workflow prepares bundled voice resources, tests Rust, and builds
-Windows x64 and macOS universal packages. Current source has not yet been pushed;
-there is no current macOS artifact or native macOS acceptance result. Local
-Windows tests cannot establish microphone permissions, universal binary behavior,
-Gatekeeper behavior or UI operation on macOS. Draft-SOW Linux delivery remains an
-explicit unresolved target; no Linux completion claim is made.
+Source 4cf8cec is published on dev. Native
+[run 42373955371](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/actions/runs/42373955371)
+passed backend and bridge/voice tests on both Windows and macOS. The clean Windows
+runner also passed the full executable UI regression. The Mac job SUCCEEDED:
+universal .app and DMG generated, arm64/x86_64 architectures checked, deep/strict
+ad-hoc signature verified, and packaged process alive after ten seconds. The
+Windows CI release-package build is still running; the local Windows installer
+and release startup already passed. Mac tests include bundled-engine transcription; these
+do not establish physical microphone permissions, Gatekeeper acceptance or Mac UI
+operation. Draft-SOW Linux delivery remains an explicit unresolved target; no
+Linux completion claim is made.
 
 ## Required final checks
 
@@ -72,8 +77,9 @@ explicit unresolved target; no Linux completion claim is made.
   screen-reader and platform checks still require evidence.
 - Windows NSIS generation, bundled model/runtime declarations and release startup:
   passed. Fresh installation/update and installed-feature testing remain separate.
-- Build on native macOS CI after authorized commit/push, then perform Mac UI,
-  microphone and portable-transfer acceptance with the available Mac owner.
+- Native macOS build/package, architecture, signature and process checks: passed.
+  Perform full Mac UI, microphone and portable-transfer acceptance on the available
+  Mac; neither Intel hardware execution nor macOS 13 execution was tested here.
 - Exercise actual microphone capture/review and native file pickers. A successful
   engine sample test does not establish hardware capture end to end.
 
@@ -104,3 +110,20 @@ Installer SHA-256:
 50933fd7519f58d92a19202543425d4f4e6d128b76d7e7eab05b0cdd35d2f75a.
 This ignored build output does not travel through a source Git commit; native CI
 uploads the installer after an authorized push. It has not been published here.
+
+## Ready-to-install delivery folder
+
+Both installers and the install guide are available locally in
+src-tauri/target/installers/. The files are generated/ignored, not Git source:
+
+| Platform | File | Bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| Windows x64 | Hippo Harbor CRM_0.2.0_x64-setup.exe | 355313350 | 50933fd7519f58d92a19202543425d4f4e6d128b76d7e7eab05b0cdd35d2f75a |
+| macOS universal | Hippo Harbor CRM_0.2.0_universal.dmg | 158510026 | bb031578be20ca5b26aa6f647a6e954e9bff989638b02f87fb41536e5b759e2a |
+
+[Mac CI download](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/actions/runs/42373955371/artifacts/13575700414)
+contains the DMG and a metadata-preserving ZIP of the .app. The downloaded outer
+artifact ZIP was verified against GitHub's upload digest
+51d07aed0fbdd1bd69e6625e017a7e4a8e8ccd5c9e0e0f580fe87f66e4a89071.
+The DMG was copied unchanged into the delivery folder. See installation.md for
+Windows setup, Mac drag-to-Applications and the ad-hoc signing/first-open boundary.

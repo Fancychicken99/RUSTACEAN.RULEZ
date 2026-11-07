@@ -1,5 +1,14 @@
 # Rust learning log
 
+## Native installer delivery — November 7, 2026
+
+Windows executables and macOS executable app bundles must be packaged on their
+native platforms. A Mac DMG is the delivery container; the .app inside is copied
+to Applications. Bundled speech resources are required beside the Windows binary
+and inside the Mac bundle, so a loose .exe is not the full distributable. Native
+build/signature/architecture checks differ from installation and microphone/UI
+acceptance. No new user coding practice or independent proficiency was assessed.
+
 ## Final verification — November 7, 2026
 
 Continued development without a quiz or new user coding exercise. Backend tests,

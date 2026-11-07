@@ -13,8 +13,15 @@ C:\Users\Brody Mensonides\AppData\Local\Temp\rustacean-desktop-smoke-QCQXdq.
 Windows release startup PASSED without login/data changes; final NSIS build PASSED.
 Installer: src-tauri/target/release/bundle/nsis/Hippo Harbor CRM_0.2.0_x64-setup.exe,
 355,313,350 bytes; checksum recorded in final-submission-verification.md.
-Native Mac CI still needs authorized commit/push; no current Mac
-artifact or Mac UI acceptance. Installer/fresh-device/physical mic/native picker
+User authorized installer completion; source 4cf8cec is pushed to dev. Native
+Windows/Mac run 42373955371: Mac job SUCCEEDED, including backend/bridge tests,
+actual Whisper transcription, universal app/DMG, architecture/signature checks and
+packaged process launch. Mac artifact 13575700414 downloaded and digest verified.
+Both local installers are in src-tauri/target/installers/ with INSTALL.md and
+SHA256SUMS.txt. Windows CI backend/bridge/full UI passed; release packaging is
+still running. Local Windows installer/release checks already passed. No full
+Mac UI acceptance yet; app is ad-hoc signed, not Developer ID notarized.
+Installer/fresh-device/physical mic/native picker
 and manual accessibility checks remain explicit.
 Latest source also clears hidden record tools and DataTables caches on lock.
 See final-submission-verification.md for acceptance boundaries. Older sections
