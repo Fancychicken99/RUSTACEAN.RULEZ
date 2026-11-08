@@ -206,7 +206,7 @@
         const color = getAlertColor(daysSinceContact);
         alertBadge.className = `badge ms-1 ${color === 'orange' ? 'text-white' : color === 'warning' ? 'bg-warning text-dark' : `bg-${color}`}`;
         if (color === 'orange') alertBadge.style.backgroundColor = '#fd7e14';
-        alertBadge.textContent = `${daysSinceContact}+ days`;
+        alertBadge.textContent = `${daysSinceContact} days`;
         alertBadge.setAttribute('aria-label', `${daysSinceContact} days since last contact; ${color} alert`);
         statusCell.appendChild(alertBadge);
       }

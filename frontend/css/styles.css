@@ -44,7 +44,7 @@ a { text-decoration: none; }
 .sidebar { width: 260px; flex: 0 0 260px; min-height: 100vh; padding: 1.45rem 1rem 1rem; background: var(--hope-bg); border-right: 1px solid var(--hope-border); transition: width .2s ease, flex-basis .2s ease, margin .2s ease; overflow: hidden; }
 .sidebar.sidebar-collapsed { width: 0; flex-basis: 0; padding-left: 0; padding-right: 0; border: 0; }
 .sidebar.collapse:not(.show) { display: flex; width: 0; flex-basis: 0; padding-left: 0; padding-right: 0; border: 0; }
-.sidebar .nav { background: transparent; border-radius: 0; }
+.sidebar nav.nav { background: transparent !important; border: 0; border-radius: 0; box-shadow: none; }
 .brand { color: var(--hope-text); padding: 0 .65rem 1.25rem; white-space: nowrap; }
 .brand:hover { color: var(--hope-text); }
 .brand-logo-mark { display: block; width: 54px; height: 54px; flex: 0 0 54px; object-fit: contain; background: transparent; }
