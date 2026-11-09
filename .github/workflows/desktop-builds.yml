@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [dev]
+    tags: ["v*"]
 
 permissions:
   contents: read
@@ -115,3 +116,45 @@ jobs:
           name: Windows-smoke-diagnostics-${{ github.sha }}
           if-no-files-found: ignore
           path: ${{ runner.temp }}/rustacean-desktop-smoke-*/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Hippo-Harbor-CRM-windows-x64-${{ github.sha }}
+          path: packages/windows
+      - name: Download macOS packages
+        uses: actions/download-artifact@v4
+        with:
+          name: Hippo-Harbor-CRM-macos-universal-${{ github.sha }}
+          path: packages/macos
+      - name: Prepare release assets
+        shell: bash
+        run: |
+          mkdir -p release-assets
+          windows_installer=$(find packages/windows -type f -name '*-setup.exe' -print -quit)
+          macos_dmg=$(find packages/macos -type f -name '*.dmg' -print -quit)
+          test -n "$windows_installer"
+          test -n "$macos_dmg"
+          cp "$windows_installer" "release-assets/Hippo-Harbor-CRM-${GITHUB_REF_NAME#v}-Windows-x64-setup.exe"
+          cp "$macos_dmg" "release-assets/Hippo-Harbor-CRM-${GITHUB_REF_NAME#v}-macOS-universal.dmg"
+          sha256sum release-assets/* > release-assets/SHA256SUMS.txt
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: Hippo Harbor CRM ${{ github.ref_name }}
+          body: |
+            Hippo Harbor CRM ${{ github.ref_name }} includes the latest app features, the cleaner sidebar, and exact alert day counts.
+
+            Windows x64 installer includes the offline WebView2 installer. macOS package is universal for Apple Silicon and Intel and is ad-hoc signed.
+          files: |
+            release-assets/*.exe
+            release-assets/*.dmg
+            release-assets/SHA256SUMS.txt
+          fail_on_unmatched_files: true

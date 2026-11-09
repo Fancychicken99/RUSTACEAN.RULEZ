@@ -49,13 +49,23 @@
     return 'success';
   }
 
+  function matchesAlertLevel(days, alertLevel) {
+    if (alertLevel === 'All') return true;
+    if (days == null) return false;
+    const age = Number(days);
+    const threshold = Number(alertLevel);
+    if (!Number.isFinite(age) || ![30, 60, 90].includes(threshold)) return false;
+    const nextThreshold = threshold === 30 ? 60 : threshold === 60 ? 90 : Infinity;
+    return age >= threshold && age < nextThreshold;
+  }
+
   const contactListHtml = `
     <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div><p class="eyebrow mb-1">WORKSPACE</p><h1 class="h3 mb-1">Contact List</h1><p class="text-secondary mb-0">Browse and manage your contractor directory.</p></div>
       <button class="btn btn-primary d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#add-contractor-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add contractor</button>
     </div>
     <p id="directory-message" class="text-secondary" role="status" aria-live="polite"></p>
-    <div class="d-flex justify-content-end align-items-center gap-2 mb-3"><label class="form-label mb-0" for="alert-level-filter">Alert Level</label><select id="alert-level-filter" class="form-select form-select-sm alert-level-select"><option value="All">All</option><option value="30">Yellow 30+</option><option value="60">Orange 60+</option><option value="90">Red 90+</option></select></div>
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-3"><label class="form-label mb-0" for="alert-level-filter">Alert Level</label><select id="alert-level-filter" class="form-select form-select-sm alert-level-select"><option value="All">All</option><option value="30">Yellow 30–59 days</option><option value="60">Orange 60–89 days</option><option value="90">Red 90+ days</option></select></div>
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
       <div id="contact-active-filters" class="active-filter-pills px-3 pt-3" aria-live="polite"></div>
@@ -197,7 +207,7 @@
         const color = getAlertColor(daysSinceContact);
         alertBadge.className = `badge ms-1 ${color === 'orange' ? 'text-white' : color === 'warning' ? 'bg-warning text-dark' : `bg-${color}`}`;
         if (color === 'orange') alertBadge.style.backgroundColor = '#fd7e14';
-        alertBadge.textContent = `${daysSinceContact}+ days`;
+        alertBadge.textContent = `${daysSinceContact} days`;
         alertBadge.setAttribute('aria-label', `${daysSinceContact} days since last contact; ${color} alert`);
         statusCell.appendChild(alertBadge);
       }
@@ -634,7 +644,7 @@
           ? Number(contractor.days_since_last_contact) >= 30
           : contractor.status === status);
       const days = Number(contractor.days_since_last_contact);
-      const matchesAlert = alertLevel === 'All' || (Number.isFinite(days) && days >= Number(alertLevel));
+      const matchesAlert = matchesAlertLevel(days, alertLevel);
 
       return matchesStatus && matchesAlert &&
         (!normalizedRegion || String(contractor.region ?? '').toLowerCase().includes(normalizedRegion)) &&
@@ -1076,8 +1086,8 @@
         due_days: filters.alertLevel !== 'All' ? Number(filters.alertLevel) : filters.status === 'Alert' ? 30 : null });
       if (!current()) return false;
       filterLoading = false;
-      // Region is enforced by SQLite; remaining search/status/org filters are local.
-      renderTable(records);
+      // The backend applies the lower alert threshold; keep each displayed alert in its color band.
+      renderTable(records.filter(record => matchesAlertLevel(record.days_since_last_contact, filters.alertLevel)));
       return true;
     } catch (error) {
       if (!current()) return false;

@@ -9,7 +9,7 @@ handoffs remain separate. This document does not claim client acceptance.
 
 | Platform target | File | Runtime prerequisites |
 | --- | --- | --- |
-| Windows 10/11, x64 | `src-tauri/target/release/rustacean_crm.exe` or `src-tauri/target/release/bundle/nsis/Hippo Harbor CRM_0.1.0_x64-setup.exe` | WebView2; setup includes its offline installer. Standalone exe needs an existing compatible WebView2 installation. |
+| Windows 10/11, x64 | `src-tauri/target/release/rustacean_crm.exe` or `src-tauri/target/release/bundle/nsis/Hippo Harbor CRM_0.2.1_x64-setup.exe` | WebView2; setup includes its offline installer. Standalone exe needs an existing compatible WebView2 installation. |
 | macOS 13+, Apple Silicon or Intel | `src-tauri/target/universal-apple-darwin/release/bundle/macos/Hippo Harbor CRM.app` in a metadata-preserving ZIP, or the DMG under `bundle/dmg/` | Built-in WKWebView. No Rust/Cargo/Node runtime. Actual OS/hardware acceptance still required. |
 
 The table above describes outputs for new Hippo Harbor CRM builds. The earlier
@@ -76,18 +76,19 @@ Mac; its owner only supplies access or runs acceptance scenarios.
 
 ## Automated native builds
 
-`.github/workflows/desktop-builds.yml` runs on pushes to dev, or manual dispatch
-where GitHub makes that trigger available. Each native runner installs pinned
-tools, tests backend/bridge, and builds release packages. Windows also runs the
-real debug UI smoke. macOS verifies universal architectures and code signature,
-and checks that the packaged process stays alive for ten seconds; this is not a
-full macOS UI test. Artifacts include a .app ZIP/DMG or Windows exe/setup.
+`.github/workflows/desktop-builds.yml` runs on pushes to dev, release tags, or
+manual dispatch where GitHub makes that trigger available. Each native runner
+installs pinned tools, tests backend/bridge, and builds release packages. Windows
+also runs the real debug UI smoke. macOS verifies universal architectures and
+code signature, and checks that the packaged process stays alive for ten seconds;
+this is not a full macOS UI test. Artifacts include the Windows installer and
+macOS app ZIP/DMG.
 
-After an authorized push, inspect the workflow under GitHub Actions and download
-its artifacts. Artifact download requires appropriate repository access. This
-workflow uploads build artifacts, not a public GitHub Release. It has read-only
-repository permissions and no signing secrets. Before its first successful run,
-the workflow is prepared configuration, not evidence of a successful Mac build.
+A `v*` tag builds both platforms, then publishes the Windows installer, universal
+DMG and SHA256SUMS.txt as a GitHub Release. The release job alone receives
+`contents: write`; signing secrets are not configured. Manual and dev builds
+remain workflow artifacts. Before a tagged run succeeds, the release is prepared
+configuration, not evidence of working packages.
 
 ## Client demonstration and acceptance (both operating systems)
 
