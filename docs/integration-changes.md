@@ -492,6 +492,18 @@ bridge test results unchanged; no new Mac/installed-release verification claimed
 
 ## Latest download repair — November 9, 2026
 
+Follow-up branch/tag audit: the prepared v0.2.1 tag points to ab4b0ed, and release
+branch 8332cc3 contains additional UI changes absent from dev. Integrated its
+expanded editor, microphone icon, region selection, sidebar and disjoint alert
+bands with the newer dev archive/history features using reviewed three-way merges.
+Retained typed details/persistence and new company status. Corrected expanded
+editor lock cleanup and accessible action naming. Fixtures now select supported
+regions and exercise expansion, draft-only changes, restart and privacy cleanup.
+Use fresh version 0.2.2; do not move the existing annotated v0.2.1 tag. Publisher
+verifies tag source before release creation and after publication. Automatic
+approval review rejected an attempted intermediate-release rename; that mutation
+was not executed. Fresh release publication is the chosen safer path.
+
 Latest merge 474a90d committed conflict markers in 15 live source/contract files.
 Reconciled baseline typed details, SQLCipher, media, security and atomic writes
 with the newer detailed archive, field history and company-closure UI. Removed

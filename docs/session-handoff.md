@@ -1,5 +1,27 @@
 # Session handoff
 
+## Final latest-version consolidation — November 9, 2026
+
+Final provenance audit found pre-existing annotated tag v0.2.1 -> ab4b0ed, while
+the intermediate v0.2.1 installers were built from 6c9e6d8. Auto-review rejected
+renaming/repointing that public release; the rejected script was not executed.
+Preserve existing release and tags. Publish a fresh v0.2.2 instead.
+
+Also audited origin/codex/v0.2.1-release through 8332cc3: unique expanded-text,
+microphone-icon, sidebar, region-dropdown and exact-alert-band work now merged
+with current dev's archive/history/closure features. Other backend/offline branches
+are ancestors of dev. Native builds for the old release branch had failed;
+don't treat its tag as proof of ready installers. Expanded editor now closes and
+clears on lock; accessible action naming corrected. Focused v0.2.2 UI checks
+passed (smoke-cSTZMF); full Windows regression is running. Backend is unchanged
+from the successful 50-test/6-bridge native build. Version manifests now 0.2.2.
+
+Publisher now checks existing tag source, creates a new exact-source tag when
+absent and verifies it after publication. Next: commit/push v0.2.2, run native
+builds, dispatch publisher with exact source SHA/version, verify latest download
+buttons and final source tag. Existing v0.2.1 remains an intermediate build;
+latest buttons will advance to v0.2.2. User authorized completing downloads.
+
 ## Download update complete — November 9, 2026
 
 User authorized updating homepage downloads to the newest code. HEAD 474a90d had

@@ -96,6 +96,60 @@
   function fullName({ prefix, first, middle, last, suffix }) {
     return [prefix, first, middle, last, suffix].map(value => value.trim()).filter(Boolean).join(' ');
   }
+  let expandedLongTextSource = null;
+  function clearExpandedLongText() {
+    expandedLongTextSource = null;
+    const dialog = document.getElementById('custom-long-text-dialog');
+    if (!dialog) return;
+    dialog.querySelector('[data-expanded-long-text]').value = '';
+    if (dialog.open) dialog.close();
+  }
+  window.addEventListener('crm:locked', clearExpandedLongText);
+  document.addEventListener('hidden.bs.modal', event => {
+    if (expandedLongTextSource && event.target.contains(expandedLongTextSource)) clearExpandedLongText();
+  });
+  function openExpandedLongText(source, fieldName) {
+    let dialog = document.getElementById('custom-long-text-dialog');
+    if (!dialog) {
+      dialog = document.createElement('dialog');
+      dialog.id = 'custom-long-text-dialog';
+      dialog.className = 'long-text-dialog';
+      dialog.setAttribute('aria-labelledby', 'custom-long-text-title');
+      dialog.innerHTML = `
+        <div class="long-text-dialog-content">
+          <div class="long-text-dialog-header">
+            <div><h2 class="h5 mb-1" id="custom-long-text-title"></h2><p class="text-secondary small mb-0">Changes are saved to the form draft as you type.</p></div>
+            <button type="button" class="btn-close" data-close-long-text aria-label="Close expanded text"></button>
+          </div>
+          <textarea class="form-control" data-expanded-long-text maxlength="5000"></textarea>
+          <div class="long-text-dialog-footer"><span class="text-secondary small">Up to 5,000 characters</span><button type="button" class="btn btn-primary" data-close-long-text>Done</button></div>
+        </div>`;
+      document.body.appendChild(dialog);
+      const editor = dialog.querySelector('[data-expanded-long-text]');
+      dialog.addEventListener('input', event => {
+        if (event.target !== editor || !expandedLongTextSource) return;
+        expandedLongTextSource.value = editor.value;
+        expandedLongTextSource.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      dialog.querySelectorAll('[data-close-long-text]').forEach(button => button.addEventListener('click', () => dialog.close()));
+      dialog.addEventListener('close', () => {
+        const sourceToRestore = expandedLongTextSource;
+        expandedLongTextSource = null;
+        editor.value = '';
+        if (window.crmSession?.authenticated) sourceToRestore?.focus();
+      });
+      dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+      });
+    }
+    const editor = dialog.querySelector('[data-expanded-long-text]');
+    expandedLongTextSource = source;
+    dialog.querySelector('#custom-long-text-title').textContent = fieldName || 'Long text';
+    editor.setAttribute('aria-label', `${fieldName || 'Long text'} expanded editor`);
+    editor.value = source.value;
+    dialog.showModal();
+    requestAnimationFrame(() => editor.focus());
+  }
   function customFieldValueControl(row, type, saved = {}) {
     const holder = row.querySelector('[data-custom-field-control]');
     holder.replaceChildren();
@@ -103,6 +157,10 @@
     if (type === 'long_text') {
       const input = document.createElement('textarea'); input.className = 'form-control'; input.rows = 3;
       input.placeholder = 'Enter additional details'; input.maxLength = 5000; input.dataset.customFieldValue = ''; input.value = value; holder.appendChild(input);
+      const expand = document.createElement('button'); expand.type = 'button'; expand.className = 'btn btn-sm btn-outline-secondary mt-2'; expand.textContent = 'Expand text';
+      expand.setAttribute('aria-label', 'Expand text in a larger editor');
+      expand.addEventListener('click', () => openExpandedLongText(input, row.querySelector('[data-custom-field-name]')?.value.trim()));
+      holder.appendChild(expand);
     } else if (type === 'relation') {
       const wrap = document.createElement('div'); wrap.className = 'd-flex gap-2';
       const entity = document.createElement('select'); entity.className = 'form-select'; entity.dataset.customFieldEntity = '';
@@ -130,23 +188,23 @@
   function addCustomFieldRow(kind, name = '', saved = '') {
     const list = document.querySelector(`[data-custom-fields="${kind}"]`);
     if (!list) return null;
-    const row = document.createElement('div'); row.className = 'row g-3 align-items-end mb-4 custom-field-row';
-    const nameColumn = document.createElement('div'); nameColumn.className = 'col-lg-3';
+    const row = document.createElement('div'); row.className = 'row g-3 align-items-stretch mb-4 custom-field-row';
+    const nameColumn = document.createElement('div'); nameColumn.className = 'col-xl-3';
     const nameLabel = document.createElement('label'); nameLabel.className = 'form-label'; nameLabel.textContent = 'Field Name';
     const nameInput = document.createElement('input'); nameInput.className = 'form-control'; nameInput.type = 'text'; nameInput.dataset.customFieldName = ''; nameInput.placeholder = 'e.g., Callsign'; nameInput.value = name;
     nameInput.maxLength = 80;
     nameLabel.appendChild(nameInput); nameColumn.appendChild(nameLabel);
-    const typeColumn = document.createElement('div'); typeColumn.className = 'col-lg-3';
+    const typeColumn = document.createElement('div'); typeColumn.className = 'col-xl-3';
     const typeLabel = document.createElement('label'); typeLabel.className = 'form-label'; typeLabel.textContent = 'Field Type';
     const typeSelect = document.createElement('select'); typeSelect.className = 'form-select'; typeSelect.dataset.customFieldType = '';
     [['text','Short text'],['long_text','Long text / Description'],['relation','Relation']].forEach(([v,l]) => typeSelect.add(new Option(l,v)));
     typeSelect.value = typeof saved === 'object' && saved?.type ? saved.type : 'text'; typeLabel.appendChild(typeSelect); typeColumn.appendChild(typeLabel);
-    const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-lg-6';
+    const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-xl-4';
     const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = typeSelect.value === 'long_text' ? 'Description' : 'Field Value';
     const holder = document.createElement('div'); holder.dataset.customFieldControl = ''; valueLabel.appendChild(holder); valueColumn.appendChild(valueLabel);
     typeSelect.addEventListener('change', () => customFieldValueControl(row, typeSelect.value));
-    const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-1';
-    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
+    const actionColumn = document.createElement('div'); actionColumn.className = 'col-xl-2 d-flex align-items-end custom-field-actions';
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100 text-nowrap'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
     actionColumn.appendChild(remove); row.append(nameColumn, typeColumn, valueColumn, actionColumn); list.appendChild(row);
     customFieldValueControl(row, typeSelect.value, saved);
   }
@@ -223,6 +281,23 @@
       }
       select.value = record.organization_id == null ? '' : String(record.organization_id);
     }
+  }
+  function populateOrganizationRegionOptions(selectedRegion = '') {
+    const select = byId('organization-region');
+    const regions = new Set([
+      'Central Asia', 'East Asia', 'East Nairobi', 'Eastern Europe',
+      'Middle East', 'North America', 'Sub-Saharan Africa'
+    ]);
+    const directory = window.crmDirectory ?? {};
+    [...(directory.organizations ?? []), ...(directory.contractors ?? [])].forEach(record => {
+      const region = String(record.region ?? '').trim();
+      if (region) regions.add(region);
+    });
+    const selected = String(selectedRegion ?? '').trim();
+    if (selected) regions.add(selected);
+    select.replaceChildren(new Option('Select a region', ''));
+    [...regions].sort((a, b) => a.localeCompare(b)).forEach(region => select.add(new Option(region, region)));
+    select.value = selected;
   }
   function prepareContractor(record = null) {
     if (!window.crmSession?.authenticated) return;
@@ -311,7 +386,7 @@
     byId('organization-title').textContent = 'Edit Organization';
     byId('save-organization').textContent = 'Save changes';
     byId('organization-name').value = organization.name ?? '';
-    byId('organization-region').value = organization.region ?? '';
+    populateOrganizationRegionOptions(organization.region ?? '');
     byId('organization-email').value = organization.email ?? '';
     setPhone('organization-phone', organization.phone ?? '');
     setPhone('organization-secondary-phone', organization.secondary_phone ?? '');
@@ -344,6 +419,7 @@
       editingOrganizationId = null;
       byId('organization-form').reset();
       bootstrap.Tab.getOrCreateInstance(byId('organization-basic-tab')).show();
+      populateOrganizationRegionOptions();
       populateCustomFields('organization', {});
       byId('organization-title').textContent = 'Add organization';
       byId('save-organization').textContent = 'Save organization';

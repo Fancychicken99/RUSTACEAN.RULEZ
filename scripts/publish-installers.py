@@ -43,6 +43,14 @@ def publish():
     if configured["version"] != version:
         raise ValueError("Version does not match the built source")
     tag = "v" + version
+    references = api(f"{base}/git/matching-refs/tags/{tag}")
+    existing_tag = next((item for item in references if item["ref"] == "refs/tags/" + tag), None)
+    if existing_tag:
+        tagged = api(f"{base}/commits/{tag}")
+        if tagged["sha"] != sha:
+            raise ValueError("Existing version tag targets different source; choose a new version")
+    else:
+        api(f"{base}/git/refs", "POST", {"ref": "refs/tags/" + tag, "sha": sha})
     releases = api(f"{base}/releases?per_page=100")
     existing = next((item for item in releases if item["tag_name"] == tag), None)
     if existing and not existing["draft"]:
@@ -80,7 +88,7 @@ def publish():
 - Offline Whisper and its model are included. No coding tools are required.
 - Create a local password and save your recovery key privately during setup.
 
-This update reconciles the latest frontend/backend merge, preserves the newer archive and change-history features, adds the company Out of Business status, and upgrades existing v0.2.0 workspaces without discarding records. Portable imports support schemas 6 and 7.
+This update combines the latest development and release-preparation branches: expanded long-text editors, microphone controls, cleaner sidebar, organization region selection and clear alert bands, along with detailed archives, field history, company closure status and safe upgrades of existing v0.2.0 workspaces. Portable imports support schemas 6 and 7.
 
 Both native build jobs succeeded, including backend and bridge/Whisper tests, Windows executable UI regression and release startup, and Mac universal architecture/signature/process checks. [Build evidence](https://github.com/{repo}/actions/runs/{run_id}). Built commit: `{sha}`.
 
@@ -89,7 +97,7 @@ Windows remains unsigned and can show SmartScreen. Mac is ad-hoc signed, not Dev
 See INSTALL.md and SHA256SUMS.txt. Installer asset names remain stable so homepage buttons can follow the latest release.
 """)
     if not existing:
-        gh("release", "create", tag, "--repo", repo, "--draft", "--target", sha,
+        gh("release", "create", tag, "--repo", repo, "--draft", "--verify-tag", "--target", sha,
            "--title", f"Hippo Harbor CRM {version}", "--notes-file", str(notes))
     else:
         gh("release", "edit", tag, "--repo", repo, "--notes-file", str(notes))
@@ -104,6 +112,8 @@ See INSTALL.md and SHA256SUMS.txt. Installer asset names remain stable so homepa
             raise ValueError("Uploaded asset verification failed: " + name)
         print("Verified " + name + " SHA256 " + digest)
     gh("release", "edit", tag, "--repo", repo, "--draft=false", "--latest")
+    if api(f"{base}/commits/{tag}")["sha"] != sha:
+        raise ValueError("Published source tag differs from verified build")
     print(f"Published https://github.com/{repo}/releases/tag/{tag}")
 
 

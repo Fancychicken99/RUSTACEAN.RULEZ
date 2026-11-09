@@ -26,7 +26,7 @@ module.exports = context => {
       // WebView2 supplies a fake microphone; only transcription is simulated here.
       // The separate Rust test exercises the real bundled engine/model.
       const originalFirst = await evaluate("document.getElementById('contractor-first-name').value");
-      await evaluate("window.voiceObservedApi=window.crmApi;window.crmApi={...window.crmApi,transcribeAudio:async audio=>{window.voiceCapture={length:audio.length,header:String.fromCharCode(...audio.slice(0,4))};return 'Simulated transcript';}};[...document.querySelectorAll('button')].find(button=>/^Dictate First name$/i.test(button.getAttribute('aria-label')||'')).click()");
+      await evaluate("window.voiceObservedApi=window.crmApi;window.crmApi={...window.crmApi,transcribeAudio:async audio=>{window.voiceCapture={length:audio.length,header:String.fromCharCode(...audio.slice(0,4))};return 'Simulated transcript';}};[...document.querySelectorAll('button')].find(button=>/^(?:Dictate First name|Start speech-to-text for First name)$/i.test(button.getAttribute('aria-label')||'')).click()");
       await until(() => evaluate("document.querySelector('.dictation-panel p').textContent.includes('1 / 120 seconds')"), 'fake microphone capture');
       await evaluate("[...document.querySelectorAll('.dictation-panel button')].find(button=>button.textContent==='Stop recording').click()");
       await until(() => evaluate("!document.getElementById('dictation-preview').hidden"), 'dictation review');
@@ -37,6 +37,15 @@ module.exports = context => {
       assert.equal(await evaluate("document.getElementById('contractor-first-name').value"), 'Reviewed name');
       await evaluate(`document.getElementById('contractor-first-name').value=${JSON.stringify(originalFirst)};window.crmApi=window.voiceObservedApi;delete window.voiceObservedApi`);
       console.log('PASS: fake-device audio capture creates WAV; simulated transcription requires explicit review/insert and does not save automatically. Physical microphone remains a manual check.');
+      await evaluate("document.getElementById('contractor-extra-tab').click()");
+      await until(() => evaluate("document.getElementById('contractor-extra-pane').classList.contains('show')"), 'custom field pane');
+      await evaluate("document.querySelector('[data-add-custom-field=contractor]').click();{const row=[...document.querySelectorAll('[data-custom-fields=contractor] .custom-field-row')].at(-1);row.querySelector('[data-custom-field-name]').value='Release description';const type=row.querySelector('[data-custom-field-type]');type.value='long_text';type.dispatchEvent(new Event('change'));row.querySelector('button[aria-label=\"Expand text in a larger editor\"]').click();}");
+      await until(() => evaluate("document.getElementById('custom-long-text-dialog').open && document.activeElement===document.querySelector('[data-expanded-long-text]')"), 'expanded text focus');
+      await cdp('Input.insertText', {text:'Release branch text\nPreserved after restart'});
+      await accessibility('expanded-text-light'); await capture('expanded-text-light');
+      assert.equal(await evaluate(`window.crmApi.listContractors().then(records=>records.find(record=>record.id===${inline.id}).extra_information['Release description']===undefined)`), true, 'expanded editor must only change the draft');
+      await evaluate("document.querySelector('#custom-long-text-dialog [data-close-long-text]').click()");
+      await until(() => evaluate("!document.getElementById('custom-long-text-dialog').open"), 'expanded text closed');
       await evaluate("document.getElementById('contractor-contact-tab').click()");
       await until(() => evaluate("document.getElementById('contractor-contact-pane').classList.contains('show')"), 'contact pane');
       await evaluate("document.getElementById('contractor-country').value='United Kingdom';document.getElementById('contractor-country').dispatchEvent(new Event('input',{bubbles:true}))");
@@ -68,6 +77,7 @@ module.exports = context => {
       const saved = await evaluate(`window.crmApi.listContractors().then(records=>records.find(record=>record.id===${inline.id}))`);
       assert.equal(saved.city, 'London'); assert.equal(saved.phone, '+44 20 7946 0958');
       assert.ok(await evaluate(`window.crmApi.loadRecordImage({kind:'contractor',id:${inline.id}})`));
+      assert.equal(saved.extra_information['Release description'].value, 'Release branch text\nPreserved after restart');
       await evaluate(`window.crmDirectory.showProfile(${inline.id})`);
       await until(() => evaluate("document.querySelector('[data-record-history=contractor] li') !== null"), 'contractor field history');
       await evaluate("document.getElementById('nav-organizations').click()");
@@ -87,6 +97,15 @@ module.exports = context => {
       await restartLogin();
       assert.equal(await evaluate(`window.crmApi.listOrganizations().then(records=>records.find(record=>record.id===${saved.organization_id}).status)`), 'Out of Business');
       console.log('PASS: contractor/company field history UI, detailed archives, and Out of Business status persisted across restart.');
+      await evaluate(`window.crmDirectory.showProfile(${inline.id});document.getElementById('edit-contractor').click()`); await modalShown('add-contractor-modal');
+      await evaluate("document.getElementById('contractor-extra-tab').click()");
+      await until(() => evaluate("document.getElementById('contractor-extra-pane').classList.contains('show')"), 'restored custom field pane');
+      await evaluate("[...document.querySelectorAll('[data-custom-fields=contractor] .custom-field-row')].find(row=>row.querySelector('[data-custom-field-name]').value==='Release description').querySelector('button[aria-label=\"Expand text in a larger editor\"]').click()");
+      await until(() => evaluate("document.getElementById('custom-long-text-dialog').open"), 'restored expanded editor');
+      await evaluate("window.crmSession.lock('')");
+      await until(() => evaluate("!document.getElementById('custom-long-text-dialog').open"), 'lock clears expanded editor');
+      assert.equal(await evaluate("document.querySelector('[data-expanded-long-text]').value"), '');
+      console.log('PASS: expanded editor focus, draft-only editing, saved text/restart and lock cleanup; microphone icon flow verified.');
       console.log('PASS: country-derived phone prefix, address/PNG restart, taxonomy UI persistence, bounded logo and automated light/dark WCAG-tag scans (manual checks remain).');
     },
   };

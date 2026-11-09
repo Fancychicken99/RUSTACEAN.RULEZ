@@ -344,10 +344,10 @@ await until(
   await evaluate("document.querySelector('#add-contractor-modal [data-bs-dismiss]').click()");
   await modalClosed('add-contractor-modal');
   // Create two organizations with the SAME name through actual UI commands.
-  for (const region of ['Other Region', 'Test Region']) {
+  for (const region of ['East Asia', 'Central Asia']) {
     await evaluate("document.getElementById('nav-organizations').click(); document.getElementById('add-organization').click()");
     await modalShown('organization-modal');
-    if (region === 'Other Region') {
+    if (region === 'East Asia') {
       await evaluate("document.getElementById('organization-contact-tab').click()");
       await until(() => evaluate("getComputedStyle(document.getElementById('organization-contact-pane')).opacity === '1'"), 'organization contact tab');
       assert.equal(await enterPhone('organization-phone', '+33142345678'), '+33 1 42 34 56 78');
@@ -357,8 +357,8 @@ await until(
     await fillForm('organization-form', { 'organization-name': syntheticOrganization, 'organization-region': region });
     await savedMessage('Organization saved.'); await modalClosed('organization-modal');
   }
-  organizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Test Region').id)");
-  assert.equal(await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Other Region').phone)"), '+33 1 42 34 56 78');
+  organizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Central Asia').id)");
+  assert.equal(await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'East Asia').phone)"), '+33 1 42 34 56 78');
   await evaluate("document.getElementById('nav-contacts').click(); document.querySelector('#view-contacts [data-bs-target=\"#add-contractor-modal\"]').click()");
   await modalShown('add-contractor-modal');
   await fillForm('add-contractor-form', { 'contractor-first-name': 'Fictional', 'contractor-last-name': 'Contact Choice', 'contractor-role': 'Engineer', 'contractor-email': '', 'contractor-phone': '', 'contractor-organization': String(organizationId) });
@@ -421,7 +421,7 @@ await until(
   await submit('fictional smoke password');
   await waitForRecords();
   assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '1');
-  assert.equal(await evaluate("document.getElementById('region-overview').textContent.includes('Test Region')"), true);
+  assert.equal(await evaluate("document.getElementById('region-overview').textContent.includes('Central Asia')"), true);
   await evaluate("document.getElementById('nav-contacts').click()"); await directoryReady();
   assert.equal(await evaluate("document.querySelector('.contractor-row td').textContent"), syntheticName);
   assert.equal(await evaluate("document.querySelector('.contractor-row td em') === null"), true);
@@ -452,7 +452,7 @@ await until(
   assert.equal(updated.status, 'Active');
   await evaluate("document.getElementById('nav-organizations').click()");
   assert.equal(await evaluate("document.querySelector('#organizations-table-body th').textContent"), syntheticOrganization);
-  const otherOrganizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'Other Region').id)");
+  const otherOrganizationId = await evaluate("window.crmApi.listOrganizations().then(orgs => orgs.find(org => org.region === 'East Asia').id)");
   await evaluate(`document.querySelector('[data-organization-id="${otherOrganizationId}"] button').click()`);
   await directoryReady();
   assert.equal(await evaluate("(() => { const table = document.getElementById('contractor-table-body')?.closest('table'); return table && window.DataTable?.isDataTable(table) ? new DataTable(table).rows().count() : document.querySelectorAll('.contractor-row').length; })()"), 0, 'Duplicate names must not merge distinct organization rosters.');
@@ -523,7 +523,11 @@ await until(
   assert.equal(await evaluate("window.lastRegionResult"), 10);
   assert.equal(await evaluate("(() => { const table = document.getElementById('contractor-table-body')?.closest('table'); return table && window.DataTable?.isDataTable(table) ? new DataTable(table).rows().count() : document.querySelectorAll('.contractor-row').length; })()"), 10);
   assert.equal(await evaluate("document.querySelector('.metric-value').textContent"), '56', 'Filter must not change dashboard total.');
-  await chooseRegion('Other Region');
+  // The new region dropdown accepts saved choices. Give the empty organization
+  // a distinct saved region so the no-match check uses an actual selectable value.
+  await evaluate(`window.crmApi.setOrganizationRegion({id:${otherOrganizationId},region:'Empty test region'}).then(()=>window.crmDirectory.refresh())`);
+  await directoryReady();
+  await chooseRegion('Empty test region');
   assert.equal(await evaluate("window.lastRegionResult"), 0);
   assert.match(await evaluate("document.getElementById('contractor-table-body').textContent"), /No contractors match/);
   await evaluate("history.replaceState(null, '', '#/contacts?region=Unmatched%20Region'); window.dispatchEvent(new PopStateEvent('popstate'))"); await directoryReady();
