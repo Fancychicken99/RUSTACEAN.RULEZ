@@ -141,14 +141,21 @@
     const typeSelect = document.createElement('select'); typeSelect.className = 'form-select'; typeSelect.dataset.customFieldType = '';
     [['text','Short text'],['long_text','Long text / Description'],['relation','Relation']].forEach(([v,l]) => typeSelect.add(new Option(l,v)));
     typeSelect.value = typeof saved === 'object' && saved?.type ? saved.type : 'text'; typeLabel.appendChild(typeSelect); typeColumn.appendChild(typeLabel);
-    const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-lg-6';
+    const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-lg-4';
     const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = typeSelect.value === 'long_text' ? 'Description' : 'Field Value';
     const holder = document.createElement('div'); holder.dataset.customFieldControl = ''; valueLabel.appendChild(holder); valueColumn.appendChild(valueLabel);
-    typeSelect.addEventListener('change', () => customFieldValueControl(row, typeSelect.value));
-    const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-1';
-    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
-    actionColumn.appendChild(remove); row.append(nameColumn, typeColumn, valueColumn, actionColumn); list.appendChild(row);
+    row.append(nameColumn, typeColumn, valueColumn); list.appendChild(row);
+    typeSelect.addEventListener('change', () => {
+      const isDescription = typeSelect.value === 'long_text';
+      valueColumn.className = isDescription ? 'col-12' : 'col-lg-4';
+      valueLabel.firstChild.textContent = isDescription ? 'Description' : 'Field Value';
+      customFieldValueControl(row, typeSelect.value);
+    });
     customFieldValueControl(row, typeSelect.value, saved);
+    const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-2';
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100 text-nowrap'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
+    actionColumn.appendChild(remove);
+    row.appendChild(actionColumn);
   }
   function customFields(kind) {
     const rows = [...document.querySelectorAll(`[data-custom-fields="${kind}"] .custom-field-row`)];
