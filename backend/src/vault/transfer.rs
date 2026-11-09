@@ -194,9 +194,11 @@ impl VaultStore {
         let version: i64 = conn
             .query_row("PRAGMA user_version", [], |r| r.get(0))
             .map_err(|_| "Invalid imported schema")?;
-        if version != 6 {
-            return Err("This release imports version 6 workspace schemas only".into());
+        if !matches!(version, 6 | 7) {
+            return Err("This release imports version 6 or 7 workspace schemas only".into());
         }
+        crate::setup::initialize_database(&conn)
+            .map_err(|_| "Unable to upgrade imported workspace")?;
         let mut check = conn
             .prepare("PRAGMA foreign_key_check")
             .map_err(|_| "Unable to check imported relationships")?;

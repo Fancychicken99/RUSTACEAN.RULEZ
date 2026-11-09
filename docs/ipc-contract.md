@@ -1,5 +1,23 @@
 # Implemented IPC contract
 
+## 0.2.1 reconciliation — November 9, 2026
+
+Schema 7 upgrades released schema 6 in place, preserving custom fields, media and
+audit records, and adds the organization out_of_business_at marker. Portable
+import accepts schemas 6/7 and upgrades the staged copy before activation.
+Contractor responses append created_at/updated_at (UTC SQL or ISO timestamps,
+nullable for compatibility). Organization status is Active, Inactive or Out of
+Business; the closure marker preserves the older two-value SQL status constraint.
+
+Additional authenticated commands: list_archived_records {} returns records with
+entity_type (Contractor/Organization), id,name,status,details,created_at,updated_at,
+archived_at. get_record_history {request:{entity_type,id}} uses lowercase
+contractor/organization and returns {id,entity_type,entity_id,action,changed_fields,
+occurred_at}[]. set_organization_status {request:{id,status}} returns the updated
+organization. Full-profile history and the existing summary audit remain distinct
+read models. Requests keep the typed details/address/custom-field contract below;
+the conflicting duplicate raw extra_information request field was removed.
+
 ## Final Sprint 2 contract — November 7, 2026
 
 31 registered commands in current source. All 49 backend and six bridge/voice
@@ -236,11 +254,6 @@ later history/contact commands before implementation.
 
 ## Organization response and UI mapping
 
-<<<<<<< HEAD
-Organization responses include id, name, region, contact/address fields, status,
-creation/update/archive timestamps. Active-list results exclude archived
-organizations and are ordered by name. Contractor responses include organization_id in list, search,
-=======
 Organization has id (integer), name/status (strings), and nullable strings:
 region, phone, email, notes, secondary_phone, secondary_contact, secondary_email, street_address_1, street_address_2,
 city, state_province, country, created_at, updated_at. Organization status defaults
@@ -252,7 +265,6 @@ backfills created_at as UTC ISO YYYY-MM-DDTHH:MM:SS.sssZ for existing rows;
 ordinary create/update workflows currently leave timestamp values unset/stale.
 Do not present these dates as complete lifecycle auditing.
 Contractor responses include organization_id in list, search,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
 region, skill, follow-up, and single-record reads. Rosters, counts, filter values
 and form selections use IDs so duplicate names remain distinct.
 
@@ -277,13 +289,8 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 
 | Command / wrapper | request fields | Success |
 | --- | --- | --- |
-<<<<<<< HEAD
-| create_organization / createOrganization | name: string; region, phone, email, notes: nullable; contact: OrganizationContactFields (optional); extra_information: object (optional) | Persisted Organization |
-| update_organization / updateOrganization | id: integer; name: string; region, phone, email, notes: nullable; contact: OrganizationContactFields (optional); extra_information: object (optional) | Persisted Organization |
-=======
 | create_organization / createOrganization | name: string; region, phone, email, notes: string or null (optional); contractor: ProfileFields or null (optional) | Persisted Organization, after both inserts commit |
 | update_organization / updateOrganization | id: integer; name: string; region, phone, email, notes: string or null | Persisted Organization |
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
 | archive_organization / archiveOrganization | id: integer | null after archive completes |
 | create_contractor / createContractor | organization_id: integer; profile: ProfileFields | Persisted Contractor |
 | update_contractor / updateContractor | id: integer; profile: ProfileFields | Persisted Contractor |
@@ -291,20 +298,6 @@ fields; no ignored country/city/photo/status/organization-change payloads.
 | set_contractor_status / setContractorStatus | id: integer; status: `Active`, `Inactive`, `Retired`, or `Deceased` | Persisted Contractor |
 | record_contact_note / recordContactNote | id: integer; method: `Email`, `Phone`, `SMS`, `Teams`, or `Other`; note: string | null after insert |
 
-<<<<<<< HEAD
-ProfileFields: full_name (required string), role/email/phone (optional string or
-null), extra_information (optional object). Updates REPLACE these profile fields; omitted/blank optional values clear
-them to null. The UI submits all displayed fields. Name is not split/inferred.
-Additional information maps user-defined field names to typed objects, e.g.
-`{"Callsign":{"type":"text","value":"Harbor"}}`,
-`{"Notes":{"type":"long_text","value":"Longer details"}}`, or
-`{"Organization":{"type":"relation","entity_type":"organization","entity_id":1}}`.
-Text values may be up to 10000 characters; names up to 100 characters and 100
-fields per record are accepted. Values persist as JSON and are returned on profile records.
-Create requires an existing non-archived organization and starts Active. Editing
-preserves organization_id, status, photo, and history. Transfers remain a
-separate workflow. Organization status is changed through its dedicated command.
-=======
 ProfileFields: full_name (string, defaults to empty when omitted); prefix,
 first_name, middle_name, last_name, suffix, role, email, phone (optional string
 or null). With either first_name or last_name supplied as non-null text, both
@@ -325,7 +318,6 @@ preserves organization_id, status, photo, and history. Status changes use the
 separate set_contractor_status command and accept only Active/Inactive. Transfers
 remain a separate workflow. Organization active/inactive status is stored but
 its status command/UI remains unconnected; archived_at is separate visibility.
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
 Organization names need not be unique; IDs identify records. Blank region is null.
 Organization phone, email, and notes are trimmed and persisted; email receives the same basic plausibility validation as contractor email. Archiving an organization sets its `archived_at` timestamp in UTC and hides it from the active organization list. Existing contractors retain their records and organization association.
 

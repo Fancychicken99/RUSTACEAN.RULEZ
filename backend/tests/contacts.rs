@@ -11,8 +11,7 @@ fn test_record_contact() -> rusqlite::Result<()> {
     let conn = Connection::open_in_memory()?;
 
     // Create tables
-    create_tables(&conn)?;
-    create_contact_table(&conn)?;
+    secure_crm_backend::setup::initialize_database(&conn)?;
 
     // Add fictional organization
     let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi")?;

@@ -101,14 +101,8 @@
     holder.replaceChildren();
     const value = saved.value ?? (typeof saved === 'string' ? saved : '');
     if (type === 'long_text') {
-<<<<<<< HEAD
-      const input = document.createElement('textarea'); input.className = 'form-control'; input.rows = 5;
-      input.maxLength = 10000; input.placeholder = 'Write a detailed description…';
-      input.dataset.customFieldValue = ''; input.value = value; holder.appendChild(input);
-=======
       const input = document.createElement('textarea'); input.className = 'form-control'; input.rows = 3;
       input.placeholder = 'Enter additional details'; input.maxLength = 5000; input.dataset.customFieldValue = ''; input.value = value; holder.appendChild(input);
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
     } else if (type === 'relation') {
       const wrap = document.createElement('div'); wrap.className = 'd-flex gap-2';
       const entity = document.createElement('select'); entity.className = 'form-select'; entity.dataset.customFieldEntity = '';
@@ -150,23 +144,11 @@
     const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-lg-6';
     const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = typeSelect.value === 'long_text' ? 'Description' : 'Field Value';
     const holder = document.createElement('div'); holder.dataset.customFieldControl = ''; valueLabel.appendChild(holder); valueColumn.appendChild(valueLabel);
-<<<<<<< HEAD
-    row.append(nameColumn, typeColumn, valueColumn); list.appendChild(row);
-    typeSelect.addEventListener('change', () => {
-      const isDescription = typeSelect.value === 'long_text';
-      valueColumn.className = isDescription ? 'col-12' : 'col-lg-6';
-      valueLabel.firstChild.textContent = isDescription ? 'Description' : 'Field Value';
-      customFieldValueControl(row, typeSelect.value);
-    });
-    customFieldValueControl(row, typeSelect.value, saved);
-    return row;
-=======
     typeSelect.addEventListener('change', () => customFieldValueControl(row, typeSelect.value));
     const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-1';
     const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
     actionColumn.appendChild(remove); row.append(nameColumn, typeColumn, valueColumn, actionColumn); list.appendChild(row);
     customFieldValueControl(row, typeSelect.value, saved);
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
   }
   function customFields(kind) {
     const rows = [...document.querySelectorAll(`[data-custom-fields="${kind}"] .custom-field-row`)];
@@ -186,53 +168,6 @@
       return result;
     }, Object.create(null));
   }
-<<<<<<< HEAD
-  document.addEventListener('click', event => {
-    const button = event.target.closest('[data-add-custom-field]');
-    if (!button || button.disabled) return;
-    event.preventDefault();
-    const row = addCustomFieldRow(button.dataset.addCustomField);
-    row?.querySelector('[data-custom-field-name]')?.focus();
-  });
-
-  function activateModalTab(button) {
-    const pane = byId(button.getAttribute('data-bs-target')?.slice(1));
-    const tabList = button.closest('.nav-tabs');
-    const tabContent = pane?.closest('.tab-content');
-    if (!pane || !tabList || !tabContent) return;
-    tabList.querySelectorAll('[role="tab"]').forEach(tab => {
-      const selected = tab === button;
-      tab.classList.toggle('active', selected);
-      tab.setAttribute('aria-selected', String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-    });
-    tabContent.querySelectorAll('.tab-pane').forEach(tabPane => {
-      const selected = tabPane === pane;
-      tabPane.classList.toggle('active', selected);
-      tabPane.classList.toggle('show', selected);
-      tabPane.hidden = !selected;
-    });
-  }
-
-  document.querySelectorAll('.modal .nav-tabs [role="tab"]').forEach(button => {
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      activateModalTab(button);
-    });
-    button.addEventListener('keydown', event => {
-      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-      event.preventDefault();
-      const tabs = [...button.closest('.nav-tabs').querySelectorAll('[role="tab"]')];
-      const current = tabs.indexOf(button);
-      const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
-        : (current + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
-      tabs[next].focus();
-      activateModalTab(tabs[next]);
-    });
-    if (button.classList.contains('active')) activateModalTab(button);
-  });
-=======
   function captureDetails(kind, messageId) {
     try {
       return {
@@ -259,7 +194,6 @@
   byId('organization-secondary-email').maxLength = 254;
   byId('organization-secondary-phone').addEventListener('input', event => event.target.setCustomValidity(''));
   document.querySelectorAll('[data-add-custom-field]').forEach(button => button.addEventListener('click', () => addCustomFieldRow(button.dataset.addCustomField)));
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
   function populateCustomFields(kind, values = {}) {
     const list = document.querySelector(`[data-custom-fields="${kind}"]`);
     list.replaceChildren();
@@ -507,12 +441,6 @@
       headshot_filename: byId('contractor-headshot').files[0]?.name ?? null,
       created_at: createdAt,
     };
-<<<<<<< HEAD
-    console.log('Sprint 2 contractor save payload:', JSON.stringify(sprint2Payload));
-    // Keep the IPC request aligned with the currently installed Rust ProfileFields contract.
-    // The expanded payload is ready for the backend contract extension; it is not persisted yet.
-      const profile = { full_name: sprint2Payload.full_name, role: sprint2Payload.role, email: sprint2Payload.email, phone: sprint2Payload.phone, extra_information: sprint2Payload.extra_information };
-=======
     const profile = {
       full_name: legacyNameMode ? byId('contractor-legacy-name').value : '',
       prefix: split.prefix || null,
@@ -523,7 +451,6 @@
       role: sprint2Payload.role, email: sprint2Payload.email || null, phone: sprint2Payload.phone.trim() || null,
       details,
     };
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
     const id = editingId;
     const request = id === null ? { organization_id: sprint2Payload.organization_id, profile } : { id, profile };
     const headshot = byId('contractor-headshot').files[0];
@@ -556,21 +483,7 @@
       phone: byId('organization-phone').value || null,
       email: byId('organization-email').value.trim() || null,
       address: { street_address_1: byId('organization-street1').value.trim(), street_address_2: byId('organization-street2').value.trim(), city: byId('organization-city').value.trim(), state_province: byId('organization-state').value.trim(), country: byId('organization-country').value.trim() },
-<<<<<<< HEAD
-      extra_information: customFields('organization'),
-      contact: {
-        secondary_phone: byId('organization-secondary-phone').value.trim() || null,
-        secondary_contact: byId('organization-secondary-contact').value.trim() || null,
-        secondary_email: byId('organization-secondary-email').value.trim() || null,
-        street_address_1: byId('organization-street1').value.trim() || null,
-        street_address_2: byId('organization-street2').value.trim() || null,
-        city: byId('organization-city').value.trim() || null,
-        state_province: byId('organization-state').value.trim() || null,
-        country: byId('organization-country').value.trim() || null,
-      },
-=======
       extra_information: details.extra_information,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
       secondary_phone: byId('organization-secondary-phone').value || null,
       secondary_contact: byId('organization-secondary-contact').value.trim() || null,
       secondary_email: byId('organization-secondary-email').value.trim() || null,
@@ -583,13 +496,9 @@
         email: byId('inline-contractor-email').value.trim(), phone: byId('inline-contractor-phone').value,
       } : null,
     };
-<<<<<<< HEAD
-    const request = { name: sprint2Payload.name, region: sprint2Payload.region, phone: sprint2Payload.phone, email: sprint2Payload.email, notes: sprint2Payload.notes, contact: sprint2Payload.contact, extra_information: sprint2Payload.extra_information };
-=======
     // The current organization IPC request accepts only these fields.
     const request = { name: sprint2Payload.name, region: sprint2Payload.region, phone: sprint2Payload.phone, email: sprint2Payload.email, notes: sprint2Payload.notes,
       details: { ...details, secondary_phone: sprint2Payload.secondary_phone, secondary_contact: sprint2Payload.secondary_contact, secondary_email: sprint2Payload.secondary_email } };
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
     const organizationId = editingOrganizationId;
     const logo = byId('organization-logo').files[0];
     mutate('organization-modal', 'organization-form-message', async () => {

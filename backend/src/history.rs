@@ -14,11 +14,6 @@ pub fn create_change_history(conn: &Connection) -> Result<()> {
          );
          CREATE INDEX IF NOT EXISTS idx_record_change_history_entity
              ON record_change_history(entity_type, entity_id, occurred_at, id);
-         DROP TRIGGER IF EXISTS audit_contractor_insert;
-         DROP TRIGGER IF EXISTS audit_contractor_update;
-         DROP TRIGGER IF EXISTS audit_organization_insert;
-         DROP TRIGGER IF EXISTS audit_organization_update;
-         DROP TRIGGER IF EXISTS audit_contact_insert;
          CREATE TRIGGER IF NOT EXISTS audit_contractor_insert AFTER INSERT ON contractors BEGIN
            UPDATE contractors SET created_at=COALESCE(NEW.created_at,strftime('%Y-%m-%dT%H:%M:%fZ','now')),
              updated_at=COALESCE(NEW.updated_at,NEW.created_at,strftime('%Y-%m-%dT%H:%M:%fZ','now')) WHERE id=NEW.id;

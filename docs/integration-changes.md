@@ -490,6 +490,28 @@ JS syntax and seven asset integrity declarations pass. Prior 45 backend/four
 bridge test results unchanged; no new Mac/installed-release verification claimed.
 # Final verification continuation — November 7, 2026
 
+## Latest download repair — November 9, 2026
+
+Latest merge 474a90d committed conflict markers in 15 live source/contract files.
+Reconciled baseline typed details, SQLCipher, media, security and atomic writes
+with the newer detailed archive, field history and company-closure UI. Removed
+duplicate serialized fields and raw custom-field persistence that conflicted with
+the existing validated details group. Preserved the newer feature behavior.
+Schema 7 adds closure metadata after the released schema 6; tested repeated
+initialization and retained records/custom fields. Removed unconditional audit
+trigger recreation on every unlock, which broke encrypted export through stale
+schema state. New migration/closure/history/archive regression and the existing
+encrypted transfer tests pass. No ordinary application data was opened or reset.
+
+Version 0.2.1 manifests/lockfiles align. A fast merge-marker CI guard prevents
+recurrence before expensive builds. A manually dispatched publisher accepts only
+a successful native run matching exact commit/version, verifies both installer
+assets and their GitHub digests, and publishes stable asset names for latest-release
+homepage links. Python is release tooling on the GitHub runner, not app runtime.
+Local checks: 50 backend tests, six bridge/voice tests, full Windows UI regression,
+and focused history/closure/archive/restart/accessibility checks passed. Native
+packaging and public download publication are next; v0.2.0 remains available.
+
 Frontend changes to Connor's UI: darker light-theme navigation/shortcut text and
 warning button colors address actual axe contrast failures; brand link uses its
 visible name to avoid an accessible-name mismatch. On lock, global-ui.js clears

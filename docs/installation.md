@@ -1,12 +1,12 @@
 # Install Hippo Harbor CRM
 
-Use the installers for version 0.2.0 from the final native build. Older MVP
+Use the installers for version 0.2.1 from the verified native build. Older MVP
 artifacts contain older functionality. Build evidence and final download links
 are recorded in final-submission-verification.md.
 
 ## Windows x64
 
-1. Open Hippo Harbor CRM_0.2.0_x64-setup.exe.
+1. Open the downloaded Hippo Harbor CRM Windows setup .exe.
 2. Follow the setup wizard, then open Hippo Harbor CRM from the Start menu.
 3. On first use, create a password and save the one-time recovery key privately.
 

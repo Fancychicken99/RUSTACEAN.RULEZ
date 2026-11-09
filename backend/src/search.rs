@@ -25,7 +25,7 @@ pub fn search_contractors(
             c.first_name,
             c.middle_name,
             c.last_name,
-            c.suffix, c.street_address_1, c.street_address_2, c.city, c.state_province, c.country, c.extra_information, (SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id), CAST(MAX(0,julianday('now')-julianday((SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id))) AS INTEGER)
+            c.suffix, c.street_address_1, c.street_address_2, c.city, c.state_province, c.country, c.extra_information, (SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id), CAST(MAX(0,julianday('now')-julianday((SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id))) AS INTEGER), c.created_at, c.updated_at
          FROM contractors c
          LEFT JOIN organizations o
             ON c.organization_id = o.id
@@ -67,9 +67,6 @@ pub fn search_contractors(
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
-<<<<<<< HEAD
-            extra_information: None,
-=======
             street_address_1: row.get(15)?,
             street_address_2: row.get(16)?,
             city: row.get(17)?,
@@ -78,7 +75,8 @@ pub fn search_contractors(
             extra_information: crate::details::read_custom(row, 20)?,
             last_contact_at: row.get(21)?,
             days_since_last_contact: row.get(22)?,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
+            created_at: row.get(23)?,
+            updated_at: row.get(24)?,
         })
     })?;
 

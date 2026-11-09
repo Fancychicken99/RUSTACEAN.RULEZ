@@ -68,6 +68,25 @@ module.exports = context => {
       const saved = await evaluate(`window.crmApi.listContractors().then(records=>records.find(record=>record.id===${inline.id}))`);
       assert.equal(saved.city, 'London'); assert.equal(saved.phone, '+44 20 7946 0958');
       assert.ok(await evaluate(`window.crmApi.loadRecordImage({kind:'contractor',id:${inline.id}})`));
+      await evaluate(`window.crmDirectory.showProfile(${inline.id})`);
+      await until(() => evaluate("document.querySelector('[data-record-history=contractor] li') !== null"), 'contractor field history');
+      await evaluate("document.getElementById('nav-organizations').click()");
+      const selector = `tr[data-organization-id="${saved.organization_id}"]`;
+      await until(() => evaluate(`Boolean(document.querySelector(${JSON.stringify(selector + ' .organization-status-select')}))`), 'organization status dropdown');
+      await evaluate(`{const select=document.querySelector(${JSON.stringify(selector + ' .organization-status-select')});select.value='Out of Business';select.dispatchEvent(new Event('change',{bubbles:true}));}`);
+      await until(() => evaluate(`window.crmApi.listOrganizations().then(records=>records.find(record=>record.id===${saved.organization_id})?.status==='Out of Business')`), 'company closure saved');
+      await until(() => evaluate(`!document.querySelector(${JSON.stringify(selector + ' .organization-status-select')}).disabled`), 'company status ready');
+      await evaluate(`[...document.querySelectorAll(${JSON.stringify(selector + ' button')})].find(button=>button.textContent.includes('History')).click()`);
+      await modalShown('record-history-modal');
+      await until(() => evaluate("document.querySelector('#organization-history-list li') !== null"), 'organization field history');
+      await accessibility('organization-history-dark');
+      await evaluate("document.querySelector('#record-history-modal .btn-close').click()"); await modalClosed('record-history-modal');
+      await evaluate("document.getElementById('nav-archive').click()");
+      await until(() => evaluate("document.querySelectorAll('#archive-table-body tr td:first-child').length >= 4"), 'detailed archive view');
+      await accessibility('archives-dark');
+      await restartLogin();
+      assert.equal(await evaluate(`window.crmApi.listOrganizations().then(records=>records.find(record=>record.id===${saved.organization_id}).status)`), 'Out of Business');
+      console.log('PASS: contractor/company field history UI, detailed archives, and Out of Business status persisted across restart.');
       console.log('PASS: country-derived phone prefix, address/PNG restart, taxonomy UI persistence, bounded logo and automated light/dark WCAG-tag scans (manual checks remain).');
     },
   };

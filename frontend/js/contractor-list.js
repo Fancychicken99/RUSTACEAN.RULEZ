@@ -1,4 +1,12 @@
 ﻿(() => {
+  let historyGeneration = 0;
+  window.addEventListener('crm:locked', () => {
+    ++historyGeneration;
+    document.getElementById('organization-history-list')?.replaceChildren();
+    document.getElementById('archive-table-body')?.replaceChildren();
+    const modal = document.getElementById('record-history-modal');
+    if (modal) bootstrap.Modal.getInstance(modal)?.hide();
+  });
   const appContent = document.getElementById('app-content');
   const contactsView = document.getElementById('view-contacts');
   const navDashboard = document.getElementById('nav-dashboard');
@@ -106,7 +114,7 @@
       Object.assign(organization, updated);
       const stored = organizations.find(item => item.id === organization.id);
       if (stored) Object.assign(stored, updated);
-      document.getElementById('workspace-message').textContent = `${organization.name} marked ${next}.`;
+      window.crmNotify(`${organization.name} marked ${next}.`);
       renderOrganizations();
     } catch (error) {
       select.value = previous;
@@ -387,14 +395,15 @@
     historySection.append(historyHeading, historyList);
     body.appendChild(historySection);
     profile.appendChild(body);
-<<<<<<< HEAD
+    window.crmMedia?.loadInto(image, 'contractor', contractor.id, placeholder);
     loadRecordHistory('contractor', contractor.id, historyList);
   }
 
   async function loadRecordHistory(entityType, id, list) {
+    const token = historyGeneration;
     try {
       const history = await window.crmApi.getRecordHistory({ entity_type: entityType, id });
-      if (!list.isConnected) return;
+      if (!list.isConnected || !window.crmSession?.authenticated || token !== historyGeneration) return;
       list.replaceChildren();
       if (!history.length) { list.textContent = 'No changes have been recorded yet.'; return; }
       history.forEach(entry => {
@@ -414,13 +423,11 @@
         list.appendChild(item);
       });
     } catch (error) {
-      if (!list.isConnected) return;
+      if (!list.isConnected || !window.crmSession?.authenticated || token !== historyGeneration) return;
       list.textContent = error.message === 'Login required' ? 'Log in to view change history.' : error.message;
       if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
     }
-=======
-    window.crmMedia?.loadInto(image, 'contractor', contractor.id, placeholder);
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
+
   }
 
   function renderContactList() {
@@ -766,7 +773,6 @@
       const count = document.createElement('td');
       count.textContent = String(activeContractors);
       const status = document.createElement('td');
-<<<<<<< HEAD
       const statusSelect = document.createElement('select');
       statusSelect.className = 'form-select form-select-sm organization-status-select';
       statusSelect.setAttribute('aria-label', `Status for ${organization.name}`);
@@ -775,28 +781,7 @@
       statusSelect.addEventListener('click', event => event.stopPropagation());
       statusSelect.addEventListener('change', () => changeOrganizationStatus(organization, statusSelect));
       status.appendChild(statusSelect);
-=======
-      const statusWrap = document.createElement('div');
-      statusWrap.className = 'form-check form-switch mb-0';
-      const statusToggle = document.createElement('input');
-      statusToggle.className = 'form-check-input';
-      statusToggle.type = 'checkbox';
-      statusToggle.role = 'switch';
-      statusToggle.checked = organization.status === 'Active';
-      statusToggle.setAttribute('aria-label', 'Active status for ' + organization.name);
-      statusToggle.addEventListener('change', async () => {
-        statusToggle.disabled = true;
-        try { await window.crmApi.workspaceAction({action:'organization_status',id:organization.id,status:statusToggle.checked?'Active':'Inactive'}); await refreshSavedData(); window.crmNotify('Organization status updated.'); }
-        catch(error) {statusToggle.checked=organization.status==='Active';window.crmNotify(error.message,'error');}
-        finally {statusToggle.disabled=false;}
-      });
-      statusWrap.appendChild(statusToggle);
-      const statusLabel = document.createElement('span');
-      statusLabel.className = 'small text-secondary';
-      statusLabel.textContent = organization.status;
-      statusWrap.appendChild(statusLabel);
-      status.appendChild(statusWrap);
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
+
       const actions = document.createElement('td');
       const rosterButton = document.createElement('button');
       rosterButton.className = 'btn btn-outline-primary mt-auto';

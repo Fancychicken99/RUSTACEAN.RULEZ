@@ -45,9 +45,7 @@ fn main() {
             commands::filter_contractors,
             commands::import_sample_data,
             commands::record_contact_note,
-<<<<<<< HEAD
-            commands::get_record_history
-=======
+            commands::get_record_history,
             commands::take_recovery_key,
             commands::recover_password,
             commands::change_password,
@@ -62,7 +60,6 @@ fn main() {
             commands::open_contact_action,
             commands::transcribe_audio,
             commands::cancel_dictation,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start Hippo Harbor CRM");

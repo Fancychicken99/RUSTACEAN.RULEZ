@@ -1,5 +1,20 @@
 # Session handoff
 
+## Download update in progress — November 9, 2026
+
+User authorized updating homepage downloads to the newest code. HEAD 474a90d had
+committed merge markers across 15 live files; native run 42564003274 failed on both
+platforms. Reconciled overlap without dropping newer archives/history/closure UI.
+0.2.1 uses schema 7 with tested schema-6 upgrades and portable 6/7 imports.
+Local: 50 backend tests, six bridge/voice tests and full Windows regression passed;
+focused history/company closure/archive/restart scans also passed (smoke-jv6Yog).
+Fast conflict-marker guard and explicit successful-run release publisher added.
+Next: push repaired source, native Windows/Mac build, dispatch verified publisher,
+then update default main and dev README to latest-release stable asset URLs.
+Old v0.2.0 downloads remain until verified replacements exist. User authorization
+includes necessary commit/push/publication for this download update. No ordinary
+user workspace migrated or reset. Manual acceptance/signing limits still apply.
+
 ## Public download publication — November 7, 2026
 
 User explicitly authorized a GitHub Release and homepage download buttons.

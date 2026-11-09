@@ -263,12 +263,7 @@ a { text-decoration: none; }
 [hidden] { display: none !important; }
 .auth-overlay { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; background: var(--hope-bg); }
 .auth-panel { width: min(100%, 420px); border: 1px solid var(--hope-border); box-shadow: 0 12px 42px rgba(35, 45, 66, .08); }
-<<<<<<< HEAD
-#auth .auth-brand-logo-mark { display: block; width: 140px !important; max-width: 100%; height: 140px; max-height: 140px; object-fit: contain; margin: 0 auto 1rem; background: transparent; }
-=======
-<<<<<<< HEAD
 .auth-brand-logo-mark { display: block; width: 140px; height: 140px; max-width: 100%; max-height: 22vh; object-fit: contain; margin-inline: auto; background: transparent; }
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
 :root[data-bs-theme="dark"] .auth-overlay { background: #171c28; }
 :root[data-bs-theme="dark"] .auth-panel { background: #202636 !important; border-color: #343c4f; }
 :root[data-bs-theme="dark"] .auth-panel h1,

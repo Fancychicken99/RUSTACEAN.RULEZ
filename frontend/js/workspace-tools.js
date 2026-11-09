@@ -29,7 +29,7 @@
       badge.dataset.color = String(hash % 4); badges.appendChild(badge);
     }
     const status = byId('record-tools-status'); status.replaceChildren();
-    for (const value of kind === 'organization' ? ['Active', 'Inactive'] : ['Active', 'Inactive', 'Retired', 'Deceased']) status.add(new Option(value, value));
+    for (const value of kind === 'organization' ? ['Active', 'Inactive', 'Out of Business'] : ['Active', 'Inactive', 'Retired', 'Deceased']) status.add(new Option(value, value));
     status.value = record?.status || 'Active';
     byId('record-tools-transfer-group').hidden = kind !== 'contractor';
     const target = byId('record-tools-transfer'); target.replaceChildren();

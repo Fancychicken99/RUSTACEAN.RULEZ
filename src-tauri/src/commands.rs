@@ -2,12 +2,8 @@ use rusqlite::Connection;
 use secure_crm_backend::{
     contacts,
     database::{
-<<<<<<< HEAD
         ArchivedRecord, Contractor, Organization,
         archive_organization as archive_organization_record, get_archived_records,
-=======
-        Contractor, Organization, archive_organization as archive_organization_record,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         get_organizations,
     },
     profiles::{self, ProfileError, ProfileFields},
@@ -94,15 +90,8 @@ pub struct OrganizationRequest {
     phone: Option<String>,
     email: Option<String>,
     notes: Option<String>,
-<<<<<<< HEAD
-    #[serde(default)]
-    contact: profiles::OrganizationContactFields,
-    #[serde(default)]
-    extra_information: serde_json::Value,
-=======
     contractor: Option<ProfileFields>,
     details: Option<secure_crm_backend::details::OrganizationDetails>,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
 }
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -113,14 +102,7 @@ pub struct UpdateOrganizationRequest {
     phone: Option<String>,
     email: Option<String>,
     notes: Option<String>,
-<<<<<<< HEAD
-    #[serde(default)]
-    contact: profiles::OrganizationContactFields,
-    #[serde(default)]
-    extra_information: serde_json::Value,
-=======
     details: Option<secure_crm_backend::details::OrganizationDetails>,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
 }
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -462,24 +444,15 @@ impl AppState {
         if !state.session.authorize_action() {
             return Err("Login required".into());
         }
-<<<<<<< HEAD
-        profiles::create_organization_profile_complete(
-=======
         profiles::create_organization_complete(
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
             &mut state.conn,
             request.name,
             request.region,
             request.phone,
             request.email,
             request.notes,
-<<<<<<< HEAD
-            request.contact,
-            request.extra_information,
-=======
             request.contractor,
             request.details,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         )
         .map_err(|e| profile_error(e, "Unable to save organization"))
     }
@@ -489,25 +462,15 @@ impl AppState {
         if !state.session.authorize_action() {
             return Err("Login required".into());
         }
-<<<<<<< HEAD
-        profiles::update_organization_profile_complete(
-            &state.conn,
-=======
         profiles::update_organization_complete(
             &mut state.conn,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
             request.id,
             request.name,
             request.region,
             request.phone,
             request.email,
             request.notes,
-<<<<<<< HEAD
-            request.contact,
-            request.extra_information,
-=======
             request.details,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         )
         .map_err(|e| profile_error(e, "Unable to save organization"))
     }
@@ -1034,7 +997,6 @@ mod tests {
             role: None,
             email: Some("bridge@example.com".into()),
             phone: None,
-            extra_information: serde_json::json!({}),
         }
     }
 
@@ -1049,13 +1011,8 @@ mod tests {
                 phone: None,
                 email: None,
                 notes: None,
-<<<<<<< HEAD
-                contact: profiles::OrganizationContactFields::default(),
-                extra_information: serde_json::json!({}),
-=======
                 contractor: Some(profile()),
                 details: None,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
             })
             .unwrap_err(),
             "Login required"
@@ -1089,13 +1046,8 @@ mod tests {
                 phone: None,
                 email: None,
                 notes: None,
-<<<<<<< HEAD
-                contact: profiles::OrganizationContactFields::default(),
-                extra_information: serde_json::json!({}),
-=======
                 contractor: None,
                 details: None,
->>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
             })
             .unwrap();
         let saved = app

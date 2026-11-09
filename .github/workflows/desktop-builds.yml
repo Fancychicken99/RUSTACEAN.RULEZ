@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+      - name: Reject unresolved merge markers
+        # Check before downloading models or compiling native dependencies.
+        run: node scripts/check-merge-markers.cjs
       - name: Install pinned Rust toolchain
         run: rustup toolchain install 1.99.1 --profile minimal
       - name: Select pinned Rust toolchain
