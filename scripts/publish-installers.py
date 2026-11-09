@@ -80,7 +80,7 @@ def publish():
 - Offline Whisper and its model are included. No coding tools are required.
 - Create a local password and save your recovery key privately during setup.
 
-This update reconciles the latest frontend/backend merge, preserves the newer archive and change-history features, adds the company Out of Business status, and upgrades existing v0.2.0 workspaces without discarding records. Portable imports support schemas 6 and 7.
+This update fixes organization custom-field layout and carries forward the merged CRM workflows, archive and change-history features, company Out of Business status, and tested upgrades for existing workspaces without discarding records. Portable imports support schemas 6 and 7.
 
 Both native build jobs succeeded, including backend and bridge/Whisper tests, Windows executable UI regression and release startup, and Mac universal architecture/signature/process checks. [Build evidence](https://github.com/{repo}/actions/runs/{run_id}). Built commit: `{sha}`.
 
