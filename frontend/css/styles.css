@@ -370,6 +370,18 @@ a { text-decoration: none; }
 .active-filter-remove {min-width:24px;min-height:24px}
 :focus-visible {outline:3px solid #178b96;outline-offset:3px}
 .dictation-panel[hidden] {display:none!important}
+.speech-to-text-button { display: inline-grid; place-items: center; width: 2.35rem; height: 2.35rem; padding: 0; color: #334fd5; background: transparent; border: 1px solid #7384e6; }
+.speech-to-text-button:hover, .speech-to-text-button:active { color: #2338b5; background: #edf0ff; border-color: #5369db; }
+.speech-to-text-button:focus-visible { outline: 3px solid #178b96; outline-offset: 2px; box-shadow: 0 0 0 .2rem rgba(58, 87, 232, .2); }
+:root[data-bs-theme="dark"] .speech-to-text-button { color: #c3ccff; border-color: #9babff; }
+:root[data-bs-theme="dark"] .speech-to-text-button:hover,
+:root[data-bs-theme="dark"] .speech-to-text-button:active { color: #fff; background: #303950; border-color: #bcc7ff; }
+.custom-fields-list { container-type: inline-size; }
+.custom-field-actions { justify-content: flex-end; }
+.custom-field-actions .btn { width: auto !important; min-width: 5.25rem; }
+@container (max-width: 62rem) {
+  .custom-fields-list .custom-field-row > [class*="col-"] { flex: 0 0 100%; max-width: 100%; }
+}
 :root:not([data-bs-theme="dark"]) .sidebar .nav-link:not(.active),
 :root:not([data-bs-theme="dark"]) .search-shortcut {color:#566277}
 .btn-warning {color:#fff;background-color:#a7460b;border-color:#a7460b;--bs-btn-color:#fff;--bs-btn-bg:#a7460b;--bs-btn-border-color:#a7460b;--bs-btn-hover-color:#fff;--bs-btn-hover-bg:#873807;--bs-btn-hover-border-color:#873807;--bs-btn-active-color:#fff;--bs-btn-active-bg:#873807;--bs-btn-active-border-color:#873807}

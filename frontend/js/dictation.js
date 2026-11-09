@@ -43,7 +43,7 @@
     cancel(); const token = generation;
     target = field; active = true; panel.hidden = false;
     if (field.closest('label')) field.closest('label').after(panel); else field.parentElement.appendChild(panel);
-    heading.textContent = `Dictation · ${label}`; status.textContent = 'Allow microphone access. Audio is processed locally.';
+    heading.textContent = `Speech to text · ${label}`; status.textContent = 'Allow microphone access. Audio is processed locally.';
     preview.hidden = previewLabel.hidden = true; insert.disabled = true; stop.disabled = true;
     chunks = []; samples = 0;
     try {
@@ -99,7 +99,8 @@
       if (field.dataset.dictationReady || field.matches('select, [readonly]') || /country|region|tags|skills/i.test(field.id)) continue;
       field.dataset.dictationReady = 'true';
       const label = (field.labels?.[0]?.textContent || field.getAttribute('aria-label') || field.closest('label')?.textContent || 'Text field').trim();
-      const control = document.createElement('button'); control.type = 'button'; control.className = 'btn btn-sm btn-outline-primary mt-2'; control.textContent = 'Dictate'; control.setAttribute('aria-label', `Dictate ${label}`);
+      const control = document.createElement('button'); control.type = 'button'; control.className = 'btn btn-sm speech-to-text-button mt-2'; control.setAttribute('aria-label', `Start speech-to-text for ${label}`); control.title = `Speech to text for ${label}`;
+      const icon = document.createElement('i'); icon.className = 'bi bi-mic-fill'; icon.setAttribute('aria-hidden', 'true'); control.appendChild(icon);
       control.addEventListener('click', () => { if (!field.disabled) start(field, label); });
       if (field.closest('label')) field.closest('label').after(control); else field.after(control);
     }

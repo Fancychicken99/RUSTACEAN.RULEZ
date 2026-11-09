@@ -175,22 +175,22 @@
   }
   function addCustomFieldRow(kind, name = '', saved = '') {
     const list = document.querySelector(`[data-custom-fields="${kind}"]`);
-    const row = document.createElement('div'); row.className = 'row g-2 align-items-end mb-3 custom-field-row';
-    const nameColumn = document.createElement('div'); nameColumn.className = 'col-lg-3';
+    const row = document.createElement('div'); row.className = 'row g-3 align-items-stretch mb-4 custom-field-row';
+    const nameColumn = document.createElement('div'); nameColumn.className = 'col-xl-3';
     const nameLabel = document.createElement('label'); nameLabel.className = 'form-label'; nameLabel.textContent = 'Field Name';
     const nameInput = document.createElement('input'); nameInput.className = 'form-control'; nameInput.type = 'text'; nameInput.dataset.customFieldName = ''; nameInput.placeholder = 'e.g., Callsign'; nameInput.value = name;
     nameInput.maxLength = 80;
     nameLabel.appendChild(nameInput); nameColumn.appendChild(nameLabel);
-    const typeColumn = document.createElement('div'); typeColumn.className = 'col-lg-3';
+    const typeColumn = document.createElement('div'); typeColumn.className = 'col-xl-3';
     const typeLabel = document.createElement('label'); typeLabel.className = 'form-label'; typeLabel.textContent = 'Field Type';
     const typeSelect = document.createElement('select'); typeSelect.className = 'form-select'; typeSelect.dataset.customFieldType = '';
     [['text','Short text'],['long_text','Long text'],['relation','Relation']].forEach(([v,l]) => typeSelect.add(new Option(l,v)));
     typeSelect.value = typeof saved === 'object' && saved?.type ? saved.type : 'text'; typeLabel.appendChild(typeSelect); typeColumn.appendChild(typeLabel);
-    const valueColumn = document.createElement('div'); valueColumn.className = 'col-lg-4';
+    const valueColumn = document.createElement('div'); valueColumn.className = 'col-xl-4';
     const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = 'Field Value';
     const holder = document.createElement('div'); holder.dataset.customFieldControl = ''; valueLabel.appendChild(holder); valueColumn.appendChild(valueLabel);
     typeSelect.addEventListener('change', () => customFieldValueControl(row, typeSelect.value));
-    const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-2';
+    const actionColumn = document.createElement('div'); actionColumn.className = 'col-xl-2 d-flex align-items-end custom-field-actions';
     const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100 text-nowrap'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
     actionColumn.appendChild(remove); row.append(nameColumn, typeColumn, valueColumn, actionColumn); list.appendChild(row);
     customFieldValueControl(row, typeSelect.value, saved);
@@ -268,6 +268,23 @@
       }
       select.value = record.organization_id == null ? '' : String(record.organization_id);
     }
+  }
+  function populateOrganizationRegionOptions(selectedRegion = '') {
+    const select = byId('organization-region');
+    const regions = new Set([
+      'Central Asia', 'East Asia', 'East Nairobi', 'Eastern Europe',
+      'Middle East', 'North America', 'Sub-Saharan Africa'
+    ]);
+    const directory = window.crmDirectory ?? {};
+    [...(directory.organizations ?? []), ...(directory.contractors ?? [])].forEach(record => {
+      const region = String(record.region ?? '').trim();
+      if (region) regions.add(region);
+    });
+    const selected = String(selectedRegion ?? '').trim();
+    if (selected) regions.add(selected);
+    select.replaceChildren(new Option('Select a region', ''));
+    [...regions].sort((a, b) => a.localeCompare(b)).forEach(region => select.add(new Option(region, region)));
+    select.value = selected;
   }
   function prepareContractor(record = null) {
     if (!window.crmSession?.authenticated) return;
@@ -356,7 +373,7 @@
     byId('organization-title').textContent = 'Edit Organization';
     byId('save-organization').textContent = 'Save changes';
     byId('organization-name').value = organization.name ?? '';
-    byId('organization-region').value = organization.region ?? '';
+    populateOrganizationRegionOptions(organization.region ?? '');
     byId('organization-email').value = organization.email ?? '';
     setPhone('organization-phone', organization.phone ?? '');
     setPhone('organization-secondary-phone', organization.secondary_phone ?? '');
@@ -389,6 +406,7 @@
       editingOrganizationId = null;
       byId('organization-form').reset();
       bootstrap.Tab.getOrCreateInstance(byId('organization-basic-tab')).show();
+      populateOrganizationRegionOptions();
       populateCustomFields('organization', {});
       byId('organization-title').textContent = 'Add organization';
       byId('save-organization').textContent = 'Save organization';

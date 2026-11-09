@@ -19,7 +19,7 @@ Distribute the setup file rather than copying the loose executable.
 1. Open the Hippo Harbor CRM .dmg disk image.
 2. Drag Hippo Harbor CRM.app to Applications.
 3. Open it from Applications, create a password and save the recovery key.
-4. Allow microphone access when choosing Dictate if you want voice input.
+4. Allow microphone access when you choose the microphone button for speech to text.
 
 The universal app contains both CPU architectures and the offline speech model.
 Do not unpack and re-zip the app on Windows: Mac permissions and bundle metadata
