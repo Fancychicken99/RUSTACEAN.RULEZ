@@ -189,24 +189,31 @@
     const list = document.querySelector(`[data-custom-fields="${kind}"]`);
     if (!list) return null;
     const row = document.createElement('div'); row.className = 'row g-3 align-items-stretch mb-4 custom-field-row';
-    const nameColumn = document.createElement('div'); nameColumn.className = 'col-xl-3';
+    const nameColumn = document.createElement('div'); nameColumn.className = 'col-lg-3';
     const nameLabel = document.createElement('label'); nameLabel.className = 'form-label'; nameLabel.textContent = 'Field Name';
     const nameInput = document.createElement('input'); nameInput.className = 'form-control'; nameInput.type = 'text'; nameInput.dataset.customFieldName = ''; nameInput.placeholder = 'e.g., Callsign'; nameInput.value = name;
     nameInput.maxLength = 80;
     nameLabel.appendChild(nameInput); nameColumn.appendChild(nameLabel);
-    const typeColumn = document.createElement('div'); typeColumn.className = 'col-xl-3';
+    const typeColumn = document.createElement('div'); typeColumn.className = 'col-lg-3';
     const typeLabel = document.createElement('label'); typeLabel.className = 'form-label'; typeLabel.textContent = 'Field Type';
     const typeSelect = document.createElement('select'); typeSelect.className = 'form-select'; typeSelect.dataset.customFieldType = '';
     [['text','Short text'],['long_text','Long text / Description'],['relation','Relation']].forEach(([v,l]) => typeSelect.add(new Option(l,v)));
     typeSelect.value = typeof saved === 'object' && saved?.type ? saved.type : 'text'; typeLabel.appendChild(typeSelect); typeColumn.appendChild(typeLabel);
-    const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-xl-4';
+    const valueColumn = document.createElement('div'); valueColumn.className = typeSelect.value === 'long_text' ? 'col-12' : 'col-lg-4';
     const valueLabel = document.createElement('label'); valueLabel.className = 'form-label'; valueLabel.textContent = typeSelect.value === 'long_text' ? 'Description' : 'Field Value';
     const holder = document.createElement('div'); holder.dataset.customFieldControl = ''; valueLabel.appendChild(holder); valueColumn.appendChild(valueLabel);
-    typeSelect.addEventListener('change', () => customFieldValueControl(row, typeSelect.value));
-    const actionColumn = document.createElement('div'); actionColumn.className = 'col-xl-2 d-flex align-items-end custom-field-actions';
-    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100 text-nowrap'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
-    actionColumn.appendChild(remove); row.append(nameColumn, typeColumn, valueColumn, actionColumn); list.appendChild(row);
+    row.append(nameColumn, typeColumn, valueColumn); list.appendChild(row);
+    typeSelect.addEventListener('change', () => {
+      const isDescription = typeSelect.value === 'long_text';
+      valueColumn.className = isDescription ? 'col-12' : 'col-lg-4';
+      valueLabel.firstChild.textContent = isDescription ? 'Description' : 'Field Value';
+      customFieldValueControl(row, typeSelect.value);
+    });
     customFieldValueControl(row, typeSelect.value, saved);
+    const actionColumn = document.createElement('div'); actionColumn.className = 'col-lg-2 d-flex align-items-end custom-field-actions';
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-secondary w-100 text-nowrap'; remove.textContent = 'Remove'; remove.addEventListener('click', () => row.remove());
+    actionColumn.appendChild(remove);
+    row.appendChild(actionColumn);
   }
   function customFields(kind) {
     const rows = [...document.querySelectorAll(`[data-custom-fields="${kind}"] .custom-field-row`)];

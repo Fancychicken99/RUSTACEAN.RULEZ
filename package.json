@@ -1,6 +1,6 @@
 {
   "name": "rustacean-crm-build",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "description": "Development-only native packaging tools; Node is not an application runtime dependency.",
   "scripts": {

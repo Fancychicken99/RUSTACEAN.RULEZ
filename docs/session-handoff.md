@@ -1,5 +1,17 @@
 # Session handoff
 
+## Current final build: v0.2.3 — November 9, 2026
+
+Remote dev advanced concurrently with organization-layout commits 35e21c8 and
+2e218a3 (which reserve package version 0.2.2). Integrated them through a normal
+merge with local release-branch consolidation; no remote work overwritten. Fresh
+version 0.2.3 avoids version/tag collisions. Focused executable checks passed on
+the merged layout (smoke-Rg5pAh); full Windows regression passed on the combined
+release UI before the narrow layout merge (smoke-yzgdnA). Native CI will verify
+the exact final source. Backend/bridge code is unchanged from successful build
+42662290005. Reserve fresh v0.2.3 at the final tested source and publish only after
+both native jobs succeed. Latest-release homepage URLs are already configured.
+
 ## Final latest-version consolidation — November 9, 2026
 
 Final provenance audit found pre-existing annotated tag v0.2.1 -> ab4b0ed, while

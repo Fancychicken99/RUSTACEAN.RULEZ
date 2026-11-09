@@ -503,6 +503,12 @@ Use fresh version 0.2.2; do not move the existing annotated v0.2.1 tag. Publishe
 verifies tag source before release creation and after publication. Automatic
 approval review rejected an attempted intermediate-release rename; that mutation
 was not executed. Fresh release publication is the chosen safer path.
+During publication preparation, remote dev gained organization-layout commits
+35e21c8/2e218a3. Integrated their type-change/Remove alignment behavior with the
+expanded editor through a reviewed merge. Kept draft-only editing, persistence
+and lock cleanup. Version 0.2.3 is selected because the concurrent work already
+prepared 0.2.2. Existing releases/tags are retained; exact source-tag checks gate
+the fresh release. Focused merged-layout checks passed; native builds follow.
 
 Latest merge 474a90d committed conflict markers in 15 live source/contract files.
 Reconciled baseline typed details, SQLCipher, media, security and atomic writes

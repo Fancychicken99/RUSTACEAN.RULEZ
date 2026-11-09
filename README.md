@@ -17,7 +17,7 @@ approval in Privacy & Security. Save your recovery key during initial setup.
 ---
 
 Hippo Harbor CRM is a student desktop contractor CRM for Dr. Burchfield. The MVP
-has been demonstrated; current 0.2.2 work targets the full Sprint 2 submission.
+has been demonstrated; current 0.2.3 work includes the organization layout fix and targets the full Sprint 2 submission.
 It includes encrypted local workspaces/recovery, contractor and organization
 editing, images, combined filters, tags/skills, contact and audit history,
 archive/restore, encrypted portable transfer and reviewed offline dictation.

@@ -88,7 +88,7 @@ def publish():
 - Offline Whisper and its model are included. No coding tools are required.
 - Create a local password and save your recovery key privately during setup.
 
-This update combines the latest development and release-preparation branches: expanded long-text editors, microphone controls, cleaner sidebar, organization region selection and clear alert bands, along with detailed archives, field history, company closure status and safe upgrades of existing v0.2.0 workspaces. Portable imports support schemas 6 and 7.
+This update combines the latest development and release-preparation branches: the organization custom-field alignment fix, expanded long-text editors, microphone controls, cleaner sidebar, organization region selection and clear alert bands, along with detailed archives, field history, company closure status and safe upgrades of existing v0.2.0 workspaces. Portable imports support schemas 6 and 7.
 
 Both native build jobs succeeded, including backend and bridge/Whisper tests, Windows executable UI regression and release startup, and Mac universal architecture/signature/process checks. [Build evidence](https://github.com/{repo}/actions/runs/{run_id}). Built commit: `{sha}`.
 

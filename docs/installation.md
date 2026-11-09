@@ -1,6 +1,6 @@
 # Install Hippo Harbor CRM
 
-Use the installers for version 0.2.2 from the verified native build. Older MVP
+Use the installers for version 0.2.3 from the verified native build. Older MVP
 artifacts contain older functionality. Build evidence and final download links
 are recorded in final-submission-verification.md.
 
