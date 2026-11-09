@@ -20,6 +20,14 @@ pub fn initialize_database(conn: &Connection) -> Result<()> {
     // Create skill management tables
     create_skill_tables(conn)?;
 
+<<<<<<< HEAD
+=======
+    // Sprint 2: preserve existing rows and add new structured fields.
+    migrate_sprint2(conn)?;
+    crate::details::migrate_details(conn)?;
+    crate::workspace::migrate(conn)?;
+
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
     // Create communication tracking table
     create_contact_table(conn)?;
     create_change_history(conn)?;

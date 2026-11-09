@@ -7,9 +7,12 @@ the branding, committing, and pushing this chat's changes.
 ## Assets and surfaces
 
 - `frontend/assets/branding/hippo-harbor-logo.png`: approved full logo, including
-  both hippo-face O letters. Used on authentication and sidebar navigation.
+  both hippo-face O letters. Retained as the approved full-logo asset.
 - `frontend/assets/branding/hippo-harbor-mark.png`: generated transparent,
   text-free emblem derived from that logo for native icons and the favicon.
+  The November 6 conflict resolution retains the current branch's compact mark
+  with visible Hippo Harbor CRM text on authentication and sidebar navigation.
+  It removes duplicated conflict alternatives, not the approved artwork files.
 - `src-tauri/icons/icon.png`, `icon.ico`, and `icon.icns`: Linux/Windows/macOS
   exports from the mark. The old placeholder SVG is retired.
 

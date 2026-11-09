@@ -3,6 +3,13 @@
   const message = document.getElementById('sample-import-message');
   let busy = false;
   let generation = 0;
+  const settings = document.getElementById('settings-modal');
+  settings.addEventListener('show.bs.modal', event => {
+    if (!window.crmSession?.authenticated) event.preventDefault();
+  });
+  settings.addEventListener('shown.bs.modal', () => {
+    if (!window.crmSession?.authenticated) bootstrap.Modal.getInstance(settings)?.hide();
+  });
   function setBusy(value) {
     busy = value;
     modal.querySelectorAll('button').forEach(button => { button.disabled = value; });
@@ -24,7 +31,7 @@
     const token = generation;
     const current = () => token === generation && window.crmSession?.authenticated;
     setBusy(true);
-    message.textContent = 'Importing fictional records…';
+    message.textContent = 'Importing sample records…';
     try {
       const report = await window.crmApi.importSampleData();
       if (!current()) return;
@@ -34,7 +41,7 @@
       const refreshed = await window.crmDirectory.refresh();
       if (!current()) return;
       const result = `Sample import complete: ${report.contractors_added} contractors and ${report.organizations_added} organizations added; ${report.contractors_skipped} contractors and ${report.organizations_skipped} organizations skipped.`;
-      document.getElementById('workspace-message').textContent = result + (refreshed ? '' : ' The list could not update automatically; reopen the workspace to reload.');
+      window.crmNotify(result + (refreshed ? '' : ' The list could not update automatically; reopen the workspace to reload.'), refreshed ? 'success' : 'error');
     } catch (error) {
       if (!current()) return;
       message.textContent = error.message;

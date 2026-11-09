@@ -1,14 +1,16 @@
 {
   "name": "rustacean-crm-build",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Development-only native packaging tools; Node is not an application runtime dependency.",
   "scripts": {
     "tauri": "tauri",
-    "package:windows": "tauri build --bundles nsis -- --locked",
-    "package:macos": "tauri build --target universal-apple-darwin --bundles app,dmg -- --locked"
+    "package:windows": "node scripts/prepare-voice.cjs && tauri build --bundles nsis -- --locked",
+    "package:macos": "node scripts/prepare-voice.cjs && tauri build --target universal-apple-darwin --bundles app,dmg -- --locked",
+    "prepare:voice": "node scripts/prepare-voice.cjs"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "2.12.4"
+    "@tauri-apps/cli": "2.12.4",
+    "axe-core": "4.14.0"
   }
 }

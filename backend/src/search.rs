@@ -25,7 +25,7 @@ pub fn search_contractors(
             c.first_name,
             c.middle_name,
             c.last_name,
-            c.suffix
+            c.suffix, c.street_address_1, c.street_address_2, c.city, c.state_province, c.country, c.extra_information, (SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id), CAST(MAX(0,julianday('now')-julianday((SELECT MAX(e.contacted_at) FROM contact_events e WHERE e.contractor_id=c.id))) AS INTEGER)
          FROM contractors c
          LEFT JOIN organizations o
             ON c.organization_id = o.id
@@ -47,7 +47,7 @@ pub fn search_contractors(
                )
            )
 
-         ORDER BY c.full_name",
+         ORDER BY CASE WHEN c.status IN ('Retired','Deceased') THEN 1 ELSE 0 END, c.full_name",
     )?;
 
     let contractors = stmt.query_map(params![region, skill], |row| {
@@ -67,9 +67,51 @@ pub fn search_contractors(
             middle_name: row.get(12)?,
             last_name: row.get(13)?,
             suffix: row.get(14)?,
+<<<<<<< HEAD
             extra_information: None,
+=======
+            street_address_1: row.get(15)?,
+            street_address_2: row.get(16)?,
+            city: row.get(17)?,
+            state_province: row.get(18)?,
+            country: row.get(19)?,
+            extra_information: crate::details::read_custom(row, 20)?,
+            last_contact_at: row.get(21)?,
+            days_since_last_contact: row.get(22)?,
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         })
     })?;
 
     contractors.collect()
+}
+
+pub fn search_contractors_by_name(conn: &Connection, name: &str) -> Result<Vec<Contractor>> {
+    let name = name.trim();
+
+    if name.is_empty() || name.chars().count() > 200 {
+        return Ok(Vec::new());
+    }
+
+    let mut stmt = conn.prepare(
+        "SELECT id
+         FROM contractors
+         WHERE archived_at IS NULL
+           AND (
+               full_name LIKE '%' || ?1 || '%'
+               OR soundex(full_name) = soundex(?1)
+               OR soundex(first_name) = soundex(?1)
+               OR soundex(last_name) = soundex(?1)
+           )
+         ORDER BY full_name",
+    )?;
+
+    let ids = stmt
+        .query_map([name], |row| row.get::<_, i64>(0))?
+        .collect::<Result<Vec<_>>>()?;
+
+    ids.into_iter()
+        .map(|id| {
+            crate::database::get_contractor(conn, id)?.ok_or(rusqlite::Error::QueryReturnedNoRows)
+        })
+        .collect()
 }

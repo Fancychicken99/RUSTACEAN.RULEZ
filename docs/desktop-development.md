@@ -1,5 +1,22 @@
 # Desktop executable development
 
+November 7 development update: encrypted workspaces use crm.vault.json plus its
+random vault-*.db file and crm.vault.lock. Existing crm.db migrates on correct
+login and stays explicitly flagged until confirmed cleanup. Do not inspect the
+new store using ordinary plaintext SQLite or discard the manifest. New setup
+requires saving/acknowledging a recovery key. Current 0.2.0 source compiles and
+passes 49 backend plus six bridge/voice tests. Final native UI, installer and Mac
+acceptance are tracked in final-submission-verification.md. Historical MVP build
+evidence below applies to those earlier artifacts only.
+
+Before the first build/test, run npm ci and npm run prepare:voice. The latter
+downloads checksum-pinned build resources into ignored directories; installed
+apps never fetch a model. Windows scripts provision portable Perl only under
+src-tauri/target/build-tools for vendored cryptography. Package with
+scripts/desktop.ps1 -Action Package, or npm run package:windows after preparing
+the process build-tool PATH. macOS uses npm run package:macos on a native Mac.
+
+
 October 31, 2026: MVP now requires Windows and macOS. Windows optimized exe and
 offline-WebView2 NSIS setup have been generated; release login-screen launch
 passed. Native Windows/Mac CI builds now passed; exact evidence/downloads are in

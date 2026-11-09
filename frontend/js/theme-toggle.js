@@ -1,33 +1,19 @@
 (() => {
-  const root = document.documentElement;
   const toggle = document.getElementById('theme-toggle');
-  const icon = document.getElementById('theme-toggle-icon');
-  const label = document.getElementById('theme-toggle-label');
-  if (!toggle || !icon || !label) return;
-
-  function applyTheme(theme, persist = true) {
-    const isDark = theme === 'dark';
-    root.dataset.bsTheme = isDark ? 'dark' : 'light';
-    document.body?.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
-    toggle.setAttribute('aria-pressed', String(isDark));
-    const nextTheme = isDark ? 'light' : 'dark';
-    const actionLabel = `Switch to ${nextTheme} mode`;
-    toggle.setAttribute('aria-label', actionLabel);
-    toggle.title = actionLabel;
-    label.textContent = `${nextTheme[0].toUpperCase()}${nextTheme.slice(1)} mode`;
-    icon.className = `bi ${isDark ? 'bi-sun' : 'bi-moon-stars'}`;
-
-    if (persist) {
-      try {
-        localStorage.setItem('northstar-crm-theme', isDark ? 'dark' : 'light');
-      } catch {
-        // The theme still applies for this session when storage is unavailable.
-      }
-    }
+  const select = document.getElementById('theme-mode');
+  function reflect() {
+    const dark = document.documentElement.dataset.bsTheme === 'dark';
+    const next = dark ? 'light' : 'dark';
+    toggle.setAttribute('aria-pressed', String(dark));
+    toggle.setAttribute('aria-label', 'Switch to ' + next + ' mode');
+    toggle.title = 'Switch to ' + next + ' mode';
+    document.getElementById('theme-toggle-label').textContent = dark ? 'Light mode' : 'Dark mode';
+    document.getElementById('theme-toggle-icon').className = 'bi ' + (dark ? 'bi-sun' : 'bi-moon-stars');
+    select.value = window.crmTheme.mode;
   }
-
-  applyTheme(root.dataset.bsTheme, false);
-  toggle.addEventListener('click', () => {
-    applyTheme(root.dataset.bsTheme === 'dark' ? 'light' : 'dark');
-  });
+  toggle.addEventListener('click', () => window.crmTheme.setMode(document.documentElement.dataset.bsTheme === 'dark' ? 'light' : 'dark'));
+  select.addEventListener('change', event => window.crmTheme.setMode(event.target.value));
+  window.addEventListener('crm:theme', reflect);
+  window.crmTheme.apply();
+  reflect();
 })();

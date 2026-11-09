@@ -1,5 +1,95 @@
 # Rust learning log
 
+## GitHub download delivery — November 7, 2026
+
+Release assets are versioned installer files; source ZIPs are different and do not
+contain the built installer. Repository homepage buttons link directly to the
+release assets. The default main README and development README are separate files
+on separate branches, so both need the download links. This publication work does
+not change Rust behavior or establish additional coding proficiency.
+
+## Native installer delivery — November 7, 2026
+
+Windows executables and macOS executable app bundles must be packaged on their
+native platforms. A Mac DMG is the delivery container; the .app inside is copied
+to Applications. Bundled speech resources are required beside the Windows binary
+and inside the Mac bundle, so a loose .exe is not the full distributable. Native
+build/signature/architecture checks differ from installation and microphone/UI
+acceptance. No new user coding practice or independent proficiency was assessed.
+
+## Final verification — November 7, 2026
+
+Continued development without a quiz or new user coding exercise. Backend tests,
+actual offline engine transcription, executable UI and installer/Mac acceptance
+are separate evidence boundaries. Actual accessibility scans found contrast and
+visible-name issues; frontend fixes are under native recheck. No independent
+Rust proficiency is inferred from agent-written implementation or passing tests.
+
+## November 7 development batch — testing deferred by user
+
+Continued typed optional details and atomic persistence. Explained structures
+as an approximate counterpart to Python dataclasses: shape and validation are
+separate concerns. Optional groups distinguish preserve (None) from replacing
+the details object (Some); empty fields in that object clear stored values.
+
+Encryption/recovery introduced a random database key protected by separate
+password/recovery wrappers; a password hash is not database encryption. Session
+cleanup closes the actual connection, not just the visible workspace. Discussed
+safe migration retaining source until verified cleanup, and explicit responsive
+image dimensions instead of relying on native raster size. No exercises/quizzes
+or demonstrated independent proficiency. No tests/builds run for this batch.
+
+## Atomic organization and inline contractor — November 7, 2026
+
+Introduced SQLite transactions through rusqlite: commit makes both records final;
+an early error drops the transaction and rolls back its writes. Python comparison:
+a database transaction context that rolls back when an exception escapes.
+Rust's ? propagates an error; rollback comes from the transaction's cleanup, not
+from ? itself. Reused one insertion helper under either caller's transaction.
+Option<ProfileFields> means an inline contractor may be absent; map(...).transpose()
+validates it if present and propagates validation errors. These are concepts
+introduced during agent implementation, not demonstrated independent proficiency.
+
+## International phone formatting — November 7, 2026
+
+Added an offline JavaScript formatter while keeping Rust contact validation as
+the save boundary. Formatting makes input easier to read; it does not prove a
+number exists. A + calling code supplies country context without guessing a
+default country. Local input is preserved. UI formatting and persisted data are
+separate: secondary organization phone still needs its persistence contract.
+No new Rust proficiency assessment or comprehension quiz.
+
+## Structured names and contact choice — November 6, 2026
+
+Built the next complete save slice while explaining Option and explicit request
+fields. Correction recorded: Option<String> distinguishes Some(text) from None;
+omitted and JSON null both map to None here, so it does not distinguish omitted
+from intentionally cleared fields. Current save is a full replacement request.
+Legacy full-name editing/conversion is explicit UI state, not guessed name parsing.
+Rust derives display full_name from validated stored parts. Contact validation
+checks both provided values and requires at least one; phone syntax supports
+international formatting but not national numbering-plan verification yet.
+
+45 backend/four bridge tests and expanded real Windows UI/restart smoke passed.
+No user exercise, quiz or independent proficiency claim. Deeper Option/borrowing
+review can use the new `email.is_none() && phone.is_none()` validation branch.
+
+## Baseline repair and input inventory — November 6, 2026
+
+Resumed e506cdd and started authorized development. Explained that a Rust struct
+initializer must supply its fields even when they are Option types; `None` means
+the value is absent, not that the field declaration disappears. Like a Python
+data object with declared attributes, rather than an arbitrary dictionary; Rust
+checks this during compilation. Added optional-name None fields to a legacy-name
+test helper. Serde's handling of omitted JSON Option fields is separate behavior.
+
+Runtime SQL tests exposed missing commas and obsolete test schemas; full app
+initialization applies migrations before reads. Compiler success alone cannot
+validate SQL strings. After repairs: 43 backend/four bridge tests and current
+debug executable smoke passed. Inventory separates visible inputs from saved
+data; phone-or-email/name wiring is next. Whisper still awaits field selection.
+No user exercise, quiz or independent implementation proficiency inferred.
+
 ## Native CI verification — October 31, 2026
 
 Both platform builds now verified on native runners. Introduced byte integrity:
@@ -190,3 +280,12 @@ HANDOFF OUT requested at the end of this session. Development/learning agreement
 Option/HashMap introduction, verified filter/import behavior and acceptance
 backlog captured in checkpoint. Continue brief Python-grounded lessons during
 work; no routine quizzes or inference of independent proficiency from tests.
+
+## Release planning and Settings — November 6, 2026
+
+Clarified Whisper as the speech-to-text engine within a full voice-input flow
+(record/capture, conversion, transcription, review and save). Distinguished
+portable application data import/export from developer Git handoffs. Added a
+Bootstrap Settings modal for sample import; no new Rust syntax lesson or user
+coding exercise occurred. No proficiency claim. Next implementation retains the
+short Python-grounded develop-and-learn workflow in broughnut-workflow.md.

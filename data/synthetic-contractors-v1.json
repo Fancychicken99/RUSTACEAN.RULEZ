@@ -4,33 +4,183 @@
   "organizations": [
     {
       "key": "org-1",
-      "name": "Fictional Aurora Workshop",
-      "region": "East Nairobi"
+      "name": "Aurora Workshop",
+      "region": "East Nairobi",
+      "details": {
+        "address": {
+          "street_address_1": "100 Example Avenue",
+          "street_address_2": "Suite 2",
+          "city": "Nairobi",
+          "state_province": "Demonstration district",
+          "country": "Kenya"
+        },
+        "secondary_phone": "+1 202 555 0180",
+        "secondary_contact": "Sample liaison",
+        "secondary_email": "liaison1@example.com",
+        "extra_information": {
+          "Office type": {
+            "type": "text",
+            "value": "Synthetic training office"
+          },
+          "Working notes": {
+            "type": "long_text",
+            "value": "Demonstration data only.\nNo real personnel or operational information."
+          }
+        }
+      },
+      "phone": "+1 202 555 0180",
+      "email": "office1@example.com",
+      "notes": "Synthetic demonstration organization.\nNo real personnel or operational records."
     },
     {
       "key": "org-2",
-      "name": "Fictional Cobalt Studio",
-      "region": "North America"
+      "name": "Cobalt Studio",
+      "region": "North America",
+      "details": {
+        "address": {
+          "street_address_1": "101 Example Avenue",
+          "street_address_2": "Suite 2",
+          "city": "Portland",
+          "state_province": "Demonstration district",
+          "country": "United States"
+        },
+        "secondary_phone": "+1 202 555 0180",
+        "secondary_contact": "Sample liaison",
+        "secondary_email": "liaison2@example.com",
+        "extra_information": {
+          "Office type": {
+            "type": "text",
+            "value": "Synthetic training office"
+          },
+          "Working notes": {
+            "type": "long_text",
+            "value": "Demonstration data only.\nNo real personnel or operational information."
+          }
+        }
+      },
+      "phone": "+1 202 555 0181",
+      "email": "office2@example.com",
+      "notes": "Synthetic demonstration organization.\nNo real personnel or operational records."
     },
     {
       "key": "org-3",
-      "name": "Fictional Juniper Services",
-      "region": "Eastern Europe"
+      "name": "Juniper Services",
+      "region": "Eastern Europe",
+      "details": {
+        "address": {
+          "street_address_1": "102 Example Avenue",
+          "street_address_2": "Suite 2",
+          "city": "Warsaw",
+          "state_province": "Demonstration district",
+          "country": "Poland"
+        },
+        "secondary_phone": "+1 202 555 0180",
+        "secondary_contact": "Sample liaison",
+        "secondary_email": "liaison3@example.com",
+        "extra_information": {
+          "Office type": {
+            "type": "text",
+            "value": "Synthetic training office"
+          },
+          "Working notes": {
+            "type": "long_text",
+            "value": "Demonstration data only.\nNo real personnel or operational information."
+          }
+        }
+      },
+      "phone": "+1 202 555 0182",
+      "email": "office3@example.com",
+      "notes": "Synthetic demonstration organization.\nNo real personnel or operational records."
     },
     {
       "key": "org-4",
-      "name": "Fictional Meridian Lab",
-      "region": "Middle East"
+      "name": "Meridian Lab",
+      "region": "Middle East",
+      "details": {
+        "address": {
+          "street_address_1": "103 Example Avenue",
+          "street_address_2": "Suite 2",
+          "city": "Amman",
+          "state_province": "Demonstration district",
+          "country": "Jordan"
+        },
+        "secondary_phone": "+1 202 555 0180",
+        "secondary_contact": "Sample liaison",
+        "secondary_email": "liaison4@example.com",
+        "extra_information": {
+          "Office type": {
+            "type": "text",
+            "value": "Synthetic training office"
+          },
+          "Working notes": {
+            "type": "long_text",
+            "value": "Demonstration data only.\nNo real personnel or operational information."
+          }
+        }
+      },
+      "phone": "+1 202 555 0183",
+      "email": "office4@example.com",
+      "notes": "Synthetic demonstration organization.\nNo real personnel or operational records."
     },
     {
       "key": "org-5",
-      "name": "Fictional Redwood Group",
-      "region": "East Asia"
+      "name": "Redwood Group",
+      "region": "East Asia",
+      "details": {
+        "address": {
+          "street_address_1": "104 Example Avenue",
+          "street_address_2": "Suite 2",
+          "city": "Yokohama",
+          "state_province": "Demonstration district",
+          "country": "Japan"
+        },
+        "secondary_phone": "+1 202 555 0180",
+        "secondary_contact": "Sample liaison",
+        "secondary_email": "liaison5@example.com",
+        "extra_information": {
+          "Office type": {
+            "type": "text",
+            "value": "Synthetic training office"
+          },
+          "Working notes": {
+            "type": "long_text",
+            "value": "Demonstration data only.\nNo real personnel or operational information."
+          }
+        }
+      },
+      "phone": "+1 202 555 0184",
+      "email": "office5@example.com",
+      "notes": "Synthetic demonstration organization.\nNo real personnel or operational records."
     },
     {
       "key": "org-6",
-      "name": "Fictional Willow Partners",
-      "region": "Central Asia"
+      "name": "Willow Partners",
+      "region": "Central Asia",
+      "details": {
+        "address": {
+          "street_address_1": "105 Example Avenue",
+          "street_address_2": "Suite 2",
+          "city": "Almaty",
+          "state_province": "Demonstration district",
+          "country": "Kazakhstan"
+        },
+        "secondary_phone": "+1 202 555 0180",
+        "secondary_contact": "Sample liaison",
+        "secondary_email": "liaison6@example.com",
+        "extra_information": {
+          "Office type": {
+            "type": "text",
+            "value": "Synthetic training office"
+          },
+          "Working notes": {
+            "type": "long_text",
+            "value": "Demonstration data only.\nNo real personnel or operational information."
+          }
+        }
+      },
+      "phone": "+1 202 555 0185",
+      "email": "office6@example.com",
+      "notes": "Synthetic demonstration organization.\nNo real personnel or operational records."
     }
   ],
   "contractors": [
@@ -38,961 +188,2461 @@
       "key": "contractor-001",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Rowan Finch",
+        "full_name": "Rowan Finch",
         "role": "Engineering specialist",
         "email": "contractor001@example.com",
-        "phone": "202-555-0100"
+        "phone": "202-555-0100",
+        "first_name": "Rowan",
+        "last_name": "Finch",
+        "prefix": "Dr.",
+        "middle_name": "A.",
+        "suffix": "Jr.",
+        "details": {
+          "address": {
+            "street_address_1": "200 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-001"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-002",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Avery Finch",
+        "full_name": "Avery Finch",
         "role": "Planning specialist",
         "email": "contractor002@example.com",
-        "phone": "202-555-0101"
+        "phone": "202-555-0101",
+        "first_name": "Avery",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "201 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-002"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-003",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Morgan Finch",
+        "full_name": "Morgan Finch",
         "role": "Training specialist",
         "email": "contractor003@example.com",
-        "phone": "202-555-0102"
+        "phone": "202-555-0102",
+        "first_name": "Morgan",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "202 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-003"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-004",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Quinn Finch",
+        "full_name": "Quinn Finch",
         "role": "Medical Support specialist",
         "email": "contractor004@example.com",
-        "phone": "202-555-0103"
+        "phone": "202-555-0103",
+        "first_name": "Quinn",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "203 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-004"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-005",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Taylor Finch",
+        "full_name": "Taylor Finch",
         "role": "Logistics specialist",
         "email": "contractor005@example.com",
-        "phone": "202-555-0104"
+        "phone": "202-555-0104",
+        "first_name": "Taylor",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "204 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-005"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-006",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Skyler Finch",
+        "full_name": "Skyler Finch",
         "role": "Communications specialist",
         "email": "contractor006@example.com",
-        "phone": "202-555-0105"
+        "phone": "202-555-0105",
+        "first_name": "Skyler",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "205 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-006"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-007",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Emery Finch",
+        "full_name": "Emery Finch",
         "role": "Engineering specialist",
         "email": "contractor007@example.com",
-        "phone": "202-555-0106"
+        "phone": "202-555-0106",
+        "first_name": "Emery",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "206 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-007"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-008",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Finley Finch",
+        "full_name": "Finley Finch",
         "role": "Planning specialist",
         "email": "contractor008@example.com",
-        "phone": "202-555-0107"
+        "phone": "202-555-0107",
+        "first_name": "Finley",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "207 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-008"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-009",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Jordan Finch",
+        "full_name": "Jordan Finch",
         "role": "Training specialist",
         "email": "contractor009@example.com",
-        "phone": "202-555-0108"
+        "phone": "202-555-0108",
+        "first_name": "Jordan",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "208 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-009"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-010",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Reese Finch",
+        "full_name": "Reese Finch",
         "role": "Medical Support specialist",
         "email": "contractor010@example.com",
-        "phone": "202-555-0109"
+        "phone": "202-555-0109",
+        "first_name": "Reese",
+        "last_name": "Finch",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "209 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-010"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-011",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Rowan Vale",
+        "full_name": "Rowan Vale",
         "role": "Logistics specialist",
         "email": "contractor011@example.com",
-        "phone": "202-555-0110"
+        "phone": "202-555-0110",
+        "first_name": "Rowan",
+        "last_name": "Vale",
+        "prefix": "Dr.",
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "210 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-011"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-012",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Avery Vale",
+        "full_name": "Avery Vale",
         "role": "Communications specialist",
         "email": "contractor012@example.com",
-        "phone": "202-555-0111"
+        "phone": "202-555-0111",
+        "first_name": "Avery",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "211 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-012"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-013",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Morgan Vale",
+        "full_name": "Morgan Vale",
         "role": "Engineering specialist",
         "email": "contractor013@example.com",
-        "phone": "202-555-0112"
+        "phone": "202-555-0112",
+        "first_name": "Morgan",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "212 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-013"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-014",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Quinn Vale",
+        "full_name": "Quinn Vale",
         "role": "Planning specialist",
         "email": "contractor014@example.com",
-        "phone": "202-555-0113"
+        "phone": "202-555-0113",
+        "first_name": "Quinn",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "213 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-014"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-015",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Taylor Vale",
+        "full_name": "Taylor Vale",
         "role": "Training specialist",
         "email": "contractor015@example.com",
-        "phone": "202-555-0114"
+        "phone": "202-555-0114",
+        "first_name": "Taylor",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "214 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-015"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-016",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Skyler Vale",
+        "full_name": "Skyler Vale",
         "role": "Medical Support specialist",
         "email": "contractor016@example.com",
-        "phone": "202-555-0115"
+        "phone": "202-555-0115",
+        "first_name": "Skyler",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": "Jr.",
+        "details": {
+          "address": {
+            "street_address_1": "215 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-016"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-017",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Emery Vale",
+        "full_name": "Emery Vale",
         "role": "Logistics specialist",
         "email": "contractor017@example.com",
-        "phone": "202-555-0116"
+        "phone": "202-555-0116",
+        "first_name": "Emery",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "216 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-017"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-018",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Finley Vale",
+        "full_name": "Finley Vale",
         "role": "Communications specialist",
         "email": "contractor018@example.com",
-        "phone": "202-555-0117"
+        "phone": "202-555-0117",
+        "first_name": "Finley",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "217 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-018"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-019",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Jordan Vale",
+        "full_name": "Jordan Vale",
         "role": "Engineering specialist",
         "email": "contractor019@example.com",
-        "phone": "202-555-0118"
+        "phone": "202-555-0118",
+        "first_name": "Jordan",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "218 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-019"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-020",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Reese Vale",
+        "full_name": "Reese Vale",
         "role": "Planning specialist",
         "email": "contractor020@example.com",
-        "phone": "202-555-0119"
+        "phone": "202-555-0119",
+        "first_name": "Reese",
+        "last_name": "Vale",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "219 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-020"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-021",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Rowan Brook",
+        "full_name": "Rowan Brook",
         "role": "Training specialist",
         "email": "contractor021@example.com",
-        "phone": "202-555-0120"
+        "phone": "202-555-0120",
+        "first_name": "Rowan",
+        "last_name": "Brook",
+        "prefix": "Dr.",
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "220 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-021"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-022",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Avery Brook",
+        "full_name": "Avery Brook",
         "role": "Medical Support specialist",
         "email": "contractor022@example.com",
-        "phone": "202-555-0121"
+        "phone": "202-555-0121",
+        "first_name": "Avery",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "221 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-022"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-023",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Morgan Brook",
+        "full_name": "Morgan Brook",
         "role": "Logistics specialist",
         "email": "contractor023@example.com",
-        "phone": "202-555-0122"
+        "phone": "202-555-0122",
+        "first_name": "Morgan",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "222 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-023"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-024",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Quinn Brook",
+        "full_name": "Quinn Brook",
         "role": "Communications specialist",
         "email": "contractor024@example.com",
-        "phone": "202-555-0123"
+        "phone": "202-555-0123",
+        "first_name": "Quinn",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "223 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-024"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-025",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Taylor Brook",
+        "full_name": "Taylor Brook",
         "role": "Engineering specialist",
         "email": "contractor025@example.com",
-        "phone": "202-555-0124"
+        "phone": "202-555-0124",
+        "first_name": "Taylor",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "224 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-025"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Retired",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-026",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Skyler Brook",
+        "full_name": "Skyler Brook",
         "role": "Planning specialist",
         "email": "contractor026@example.com",
-        "phone": "202-555-0125"
+        "phone": "202-555-0125",
+        "first_name": "Skyler",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "225 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-026"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Retired",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-027",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Emery Brook",
+        "full_name": "Emery Brook",
         "role": "Training specialist",
         "email": "contractor027@example.com",
-        "phone": "202-555-0126"
+        "phone": "202-555-0126",
+        "first_name": "Emery",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "226 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-027"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Retired",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-028",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Finley Brook",
+        "full_name": "Finley Brook",
         "role": "Medical Support specialist",
         "email": "contractor028@example.com",
-        "phone": "202-555-0127"
+        "phone": "202-555-0127",
+        "first_name": "Finley",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "227 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-028"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Retired",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-029",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Jordan Brook",
+        "full_name": "Jordan Brook",
         "role": "Logistics specialist",
         "email": "contractor029@example.com",
-        "phone": "202-555-0128"
+        "phone": "202-555-0128",
+        "first_name": "Jordan",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "228 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-029"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Retired",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-030",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Reese Brook",
+        "full_name": "Reese Brook",
         "role": "Communications specialist",
         "email": "contractor030@example.com",
-        "phone": "202-555-0129"
+        "phone": "202-555-0129",
+        "first_name": "Reese",
+        "last_name": "Brook",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "229 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-030"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Retired",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-031",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Rowan Reed",
+        "full_name": "Rowan Reed",
         "role": "Engineering specialist",
         "email": "contractor031@example.com",
-        "phone": "202-555-0130"
+        "phone": "202-555-0130",
+        "first_name": "Rowan",
+        "last_name": "Reed",
+        "prefix": "Dr.",
+        "middle_name": "A.",
+        "suffix": "Jr.",
+        "details": {
+          "address": {
+            "street_address_1": "230 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-031"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Deceased",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-032",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Avery Reed",
+        "full_name": "Avery Reed",
         "role": "Planning specialist",
         "email": "contractor032@example.com",
-        "phone": "202-555-0131"
+        "phone": "202-555-0131",
+        "first_name": "Avery",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "231 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-032"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Deceased",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-033",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Morgan Reed",
+        "full_name": "Morgan Reed",
         "role": "Training specialist",
         "email": "contractor033@example.com",
-        "phone": "202-555-0132"
+        "phone": "202-555-0132",
+        "first_name": "Morgan",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "232 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-033"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Deceased",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-034",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Quinn Reed",
+        "full_name": "Quinn Reed",
         "role": "Medical Support specialist",
         "email": "contractor034@example.com",
-        "phone": "202-555-0133"
+        "phone": "202-555-0133",
+        "first_name": "Quinn",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "233 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-034"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Deceased",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-035",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Taylor Reed",
+        "full_name": "Taylor Reed",
         "role": "Logistics specialist",
         "email": "contractor035@example.com",
-        "phone": "202-555-0134"
+        "phone": "202-555-0134",
+        "first_name": "Taylor",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "234 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-035"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Deceased",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-036",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Skyler Reed",
+        "full_name": "Skyler Reed",
         "role": "Communications specialist",
         "email": "contractor036@example.com",
-        "phone": "202-555-0135"
+        "phone": "202-555-0135",
+        "first_name": "Skyler",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "235 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-036"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Deceased",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-037",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Emery Reed",
+        "full_name": "Emery Reed",
         "role": "Engineering specialist",
         "email": "contractor037@example.com",
-        "phone": "202-555-0136"
+        "phone": "202-555-0136",
+        "first_name": "Emery",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "236 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-037"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-038",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Finley Reed",
+        "full_name": "Finley Reed",
         "role": "Planning specialist",
         "email": "contractor038@example.com",
-        "phone": "202-555-0137"
+        "phone": "202-555-0137",
+        "first_name": "Finley",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "237 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-038"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-039",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Jordan Reed",
+        "full_name": "Jordan Reed",
         "role": "Training specialist",
         "email": "contractor039@example.com",
-        "phone": "202-555-0138"
+        "phone": "202-555-0138",
+        "first_name": "Jordan",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "238 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-039"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-040",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Reese Reed",
+        "full_name": "Reese Reed",
         "role": "Medical Support specialist",
         "email": "contractor040@example.com",
-        "phone": "202-555-0139"
+        "phone": "202-555-0139",
+        "first_name": "Reese",
+        "last_name": "Reed",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "239 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-040"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-041",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Rowan Harbor",
+        "full_name": "Rowan Harbor",
         "role": "Logistics specialist",
         "email": "contractor041@example.com",
-        "phone": "202-555-0140"
+        "phone": "202-555-0140",
+        "first_name": "Rowan",
+        "last_name": "Harbor",
+        "prefix": "Dr.",
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "240 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-041"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-042",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Avery Harbor",
+        "full_name": "Avery Harbor",
         "role": "Communications specialist",
         "email": "contractor042@example.com",
-        "phone": "202-555-0141"
+        "phone": "202-555-0141",
+        "first_name": "Avery",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "241 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-042"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-043",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Morgan Harbor",
+        "full_name": "Morgan Harbor",
         "role": "Engineering specialist",
         "email": "contractor043@example.com",
-        "phone": "202-555-0142"
+        "phone": "202-555-0142",
+        "first_name": "Morgan",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "242 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-043"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-044",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Quinn Harbor",
+        "full_name": "Quinn Harbor",
         "role": "Planning specialist",
         "email": "contractor044@example.com",
-        "phone": "202-555-0143"
+        "phone": "202-555-0143",
+        "first_name": "Quinn",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "243 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-044"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-045",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Taylor Harbor",
+        "full_name": "Taylor Harbor",
         "role": "Training specialist",
         "email": "contractor045@example.com",
-        "phone": "202-555-0144"
+        "phone": "202-555-0144",
+        "first_name": "Taylor",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "244 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-045"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-046",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Skyler Harbor",
+        "full_name": "Skyler Harbor",
         "role": "Medical Support specialist",
         "email": "contractor046@example.com",
-        "phone": "202-555-0145"
+        "phone": "202-555-0145",
+        "first_name": "Skyler",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": "Jr.",
+        "details": {
+          "address": {
+            "street_address_1": "245 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-046"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-047",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Emery Harbor",
+        "full_name": "Emery Harbor",
         "role": "Logistics specialist",
         "email": "contractor047@example.com",
-        "phone": "202-555-0146"
+        "phone": "202-555-0146",
+        "first_name": "Emery",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "246 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-047"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-048",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Finley Harbor",
+        "full_name": "Finley Harbor",
         "role": "Communications specialist",
         "email": "contractor048@example.com",
-        "phone": "202-555-0147"
+        "phone": "202-555-0147",
+        "first_name": "Finley",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "247 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-048"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-049",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Jordan Harbor",
+        "full_name": "Jordan Harbor",
         "role": "Engineering specialist",
         "email": "contractor049@example.com",
-        "phone": "202-555-0148"
+        "phone": "202-555-0148",
+        "first_name": "Jordan",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "248 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-049"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-050",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Reese Harbor",
+        "full_name": "Reese Harbor",
         "role": "Planning specialist",
         "email": "contractor050@example.com",
-        "phone": "202-555-0149"
+        "phone": "202-555-0149",
+        "first_name": "Reese",
+        "last_name": "Harbor",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "249 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-050"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-051",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Rowan Glen",
+        "full_name": "Rowan Glen",
         "role": "Training specialist",
         "email": "contractor051@example.com",
-        "phone": "202-555-0150"
+        "phone": "202-555-0150",
+        "first_name": "Rowan",
+        "last_name": "Glen",
+        "prefix": "Dr.",
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "250 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-051"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-052",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Avery Glen",
+        "full_name": "Avery Glen",
         "role": "Medical Support specialist",
         "email": "contractor052@example.com",
-        "phone": "202-555-0151"
+        "phone": "202-555-0151",
+        "first_name": "Avery",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "251 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-052"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": false
     },
     {
       "key": "contractor-053",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Morgan Glen",
+        "full_name": "Morgan Glen",
         "role": "Logistics specialist",
         "email": "contractor053@example.com",
-        "phone": "202-555-0152"
+        "phone": "202-555-0152",
+        "first_name": "Morgan",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "252 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-053"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": false
     },
     {
       "key": "contractor-054",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Quinn Glen",
+        "full_name": "Quinn Glen",
         "role": "Communications specialist",
         "email": "contractor054@example.com",
-        "phone": "202-555-0153"
+        "phone": "202-555-0153",
+        "first_name": "Quinn",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "253 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-054"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Active",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": false
     },
     {
       "key": "contractor-055",
       "organization_key": "org-1",
       "profile": {
-        "full_name": "Fictional Taylor Glen",
+        "full_name": "Taylor Glen",
         "role": "Engineering specialist",
         "email": "contractor055@example.com",
-        "phone": "202-555-0154"
+        "phone": "202-555-0154",
+        "first_name": "Taylor",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "254 Example Street",
+            "street_address_2": null,
+            "city": "Nairobi",
+            "state_province": "Demonstration district",
+            "country": "Kenya"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-055"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Logistics",
         "Communications"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": false
     },
     {
       "key": "contractor-056",
       "organization_key": "org-2",
       "profile": {
-        "full_name": "Fictional Skyler Glen",
+        "full_name": "Skyler Glen",
         "role": "Planning specialist",
         "email": "contractor056@example.com",
-        "phone": "202-555-0155"
+        "phone": "202-555-0155",
+        "first_name": "Skyler",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "255 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Portland",
+            "state_province": "Demonstration district",
+            "country": "United States"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-056"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Communications",
         "Engineering"
       ],
-      "last_contact_at": null
+      "last_contact_at": null,
+      "archived": false
     },
     {
       "key": "contractor-057",
       "organization_key": "org-3",
       "profile": {
-        "full_name": "Fictional Emery Glen",
+        "full_name": "Emery Glen",
         "role": "Training specialist",
         "email": "contractor057@example.com",
-        "phone": "202-555-0156"
+        "phone": "202-555-0156",
+        "first_name": "Emery",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "256 Example Street",
+            "street_address_2": null,
+            "city": "Warsaw",
+            "state_province": "Demonstration district",
+            "country": "Poland"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-057"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Engineering",
         "Planning"
       ],
-      "last_contact_at": "2026-10-25 09:00:00"
+      "last_contact_at": "2026-10-25 09:00:00",
+      "archived": true
     },
     {
       "key": "contractor-058",
       "organization_key": "org-4",
       "profile": {
-        "full_name": "Fictional Finley Glen",
+        "full_name": "Finley Glen",
         "role": "Medical Support specialist",
         "email": "contractor058@example.com",
-        "phone": "202-555-0157"
+        "phone": "202-555-0157",
+        "first_name": "Finley",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": "A.",
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "257 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Amman",
+            "state_province": "Demonstration district",
+            "country": "Jordan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-058"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Planning",
         "Training"
       ],
-      "last_contact_at": "2026-09-01 14:30:00"
+      "last_contact_at": "2026-09-01 14:30:00",
+      "archived": true
     },
     {
       "key": "contractor-059",
       "organization_key": "org-5",
       "profile": {
-        "full_name": "Fictional Jordan Glen",
+        "full_name": "Jordan Glen",
         "role": "Logistics specialist",
         "email": "contractor059@example.com",
-        "phone": "202-555-0158"
+        "phone": "202-555-0158",
+        "first_name": "Jordan",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "258 Example Street",
+            "street_address_2": null,
+            "city": "Yokohama",
+            "state_province": "Demonstration district",
+            "country": "Japan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-059"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Training",
         "Medical Support"
       ],
-      "last_contact_at": "2026-06-01 10:15:00"
+      "last_contact_at": "2026-06-01 10:15:00",
+      "archived": true
     },
     {
       "key": "contractor-060",
       "organization_key": "org-6",
       "profile": {
-        "full_name": "Fictional Reese Glen",
+        "full_name": "Reese Glen",
         "role": "Communications specialist",
         "email": "contractor060@example.com",
-        "phone": "202-555-0159"
+        "phone": "202-555-0159",
+        "first_name": "Reese",
+        "last_name": "Glen",
+        "prefix": null,
+        "middle_name": null,
+        "suffix": null,
+        "details": {
+          "address": {
+            "street_address_1": "259 Example Street",
+            "street_address_2": "Unit 4",
+            "city": "Almaty",
+            "state_province": "Demonstration district",
+            "country": "Kazakhstan"
+          },
+          "extra_information": {
+            "Reference": {
+              "type": "text",
+              "value": "DEMO-060"
+            },
+            "Background notes": {
+              "type": "long_text",
+              "value": "Synthetic profile for CRM demonstration.\nExercise filtering, history and persistence."
+            }
+          }
+        }
       },
       "status": "Inactive",
       "skills": [
         "Medical Support",
         "Logistics"
       ],
-      "last_contact_at": "2025-12-01 12:00:00"
+      "last_contact_at": "2025-12-01 12:00:00",
+      "archived": true
     }
   ]
 }

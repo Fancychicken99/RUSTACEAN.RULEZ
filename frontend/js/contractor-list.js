@@ -26,7 +26,7 @@
       'Total Contractors': contractors.length,
       'Active Contractors': contractors.filter((contractor) => contractor.status === 'Active').length,
       'Inactive Contractors': contractors.filter((contractor) => contractor.status === 'Inactive').length,
-      'Critical Alerts': contractors.filter(contractor => Number(contractor.days_since_last_contact) >= 30).length,
+      'Critical Alerts': contractors.filter(contractor => (contractor.days_since_last_contact == null || Number(contractor.days_since_last_contact) >= 30)).length,
     };
 
     document.querySelectorAll('.metric-card').forEach((card) => {
@@ -60,7 +60,7 @@
     <section class="card activity-card" aria-labelledby="contractor-list-title">
       <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2"><div><h2 class="h5 mb-1" id="destination-title">Contractor Directory</h2><p class="text-secondary small mb-0">A directory of people in your workspace.</p></div><div class="d-flex align-items-center gap-3"><span class="text-secondary small" id="contractor-result-count"></span><button type="button" class="btn btn-sm btn-light d-none" id="btn-reset-destination">Clear View / View All</button></div></div>
       <div id="contact-active-filters" class="active-filter-pills px-3 pt-3" aria-live="polite"></div>
-      <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City/Sector</th><th scope="col">Status</th><th scope="col">Last Contact</th><th scope="col">Notes</th><th scope="col">Actions</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
+      <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th scope="col">Name</th><th scope="col">Organization</th><th scope="col">Role</th><th scope="col">Region</th><th scope="col">Country</th><th scope="col">City</th><th scope="col">Status</th><th scope="col">Last Contact</th><th scope="col">Notes</th><th scope="col">Actions</th></tr></thead><tbody id="contractor-table-body"></tbody></table></div>
     </section>
     <footer class="page-footer">© 2026 Hippo Harbor CRM <span>·</span> Secure, on-device workspace</footer>
   `;
@@ -85,12 +85,12 @@
     try {
       await window.crmApi.archiveOrganization({ id: organization.id });
       const refreshed = await refreshSavedData();
-      message.textContent = refreshed
+      window.crmNotify(refreshed
         ? `${organization.name} archived. The record is retained.`
-        : `${organization.name} archived, but the list could not reload. Reopen the workspace to refresh.`;
+        : `${organization.name} archived, but the list could not reload. Reopen the workspace to refresh.`, refreshed ? 'success' : 'error');
       return refreshed;
     } catch (error) {
-      message.textContent = error.message;
+      window.crmNotify(error.message, 'error');
       if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
       return false;
     }
@@ -125,9 +125,10 @@
   }
 
   function lastContactDate(contractor) {
-    const explicitDate = contractor.last_contact_date ?? contractor.last_contacted_at ?? contractor.lastContactDate;
+    const explicitDate = contractor.last_contact_at ?? contractor.last_contact_date ?? contractor.last_contacted_at ?? contractor.lastContactDate;
     if (explicitDate) {
-      const parsedDate = new Date(explicitDate);
+      const normalized = /[zZ]|[+-]\d\d:\d\d$/.test(explicitDate) ? explicitDate : explicitDate.replace(' ', 'T') + 'Z';
+      const parsedDate = new Date(normalized);
       if (!Number.isNaN(parsedDate.getTime())) return parsedDate;
     }
 
@@ -146,7 +147,7 @@
     const resultCount = document.getElementById(resultCountId);
     if (!tableBody) return;
     const table = tableBody.closest('table');
-    if (table && window.DataTable?.isDataTable(table)) new DataTable(table).destroy();
+    window.crmDestroyTable?.(table);
     tableBody.replaceChildren();
     tableBody.dataset.loading = String(loading || filterLoading);
     if (data.length === 0) {
@@ -181,7 +182,7 @@
         contractor.role,
         contractor.region,
         contractor.country,
-        contractor.city_sector,
+        contractor.city,
       ];
       cells.forEach((value, index) => {
         const cell = document.createElement('td');
@@ -296,14 +297,6 @@
     const placeholder = document.createElement('span');
     placeholder.className = 'contractor-profile-placeholder';
     placeholder.innerHTML = '<i class="bi bi-person-square" aria-hidden="true"></i><span>Profile picture unavailable</span>';
-    const imagePath = contractor.image_path ?? contractor.headshot_path;
-    const convertFileSrc = window.__TAURI__?.core?.convertFileSrc;
-    if (imagePath && typeof convertFileSrc === 'function') {
-      image.src = convertFileSrc(imagePath);
-      image.hidden = false;
-      placeholder.hidden = true;
-      image.addEventListener('error', () => { image.hidden = true; placeholder.hidden = false; }, { once: true });
-    }
     imageWrap.append(image, placeholder);
     const nameBlock = document.createElement('div');
     const name = document.createElement('h2');
@@ -321,7 +314,7 @@
     const fields = [
       ['Organization', contractor.organization_name], ['Region', contractor.region],
       ['Street Address 1', contractor.street_address_1], ['Street Address 2', contractor.street_address_2],
-      ['City', contractor.city], ['State/Province', contractor.state_province], ['Country', contractor.country], ['City/Sector', contractor.city_sector],
+      ['City', contractor.city], ['State/Province', contractor.state_province], ['Country', contractor.country],
       ['Status', contractor.status], ['Internal ID', contractor.id], ['Phone', contractor.phone],
     ];
     fields.forEach(([label, value]) => {
@@ -374,7 +367,13 @@
     archive.type = 'button'; archive.id = 'archive-contractor'; archive.className = 'btn btn-warning';
     archive.innerHTML = '<i class="bi bi-file-earmark-zip me-1" aria-hidden="true"></i>Archive contractor';
     archive.addEventListener('click', () => window.dispatchEvent(new CustomEvent('crm:archive-contractor', { detail: contractor })));
-    actions.append(edit, archive);
+    const tools = document.createElement('button'); tools.type = 'button'; tools.className = 'btn btn-outline-primary'; tools.textContent = 'Tags, skills & history';
+    tools.addEventListener('click', () => window.dispatchEvent(new CustomEvent('crm:open-record-tools', {detail:{kind:'contractor',id:contractor.id}})));
+    actions.append(edit, tools, archive);
+    for (const [method,label,available] of [['tel','Call',contractor.phone],['sms','SMS',contractor.phone],['teams','Teams chat',contractor.email]]) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'btn btn-outline-primary'; button.textContent = label; button.disabled = !available;
+      button.addEventListener('click', async () => { try { await window.crmApi.openContactAction({id:contractor.id,method}); } catch(error) { window.crmNotify(error.message,'error'); } }); actions.appendChild(button);
+    }
     body.appendChild(actions);
     const historySection = document.createElement('section');
     historySection.className = 'border-top mt-4 pt-4';
@@ -388,6 +387,7 @@
     historySection.append(historyHeading, historyList);
     body.appendChild(historySection);
     profile.appendChild(body);
+<<<<<<< HEAD
     loadRecordHistory('contractor', contractor.id, historyList);
   }
 
@@ -418,6 +418,9 @@
       list.textContent = error.message === 'Login required' ? 'Log in to view change history.' : error.message;
       if (error.message === 'Login required') await window.crmSession.lock('Session expired. Log in again.');
     }
+=======
+    window.crmMedia?.loadInto(image, 'contractor', contractor.id, placeholder);
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
   }
 
   function renderContactList() {
@@ -441,6 +444,8 @@
       status: document.getElementById('filter-status')?.value ?? 'All',
       organization: document.getElementById('filter-organization')?.value ?? 'All',
       query: directoryQuery,
+      tag: document.getElementById('filter-tag')?.value.trim() || '',
+      skill: document.getElementById('filter-skill')?.value.trim() || '',
       alertLevel: document.getElementById('alert-level-filter')?.value ?? 'All',
     };
   }
@@ -449,7 +454,7 @@
     const container = document.getElementById(containerId);
     if (!container) return;
     container.replaceChildren();
-    const labels = { region: 'Region', country: 'Country', citySector: 'City/Sector', status: 'Status', organization: 'Organization', query: 'Search', alertLevel: 'Alert Level' };
+    const labels = { region: 'Region', country: 'Country', citySector: 'City', status: 'Status', organization: 'Organization', query: 'Search', tag: 'Tag', skill: 'Skill', alertLevel: 'Alert Level' };
     const active = Object.entries(filters).filter(([key, value]) => value && value !== 'All');
     active.forEach(([key, value]) => {
       const pill = document.createElement('span');
@@ -470,7 +475,7 @@
   }
 
   function removeContactFilter(key) {
-    const controls = { region: 'contractor-region-filter', country: 'contractor-country-filter', citySector: 'contractor-city-sector-filter', status: 'filter-status', organization: 'filter-organization', alertLevel: 'alert-level-filter' };
+    const controls = { region: 'contractor-region-filter', country: 'contractor-country-filter', citySector: 'contractor-city-sector-filter', status: 'filter-status', organization: 'filter-organization', alertLevel: 'alert-level-filter', tag: 'filter-tag', skill: 'filter-skill' };
     if (key === 'query') {
       directoryQuery = '';
       const search = document.getElementById('global-search');
@@ -529,7 +534,9 @@
   }
 
   function clearContactFilters() {
+    const table = document.getElementById('contractor-table-body')?.closest('table'); if (table) { table.dataset.resetOrder = 'true'; delete table.dataset.manualOrder; }
     document.getElementById('contractor-region-filter').value = '';
+    document.getElementById('filter-tag').value = ''; document.getElementById('filter-skill').value = '';
     document.getElementById('contractor-country-filter').value = '';
     document.getElementById('contractor-city-sector-filter').value = '';
     document.getElementById('filter-status').value = 'All';
@@ -583,7 +590,7 @@
   function matchesSearchWithTypos(contractor, query) {
     if (!query) return true;
     const searchableText = [contractorName(contractor), contractor.organization_name, contractor.role,
-      contractor.region, contractor.country, contractor.city_sector, contractor.email]
+      contractor.region, contractor.country, contractor.city, contractor.email]
       .filter(Boolean).join(' ').toLowerCase();
     if (searchableText.includes(query)) return true;
 
@@ -693,7 +700,7 @@
         (!normalizedRegion || String(contractor.region ?? '').toLowerCase().includes(normalizedRegion)) &&
         (organization === 'All' || String(contractor.organization_id) === organization) &&
         (!normalizedCountry || String(contractor.country ?? '').toLowerCase().includes(normalizedCountry)) &&
-        (!normalizedCitySector || String(contractor.city_sector ?? '').toLowerCase().includes(normalizedCitySector)) &&
+        (!normalizedCitySector || String(contractor.city ?? '').toLowerCase().includes(normalizedCitySector)) &&
         matchesSearchWithTypos(contractor, normalizedQuery);
     });
   }
@@ -702,7 +709,7 @@
     const tableBody = document.getElementById('organizations-table-body');
     const table = document.getElementById('organizations-table');
     if (!tableBody || !table) return;
-    if (window.DataTable?.isDataTable(table)) new DataTable(table).destroy();
+    window.crmDestroyTable?.(table);
     tableBody.replaceChildren();
     if (organizations.length === 0) {
       const row = document.createElement('tr');
@@ -720,14 +727,17 @@
     }
 
     const query = directoryQuery.trim().toLocaleLowerCase();
-    const visibleOrganizations = organizations.filter(organization => !query ||
-      `${organization.name} ${organization.region ?? ''}`.toLocaleLowerCase().includes(query));
-    renderActiveFilterPills('organization-active-filters', { query: directoryQuery }, key => {
-      if (key !== 'query') return;
-      directoryQuery = '';
-      const search = document.getElementById('global-search');
-      if (search) search.value = '';
-      syncSearchChrome();
+    const tag = document.getElementById('organization-tag-filter').value.trim();
+    const skill = document.getElementById('organization-skill-filter').value.trim();
+    const visibleOrganizations = organizations.filter(organization => {
+      const meta = window.crmWorkspace?.snapshot?.meta.find(record => record.kind === 'organization' && record.id === organization.id);
+      return (!query || (organization.name + ' ' + (organization.region || '')).toLocaleLowerCase().includes(query)) &&
+        (!tag || meta?.tags.some(value => value.toLowerCase() === tag.toLowerCase())) &&
+        (!skill || meta?.skills.some(value => value.toLowerCase() === skill.toLowerCase()));
+    });
+    renderActiveFilterPills('organization-active-filters', {query:directoryQuery,tag,skill}, key => {
+      if (key === 'query') {directoryQuery='';document.getElementById('global-search').value='';syncSearchChrome();}
+      else document.getElementById(key === 'tag' ? 'organization-tag-filter' : 'organization-skill-filter').value='';
       renderOrganizations();
     });
     if (organizations.length && visibleOrganizations.length === 0) {
@@ -756,6 +766,7 @@
       const count = document.createElement('td');
       count.textContent = String(activeContractors);
       const status = document.createElement('td');
+<<<<<<< HEAD
       const statusSelect = document.createElement('select');
       statusSelect.className = 'form-select form-select-sm organization-status-select';
       statusSelect.setAttribute('aria-label', `Status for ${organization.name}`);
@@ -764,6 +775,28 @@
       statusSelect.addEventListener('click', event => event.stopPropagation());
       statusSelect.addEventListener('change', () => changeOrganizationStatus(organization, statusSelect));
       status.appendChild(statusSelect);
+=======
+      const statusWrap = document.createElement('div');
+      statusWrap.className = 'form-check form-switch mb-0';
+      const statusToggle = document.createElement('input');
+      statusToggle.className = 'form-check-input';
+      statusToggle.type = 'checkbox';
+      statusToggle.role = 'switch';
+      statusToggle.checked = organization.status === 'Active';
+      statusToggle.setAttribute('aria-label', 'Active status for ' + organization.name);
+      statusToggle.addEventListener('change', async () => {
+        statusToggle.disabled = true;
+        try { await window.crmApi.workspaceAction({action:'organization_status',id:organization.id,status:statusToggle.checked?'Active':'Inactive'}); await refreshSavedData(); window.crmNotify('Organization status updated.'); }
+        catch(error) {statusToggle.checked=organization.status==='Active';window.crmNotify(error.message,'error');}
+        finally {statusToggle.disabled=false;}
+      });
+      statusWrap.appendChild(statusToggle);
+      const statusLabel = document.createElement('span');
+      statusLabel.className = 'small text-secondary';
+      statusLabel.textContent = organization.status;
+      statusWrap.appendChild(statusLabel);
+      status.appendChild(statusWrap);
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
       const actions = document.createElement('td');
       const rosterButton = document.createElement('button');
       rosterButton.className = 'btn btn-outline-primary mt-auto';
@@ -1111,7 +1144,7 @@
     updateFilterOptions();
     updateDashboardMetricCounts();
     renderRegions();
-    document.getElementById('workspace-message').textContent = '';
+    window.crmNotify('');
     window.history.replaceState(null, '', '#/dashboard');
   }
 
@@ -1127,7 +1160,7 @@
     contractors = [];
     organizations = [];
     const status = document.getElementById('workspace-message');
-    status.textContent = 'Loading saved records…';
+    window.crmNotify('Loading saved records…', 'progress');
     updateDashboardMetricCounts();
     renderTable([]);
     renderOrganizations();
@@ -1136,12 +1169,13 @@
       const results = await Promise.all([window.crmApi.listContractors(), window.crmApi.listOrganizations()]);
       if (generation !== loadGeneration || !window.crmSession.authenticated) return;
       [contractors, organizations] = results;
+      window.dispatchEvent(new Event('crm:records-loaded'));
       loaded = true;
-      status.textContent = `Loaded ${contractors.length} saved contractor(s).`;
+      window.crmNotify('');
     } catch (error) {
       if (generation !== loadGeneration || !window.crmSession.authenticated) return;
       loadError = error.message;
-      status.textContent = error.message;
+      window.crmNotify(error.message, 'error');
       if (error.message === 'Login required') {
         await window.crmSession.lock('Session expired. Log in again.');
         return;
@@ -1167,7 +1201,8 @@
     }
     const generation = ++filterGeneration;
     const directoryGeneration = loadGeneration;
-    const region = readContactFilters().region || null;
+    const filters = readContactFilters();
+    const region = filters.region || null;
     const current = () => generation === filterGeneration && directoryGeneration === loadGeneration && window.crmSession?.authenticated;
     filterLoading = true;
     filterError = null;
@@ -1175,11 +1210,14 @@
     const count = document.getElementById('contractor-result-count');
     if (count) count.textContent = 'Filtering…';
     try {
-      const records = await window.crmApi.filterContractors({ region });
+      const records = await window.crmApi.searchRecords({ region, country: filters.country || null, city: filters.citySector || null,
+        organization_id: filters.organization === 'All' ? null : Number(filters.organization), status: ['All', 'Alert'].includes(filters.status) ? null : filters.status,
+        query: filters.query || null, tag: filters.tag || null, skill: filters.skill || null,
+        due_days: filters.alertLevel !== 'All' ? Number(filters.alertLevel) : filters.status === 'Alert' ? 30 : null });
       if (!current()) return false;
       filterLoading = false;
       // Region is enforced by SQLite; remaining search/status/org filters are local.
-      renderTable(filterContractors(readContactFilters(), records));
+      renderTable(records);
       return true;
     } catch (error) {
       if (!current()) return false;
@@ -1194,8 +1232,12 @@
     }
   }
 
+  document.getElementById('organization-tag-filter').addEventListener('input', renderOrganizations);
+  document.getElementById('organization-skill-filter').addEventListener('input', renderOrganizations);
+  window.addEventListener('crm:taxonomy-loaded', renderOrganizations);
   window.crmDirectory = Object.freeze({
     refresh: refreshSavedData,
+    get loaded() { return loaded && !loading && !loadError; },
     get organizations() { return organizations.map(organization => ({ ...organization })); },
     get contractors() { return contractors.map(contractor => ({ ...contractor })); },
     showProfile(id) {
@@ -1232,13 +1274,14 @@
     save.disabled = true;
     message.textContent = 'Saving note…';
     try {
-      await window.crmApi.recordContactNote({ id: noteContractor.id, method: document.getElementById('contact-note-method').value, note: `${timestamp}\n${note}` });
+      await window.crmApi.recordContactNote({ id: noteContractor.id, method: document.getElementById('contact-note-method').value, note });
       noteContractor.last_contact_date = timestamp;
       noteContractor.days_since_last_contact = 0;
       const stored = contractors.find(record => record.id === noteContractor.id);
       if (stored) Object.assign(stored, { last_contact_date: timestamp, days_since_last_contact: 0 });
       renderTable(filterContractors(readContactFilters(), contractors));
-      document.getElementById('directory-message').textContent = `Contact note saved for ${contractorName(noteContractor)}.`;
+      window.crmNotify('Contact note saved.');
+      await refreshSavedData();
       bootstrap.Modal.getOrCreateInstance(document.getElementById('contact-note-modal')).hide();
     } catch (error) {
       message.textContent = error.message;

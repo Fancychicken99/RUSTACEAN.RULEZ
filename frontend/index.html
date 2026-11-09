@@ -14,10 +14,16 @@
   <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
-  <section id="auth" class="auth-overlay" aria-labelledby="auth-heading">
+  <section id="auth" class="auth-overlay" role="main" aria-labelledby="auth-heading">
     <div class="card auth-panel"><div class="card-body p-4">
+<<<<<<< HEAD
       <img class="auth-brand-logo-mark mb-3" src="assets/branding/hippo-harbor-mark.png" alt="Hippo Harbor CRM logo" width="1254" height="1254">
       <h1 class="h4">Hippo Harbor CRM</h1>
+=======
+      <img class="auth-brand-logo-mark mb-3" src="assets/branding/hippo-harbor-mark.png" alt="Hippo Harbor CRM logo" width="140" height="140">
+      <h1 class="h4">Hippo Harbor CRM</h1>
+      <p class="auth-tagline small">A safe harbor for your connections.</p>
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
       <h2 class="h5" id="auth-heading">Connecting…</h2>
       <p id="message" class="text-secondary" role="status" aria-live="polite">Checking local authentication.</p>
       <form id="auth-form" hidden>
@@ -31,13 +37,38 @@
         <p id="setup-help" class="small text-secondary" hidden>Create a password with at least 12 characters. Then log in to open your workspace.</p>
         <button id="submit-auth" type="submit" class="btn btn-primary w-100">Log in</button>
       </form>
+      <button id="forgot-password" type="button" class="btn btn-link w-100 mt-2" hidden>Forgot your password?</button>
+      <form id="recovery-form" hidden>
+        <p class="small text-secondary">Use your saved recovery key to set a new password and keep your records. A new recovery key will replace the old one.</p>
+        <label class="form-label" for="recovery-code">Recovery key</label>
+        <input id="recovery-code" type="password" class="form-control mb-3 font-monospace" required maxlength="128" autocomplete="off" spellcheck="false">
+        <label class="form-label" for="recovery-password">New password</label>
+        <input id="recovery-password" type="password" class="form-control mb-3" required minlength="12" maxlength="1024" autocomplete="new-password">
+        <label class="form-label" for="recovery-confirm">Confirm new password</label>
+        <input id="recovery-confirm" type="password" class="form-control mb-3" required minlength="12" maxlength="1024" autocomplete="new-password">
+        <button id="submit-recovery" type="submit" class="btn btn-primary w-100">Reset password</button>
+        <button id="cancel-recovery" type="button" class="btn btn-link w-100 mt-2">Back to login</button>
+      </form>
+      <section id="recovery-key-panel" aria-labelledby="recovery-key-heading" hidden>
+        <h3 id="recovery-key-heading" class="h5">Save your recovery key</h3>
+        <p class="small text-secondary">Keep this key somewhere safe, separate from this device. It can unlock your data if you forget your password. This is its only display.</p>
+        <label class="form-label" for="issued-recovery-key">Your recovery key</label>
+        <textarea id="issued-recovery-key" class="form-control font-monospace mb-3" rows="3" readonly autocomplete="off" spellcheck="false"></textarea>
+        <div class="form-check mb-3"><input id="recovery-key-saved" type="checkbox" class="form-check-input"><label class="form-check-label" for="recovery-key-saved">I have saved my recovery key</label></div>
+        <button id="continue-recovery-key" type="button" class="btn btn-primary w-100" disabled>Continue</button>
+      </section>
       <button id="retry-auth" type="button" class="btn btn-light w-100 mt-3" hidden>Retry connection</button>
     </div></div>
   </section>
   <div id="workspace" class="app-shell d-flex" hidden inert>
     <aside class="sidebar d-flex flex-column" id="sidebar" aria-label="Main navigation">
+<<<<<<< HEAD
       <a class="brand d-flex align-items-center gap-2" href="#dashboard" aria-label="Hippo Harbor CRM home">
         <img class="brand-logo-mark" src="assets/branding/hippo-harbor-mark.png" alt="" aria-hidden="true" width="1254" height="1254">
+=======
+      <a class="brand d-flex align-items-center gap-2" href="#dashboard">
+        <img class="brand-logo-mark" src="assets/branding/hippo-harbor-mark.png" alt="" aria-hidden="true" width="54" height="54">
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         <span class="brand-name">Hippo Harbor<span>CRM</span></span>
       </a>
 
@@ -57,12 +88,8 @@
       </nav>
 
       <div class="sidebar-footer mt-auto">
-        <button id="sample-import-button" class="btn btn-outline-primary w-100 mb-3" type="button" data-bs-toggle="modal" data-bs-target="#sample-import-modal">Import fictional samples</button>
-        <div class="security-note d-flex align-items-center gap-2">
-          <i class="bi bi-shield-lock" aria-hidden="true"></i>
-          <div><strong>Private workspace</strong><small>Data stays on this device</small></div>
-        </div>
-        <div class="sidebar-version">CRM Desktop <span>v0.1</span></div>
+        <button id="settings-button" class="btn btn-outline-primary w-100 mb-3" type="button" data-bs-toggle="modal" data-bs-target="#settings-modal"><i class="bi bi-gear me-1" aria-hidden="true"></i>Settings</button>
+        <div class="sidebar-version">CRM Desktop <span>v0.2</span></div>
       </div>
     </aside>
 
@@ -89,7 +116,15 @@
         </div>
       </header>
 
-      <p id="workspace-message" class="workspace-message mb-0 px-4 py-2" role="status" aria-live="polite"></p>
+      <div id="workspace-notification" class="workspace-notification" hidden>
+        <p id="workspace-message" class="workspace-message mb-0" role="status" aria-live="polite" aria-atomic="true"></p>
+        <button id="dismiss-notification" type="button" class="btn-close flex-shrink-0" aria-label="Dismiss notification"></button>
+      </div>
+      <div id="migration-notice" class="alert alert-warning mx-4 mt-3" hidden>
+        Your active database is encrypted. The original unencrypted migration copy still exists on this device.
+        <button id="cleanup-original" class="btn btn-sm btn-outline-dark ms-2" type="button">Remove original copy</button>
+        <p id="migration-message" class="mb-0 mt-2" role="status"></p>
+      </div>
       <main id="app-content" class="container-fluid">
         <div id="view-dashboard">
           <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -121,9 +156,9 @@
             </div>
             <div class="col-12 col-md-6">
               <article class="card h-100" aria-labelledby="transience-title">
-                <div class="card-header bg-white px-4 py-3"><h2 class="h5 mb-1" id="transience-title">Recent Transience Activity</h2><p class="text-secondary small mb-0">Recent contractor record changes</p></div>
+                <div class="card-header bg-white px-4 py-3"><h2 class="h5 mb-1" id="transience-title">Recent Activity</h2><p class="text-secondary small mb-0">Recent contractor record changes</p></div>
                 <div class="card-body p-4">
-                  <p class="text-secondary mb-0">History is not available in this view yet.</p>
+                  <ol id="recent-activity" class="mb-0 ps-3"><li class="text-secondary">No recorded activity yet.</li></ol>
                 </div>
               </article>
             </div>
@@ -140,6 +175,7 @@
             </div>
             <button class="btn btn-primary d-flex align-items-center gap-2" type="button" id="add-organization" data-bs-toggle="modal" data-bs-target="#organization-modal"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add organization</button>
           </div>
+          <div class="row g-3 mb-3"><div class="col-sm-6"><label class="form-label" for="organization-tag-filter">Organization tag</label><input class="form-control" id="organization-tag-filter" list="record-tags-options" maxlength="100"></div><div class="col-sm-6"><label class="form-label" for="organization-skill-filter">Organization skill</label><input class="form-control" id="organization-skill-filter" list="record-skills-options" maxlength="100"></div></div>
           <div id="organization-active-filters" class="active-filter-pills mb-3" aria-live="polite"></div>
           <div class="card activity-card"><div class="table-responsive"><table id="organizations-table" class="table align-middle mb-0"><thead><tr><th scope="col">Organization</th><th scope="col">Region</th><th scope="col">Active contractors</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody id="organizations-table-body"></tbody></table></div></div>
         </div>
@@ -158,22 +194,32 @@
   </div>
 
   <div class="modal fade" id="add-contractor-modal" tabindex="-1" aria-labelledby="add-contractor-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
-      <form id="add-contractor-form">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg"><div class="modal-content">
+      <form id="add-contractor-form" novalidate>
         <div class="modal-header"><h2 class="modal-title h5" id="add-contractor-title">Add contractor</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4">
           <p id="contractor-form-message" role="status" aria-live="polite" class="text-secondary"></p>
           <ul class="nav nav-tabs mb-3" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="contractor-basic-tab" data-bs-toggle="tab" data-bs-target="#contractor-basic-pane" type="button" role="tab" aria-controls="contractor-basic-pane" aria-selected="true">Basic Details</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="contractor-contact-tab" data-bs-toggle="tab" data-bs-target="#contractor-contact-pane" type="button" role="tab" aria-controls="contractor-contact-pane" aria-selected="false">Location &amp; Contact</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="contractor-extra-tab" data-bs-toggle="tab" data-bs-target="#contractor-extra-pane" type="button" role="tab" aria-controls="contractor-extra-pane" aria-selected="false">Additional Info</button></li></ul>
           <fieldset id="contractor-fields"><legend class="visually-hidden">Contractor details</legend><div class="tab-content"><div class="tab-pane fade show active" id="contractor-basic-pane" role="tabpanel" aria-labelledby="contractor-basic-tab"><div class="row g-3">
+            <div class="col-12" id="contractor-legacy-name-group" hidden><label class="form-label" for="contractor-legacy-name">Full name</label><input class="form-control" id="contractor-legacy-name" autocomplete="name" type="text" maxlength="200" aria-describedby="contractor-legacy-name-help"><p id="contractor-legacy-name-help" class="form-text">This existing record has one full name. It will be kept as entered.</p><button id="contractor-use-name-parts" class="btn btn-outline-secondary btn-sm mb-2" type="button"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Enter separate name fields</button></div>
             <div class="col-sm-3"><label class="form-label" for="contractor-prefix">Prefix</label><select class="form-select" id="contractor-prefix" name="prefix"><option value="">None</option><option>Dr.</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Prof.</option></select></div>
             <div class="col-sm-9"><label class="form-label" for="contractor-first-name">First name</label><input class="form-control" id="contractor-first-name" name="first_name" type="text" maxlength="100" required autocomplete="given-name"></div>
             <div class="col-md-6"><label class="form-label" for="contractor-middle-name">Middle name(s)</label><input class="form-control" id="contractor-middle-name" name="middle_name" type="text" maxlength="150" autocomplete="additional-name"></div>
             <div class="col-md-6"><label class="form-label" for="contractor-last-name">Last name</label><input class="form-control" id="contractor-last-name" name="last_name" type="text" maxlength="100" required autocomplete="family-name"></div>
             <div class="col-sm-4"><label class="form-label" for="contractor-suffix">Suffix</label><select class="form-select" id="contractor-suffix" name="suffix"><option value="">None</option><option>Jr.</option><option>Sr.</option><option>II</option><option>III</option><option>IV</option></select></div>
-            <div class="col-sm-8"><label class="form-label" for="contractor-headshot">Profile Picture</label><input class="form-control" id="contractor-headshot" name="headshot" type="file" accept="image/*"><div class="form-text">Choose an image file. Saving it to the local profile requires the desktop file import connection.</div></div>
-            <div class="col-12"><label class="form-label" for="contractor-organization">Organization</label><select class="form-select" id="contractor-organization" name="organization_id" required></select><p id="contractor-organization-help" class="form-text mb-0">Region comes from the selected organization.</p></div>
-            <div class="col-12"><label class="form-label" for="contractor-role">Role</label><select class="form-select" id="contractor-role" name="role" required><option value="">Select a role</option><option>Analyst</option><option>Consultant</option><option>Engineer</option><option>Field Specialist</option><option>Intelligence Specialist</option><option>Logistics Specialist</option><option>Medical Specialist</option><option>Operations Manager</option><option>Security Advisor</option><option>Training Specialist</option><option>Other</option></select></div>
-          </div></div><div class="tab-pane fade" id="contractor-contact-pane" role="tabpanel" aria-labelledby="contractor-contact-tab"><div class="row g-3"><div class="col-md-6"><label class="form-label" for="contractor-email">Email</label><input class="form-control" id="contractor-email" name="email" type="email" maxlength="254" autocomplete="email" required></div><div class="col-md-6"><label class="form-label" for="contractor-phone">Phone</label><input class="form-control" id="contractor-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required></div><div class="col-12"><label class="form-label" for="contractor-street1">Street Address 1</label><input class="form-control" id="contractor-street1" name="street_address_1" autocomplete="address-line1"></div><div class="col-12"><label class="form-label" for="contractor-street2">Street Address 2 <span class="text-secondary">(optional)</span></label><input class="form-control" id="contractor-street2" name="street_address_2" autocomplete="address-line2"></div><div class="col-md-4"><label class="form-label" for="contractor-city">City</label><input class="form-control" id="contractor-city" name="city" autocomplete="address-level2"></div><div class="col-md-4"><label class="form-label" for="contractor-state">State/Province</label><input class="form-control" id="contractor-state" name="state_province" autocomplete="address-level1"></div><div class="col-md-4"><label class="form-label" for="contractor-country">Country</label><input class="form-control" id="contractor-country" name="country" autocomplete="country-name"></div></div></div><div class="tab-pane fade" id="contractor-extra-pane" role="tabpanel" aria-labelledby="contractor-extra-tab"><div class="d-flex justify-content-between align-items-center mb-3"><p class="text-secondary mb-0">Add any additional profile details.</p><button type="button" class="btn btn-outline-primary" data-add-custom-field="contractor">+ Add Custom Field</button></div><div class="custom-fields-list" data-custom-fields="contractor"></div></div></div></fieldset>
+            <div class="col-sm-8"><label class="form-label" for="contractor-headshot">Profile Picture</label><input class="form-control" id="contractor-headshot" name="headshot" type="file" accept="image/png,image/jpeg"><div class="form-text">PNG or JPEG, up to 8 MiB and 4096 × 4096 pixels.</div></div>
+            <div class="col-12"><label class="form-label" for="contractor-organization">Organization</label><select class="form-select" id="contractor-organization" name="organization_id" required></select><p id="contractor-organization-help" class="form-text mb-0">Region comes from the selected organization.</p>
+              <button id="add-contractor-region" class="btn btn-sm btn-outline-primary mt-2" type="button">Add or change region</button>
+              <div id="contractor-region-editor" class="border rounded p-3 mt-3" hidden>
+                <label class="form-label" for="contractor-region-value">Organization region</label><input id="contractor-region-value" class="form-control mb-2" type="text" maxlength="120" disabled>
+                <p class="small text-secondary">Saving this region updates the selected organization and every contractor linked to it. Your contractor draft stays open.</p>
+                <button id="save-contractor-region" class="btn btn-sm btn-primary" type="button">Save region</button>
+                <button id="cancel-contractor-region" class="btn btn-sm btn-light" type="button">Cancel</button>
+                <p id="contractor-region-message" class="small mt-2 mb-0" role="status"></p>
+              </div>
+            </div>
+            <div class="col-12"><label class="form-label" for="contractor-role">Role</label><select class="form-select" id="contractor-role" name="role"><option value="">Select a role</option><option>Analyst</option><option>Consultant</option><option>Engineer</option><option>Field Specialist</option><option>Intelligence Specialist</option><option>Logistics Specialist</option><option>Medical Specialist</option><option>Operations Manager</option><option>Security Advisor</option><option>Training Specialist</option><option>Other</option></select></div>
+          </div></div><div class="tab-pane fade" id="contractor-contact-pane" role="tabpanel" aria-labelledby="contractor-contact-tab"><div class="row g-3"><div class="col-md-6"><p class="form-text mb-2">Provide a phone number or email address, or both. Phone numbers may contain 7 to 15 digits, a leading +, spaces, hyphens or parentheses.</p><label class="form-label" for="contractor-email">Email</label><input class="form-control" id="contractor-email" name="email" type="email" maxlength="254" autocomplete="email"></div><div class="col-md-6"><label class="form-label" for="contractor-phone">Phone</label><input class="form-control" id="contractor-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="80" placeholder="e.g., +44 20 7946 0958"></div><div class="col-12"><label class="form-label" for="contractor-street1">Street Address 1</label><input class="form-control" id="contractor-street1" name="street_address_1" autocomplete="address-line1"></div><div class="col-12"><label class="form-label" for="contractor-street2">Street Address 2 <span class="text-secondary">(optional)</span></label><input class="form-control" id="contractor-street2" name="street_address_2" autocomplete="address-line2"></div><div class="col-md-4"><label class="form-label" for="contractor-city">City</label><input class="form-control" id="contractor-city" name="city" autocomplete="address-level2"></div><div class="col-md-4"><label class="form-label" for="contractor-state">State/Province</label><input class="form-control" id="contractor-state" name="state_province" autocomplete="address-level1"></div><div class="col-md-4"><label class="form-label" for="contractor-country">Country</label><input class="form-control" id="contractor-country" name="country" autocomplete="country-name"></div></div></div><div class="tab-pane fade" id="contractor-extra-pane" role="tabpanel" aria-labelledby="contractor-extra-tab"><div class="d-flex justify-content-between align-items-center mb-3"><p class="text-secondary mb-0">Add any additional profile details.</p><button type="button" class="btn btn-outline-primary" data-add-custom-field="contractor">+ Add Custom Field</button></div><div class="custom-fields-list" data-custom-fields="contractor"></div></div></div></fieldset>
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" id="save-contractor" class="btn btn-primary">Save contractor</button></div>
       </form>
@@ -181,19 +227,19 @@
   </div>
 
   <div class="modal fade" id="organization-modal" tabindex="-1" aria-labelledby="organization-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-      <form id="organization-form">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"><div class="modal-content">
+      <form id="organization-form" novalidate>
         <div class="modal-header"><h2 id="organization-title" class="modal-title h5">Add organization</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4"><p id="organization-form-message" role="status" aria-live="polite" class="text-secondary"></p>
           <ul class="nav nav-tabs mb-3" role="tablist"><li class="nav-item" role="presentation"><button class="nav-link active" id="organization-basic-tab" data-bs-toggle="tab" data-bs-target="#organization-basic-pane" type="button" role="tab" aria-controls="organization-basic-pane" aria-selected="true">Basic Details</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="organization-contact-tab" data-bs-toggle="tab" data-bs-target="#organization-contact-pane" type="button" role="tab" aria-controls="organization-contact-pane" aria-selected="false">Location &amp; Contact</button></li><li class="nav-item" role="presentation"><button class="nav-link" id="organization-extra-tab" data-bs-toggle="tab" data-bs-target="#organization-extra-pane" type="button" role="tab" aria-controls="organization-extra-pane" aria-selected="false">Additional Info</button></li></ul>
           <fieldset id="organization-fields"><legend class="visually-hidden">Organization details</legend><div class="tab-content"><div class="tab-pane fade show active" id="organization-basic-pane" role="tabpanel" aria-labelledby="organization-basic-tab">
             <label class="form-label" for="organization-name">Name</label><input class="form-control mb-3" id="organization-name" name="name" type="text" maxlength="200" required>
             <label class="form-label" for="organization-region">Primary Region</label><input class="form-control mb-3" id="organization-region" name="region" type="text" maxlength="120">
-            <label class="form-label" for="organization-logo">Organization Logo</label><input class="form-control mb-3" id="organization-logo" name="logo" type="file" accept="image/*"><div id="organization-help" class="form-text mb-3">Logo selection is ready; saving image files requires the desktop file import connection.</div>
+            <label class="form-label" for="organization-logo">Organization Logo</label><input class="form-control mb-3" id="organization-logo" name="logo" type="file" accept="image/png,image/jpeg"><div id="organization-help" class="form-text mb-3"></div>
             <label class="form-label" for="organization-notes">Additional Information/Notes</label><textarea class="form-control mb-3" id="organization-notes" name="notes" rows="6" maxlength="5000"></textarea>
           </div><div class="tab-pane fade" id="organization-contact-pane" role="tabpanel" aria-labelledby="organization-contact-tab"><div class="row g-3"><div class="col-md-6"><label class="form-label" for="organization-email">Email</label><input class="form-control" id="organization-email" name="email" type="email" maxlength="254" autocomplete="email"></div><div class="col-md-6"><label class="form-label" for="organization-phone">Main phone</label><input class="form-control" id="organization-phone" name="phone" type="tel" inputmode="tel"></div><div class="col-md-6"><label class="form-label" for="organization-secondary-phone">Secondary phone</label><input class="form-control" id="organization-secondary-phone" name="secondary_phone" type="tel" inputmode="tel"></div><div class="col-md-6"><label class="form-label" for="organization-secondary-contact">Secondary contact</label><input class="form-control" id="organization-secondary-contact" name="secondary_contact" type="text" maxlength="200"></div><div class="col-md-6"><label class="form-label" for="organization-secondary-email">Secondary contact email</label><input class="form-control" id="organization-secondary-email" name="secondary_email" type="email" maxlength="254"></div><div class="col-12"><label class="form-label" for="organization-street1">Street Address 1</label><input class="form-control" id="organization-street1" name="street_address_1" autocomplete="address-line1"></div><div class="col-12"><label class="form-label" for="organization-street2">Street Address 2 <span class="text-secondary">(optional)</span></label><input class="form-control" id="organization-street2" name="street_address_2" autocomplete="address-line2"></div><div class="col-md-4"><label class="form-label" for="organization-city">City</label><input class="form-control" id="organization-city" name="city" autocomplete="address-level2"></div><div class="col-md-4"><label class="form-label" for="organization-state">State/Province</label><input class="form-control" id="organization-state" name="state_province" autocomplete="address-level1"></div><div class="col-md-4"><label class="form-label" for="organization-country">Country</label><input class="form-control" id="organization-country" name="country" autocomplete="country-name"></div></div></div><div class="tab-pane fade" id="organization-extra-pane" role="tabpanel" aria-labelledby="organization-extra-tab"><div class="d-flex justify-content-between align-items-center mb-3"><p class="text-secondary mb-0">Add any additional organization details.</p><button type="button" class="btn btn-outline-primary" data-add-custom-field="organization">+ Add Custom Field</button></div><div class="custom-fields-list" data-custom-fields="organization"></div></div>
             </div><section id="inline-contractor-section" class="border rounded p-3 mt-3" aria-labelledby="inline-contractor-heading"><div class="d-flex align-items-center justify-content-between gap-2"><div><h3 class="h6 mb-1" id="inline-contractor-heading">Add Contractor on the fly</h3><p class="small text-secondary mb-0">Optionally create the first contact for this organization.</p></div><button type="button" class="btn btn-sm btn-outline-primary" id="toggle-inline-contractor" aria-expanded="false" aria-controls="inline-contractor-fields"><i class="bi bi-person-plus" aria-hidden="true"></i><span class="visually-hidden">Add contractor on the fly</span></button></div>
-              <fieldset id="inline-contractor-fields" class="row g-3 mt-1" hidden><legend class="visually-hidden">New contractor details</legend><div class="col-md-6"><label class="form-label" for="inline-contractor-first-name">First name</label><input class="form-control" id="inline-contractor-first-name" type="text" autocomplete="given-name"></div><div class="col-md-6"><label class="form-label" for="inline-contractor-last-name">Last name</label><input class="form-control" id="inline-contractor-last-name" type="text" autocomplete="family-name"></div><div class="col-md-6"><label class="form-label" for="inline-contractor-email">Email</label><input class="form-control" id="inline-contractor-email" type="email" autocomplete="email"></div><div class="col-md-6"><label class="form-label" for="inline-contractor-phone">Phone</label><input class="form-control phone-mask" id="inline-contractor-phone" type="tel" inputmode="tel"></div><div class="col-12"><label class="form-label" for="inline-contractor-role">Role</label><select class="form-select" id="inline-contractor-role"><option value="">Select a role</option><option>Analyst</option><option>Consultant</option><option>Engineer</option><option>Field Specialist</option><option>Intelligence Specialist</option><option>Logistics Specialist</option><option>Medical Specialist</option><option>Operations Manager</option><option>Security Advisor</option><option>Training Specialist</option><option>Other</option></select></div></fieldset>
+              <fieldset id="inline-contractor-fields" class="row g-3 mt-1" hidden disabled><legend class="visually-hidden">New contractor details</legend><div class="col-md-6"><label class="form-label" for="inline-contractor-first-name">First name</label><input class="form-control" id="inline-contractor-first-name" type="text" autocomplete="given-name" maxlength="100"></div><div class="col-md-6"><label class="form-label" for="inline-contractor-last-name">Last name</label><input class="form-control" id="inline-contractor-last-name" type="text" autocomplete="family-name" maxlength="100"></div><div class="col-md-6"><p class="form-text">Provide a phone number or email address, or both.</p><label class="form-label" for="inline-contractor-email">Email</label><input class="form-control" id="inline-contractor-email" type="email" autocomplete="email" maxlength="254"></div><div class="col-md-6"><label class="form-label" for="inline-contractor-phone">Phone</label><input class="form-control" id="inline-contractor-phone" type="tel" inputmode="tel" maxlength="80" placeholder="e.g., +44 20 7946 0958"></div><div class="col-12"><label class="form-label" for="inline-contractor-role">Role</label><select class="form-select" id="inline-contractor-role"><option value="">Select a role</option><option>Analyst</option><option>Consultant</option><option>Engineer</option><option>Field Specialist</option><option>Intelligence Specialist</option><option>Logistics Specialist</option><option>Medical Specialist</option><option>Operations Manager</option><option>Security Advisor</option><option>Training Specialist</option><option>Other</option></select></div></fieldset>
             </section>
           </fieldset>
         </div>
@@ -203,7 +249,7 @@
   </div>
 
   <div class="modal fade" id="archive-modal" tabindex="-1" aria-labelledby="archive-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"><div class="modal-content">
       <form id="archive-form">
         <div class="modal-header"><h2 class="modal-title h5" id="archive-title">Archive contractor?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4"><p id="archive-name" class="fw-semibold"></p><p>Are you sure you want to archive this record? It will be hidden from the directory and retained in the local database.</p><p id="archive-form-message" role="status" aria-live="polite" class="text-secondary"></p></div>
@@ -212,12 +258,51 @@
     </div></div>
   </div>
 
+  <div class="modal fade" id="settings-modal" tabindex="-1" aria-labelledby="settings-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"><div class="modal-content">
+      <div class="modal-header"><h2 class="modal-title h5" id="settings-title">Settings</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close settings"></button></div>
+      <div class="modal-body p-4">
+        <label class="form-label" for="theme-mode">Appearance</label>
+        <select id="theme-mode" class="form-select mb-4"><option value="system">Follow system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+        <h3 class="h6">Sample data</h3>
+        <button id="open-record-tools" class="btn btn-outline-primary mb-3" type="button">Tags, skills, status and history</button>
+        <h3 class="h6 mt-3">Archived records</h3>
+        <div class="table-responsive mb-4"><table id="archives-table" class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Archived</th><th>Action</th></tr></thead><tbody id="archives-table-body"></tbody></table></div>
+        <p class="text-secondary">Add synthetic records to explore the application. You can review the details before importing.</p>
+        <button id="sample-import-button" class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#sample-import-modal">Import sample records</button>
+        <hr class="my-4">
+        <h3 class="h6">Password and recovery</h3>
+        <details class="mb-4"><summary class="h6">Move a workspace between devices</summary>
+          <p class="small text-secondary mt-3">Export records, archives, history and images into a password-encrypted file. Import restores that workspace; a recovery backup of this workspace is retained.</p>
+          <form id="transfer-form">
+            <label for="transfer-password" class="form-label">Transfer file password</label><input id="transfer-password" class="form-control mb-3" type="password" required minlength="12" maxlength="1024" autocomplete="off">
+            <label for="transfer-confirm" class="form-label">Confirm transfer file password</label><input id="transfer-confirm" class="form-control mb-3" type="password" required minlength="12" maxlength="1024" autocomplete="off">
+            <label for="transfer-new-password" class="form-label">New login password (import only)</label><input id="transfer-new-password" class="form-control mb-3" type="password" minlength="12" maxlength="1024" autocomplete="new-password">
+            <label for="transfer-new-confirm" class="form-label">Confirm new login password (import only)</label><input id="transfer-new-confirm" class="form-control mb-3" type="password" minlength="12" maxlength="1024" autocomplete="new-password">
+            <p id="transfer-message" class="small" role="status"></p>
+            <button id="export-workspace" class="btn btn-outline-primary" type="button">Export workspace</button>
+            <button id="import-workspace" class="btn btn-outline-primary" type="button">Import workspace</button>
+          </form>
+        </details>
+        <p class="small text-secondary">Changing your password also replaces your recovery key. Your records stay in place.</p>
+        <form id="change-password-form">
+          <label class="form-label" for="current-password">Current password</label><input id="current-password" class="form-control mb-3" type="password" required maxlength="1024" autocomplete="current-password">
+          <label class="form-label" for="new-password">New password</label><input id="new-password" class="form-control mb-3" type="password" required minlength="12" maxlength="1024" autocomplete="new-password">
+          <label class="form-label" for="new-password-confirm">Confirm new password</label><input id="new-password-confirm" class="form-control mb-3" type="password" required minlength="12" maxlength="1024" autocomplete="new-password">
+          <p id="password-change-message" role="status" class="small"></p>
+          <button id="change-password-button" type="submit" class="btn btn-outline-primary">Change password and recovery key</button>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button></div>
+    </div></div>
+  </div>
+
   <div class="modal fade" id="sample-import-modal" tabindex="-1" aria-labelledby="sample-import-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"><div class="modal-content">
       <form id="sample-import-form">
-        <div class="modal-header"><h2 class="modal-title h5" id="sample-import-title">Import fictional sample data?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-header"><h2 class="modal-title h5" id="sample-import-title">Import synthetic sample data?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body p-4">
-          <p>Add 60 clearly fictional contractors across six organizations, with varied regions, statuses, skills, and contact dates.</p>
+          <p>Add 60 synthetic contractors across six organizations, including four archived examples, with addresses, images, tags, skills and contact dates. No real personnel data.</p>
           <p>Existing records are not replaced. Importing again skips previously imported records and preserves your edits and archives.</p>
           <p class="small text-secondary">Samples are saved in this local database and follow the same archive retention rules as other records. There is no bulk-delete action.</p>
           <p id="sample-import-message" class="text-secondary" role="status" aria-live="polite"></p>
@@ -234,16 +319,22 @@
     </div>
     <form id="contractor-filter-form" class="offcanvas-body d-flex flex-column gap-3">
       <div><label class="form-label small fw-semibold" for="contractor-region-filter">Region</label><select id="contractor-region-filter" name="region" class="form-select"><option value="">All regions</option><option value="Sub-Saharan Africa">Sub-Saharan Africa</option><option value="Eastern Europe">Eastern Europe</option><option value="Middle East">Middle East</option><option value="East Asia">East Asia</option><option value="Central Asia">Central Asia</option></select></div>
-      <div><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" disabled title="Not available for saved records in this build" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
-      <div><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City/Sector</label><input id="contractor-city-sector-filter" disabled title="Not available for saved records in this build" name="city_sector" class="form-control" type="search" placeholder="Filter by city or sector"></div>
+      <div><label class="form-label small fw-semibold" for="contractor-country-filter">Country</label><input id="contractor-country-filter" name="country" class="form-control" type="search" placeholder="Filter by country"></div>
+      <div><label class="form-label small fw-semibold" for="contractor-city-sector-filter">City</label><input id="contractor-city-sector-filter" name="city_sector" class="form-control" type="search" placeholder="Filter by city"></div>
       <div><label class="form-label small fw-semibold" for="filter-organization">Organization</label><select id="filter-organization" name="organization" class="form-select"><option value="All">All organizations</option><option value="Aegis Meridian Group">Aegis Meridian Group</option><option value="Northstar Risk Partners">Northstar Risk Partners</option><option value="Cobalt Gate Services">Cobalt Gate Services</option><option value="Redwood Strategic Group">Redwood Strategic Group</option><option value="Bluehaven Operations">Bluehaven Operations</option></select></div>
+<<<<<<< HEAD
       <div><label class="form-label small fw-semibold" for="filter-status">Status</label><select id="filter-status" name="status" class="form-select"><option value="All">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Deceased">Deceased</option></select></div>
+=======
+      <div><label class="form-label small fw-semibold" for="filter-status">Status</label><select id="filter-status" name="status" class="form-select"><option value="All">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Retired">Retired</option><option value="Deceased">Deceased</option><option value="Other Circumstance">Other Circumstance</option></select></div>
+      <div><label class="form-label" for="filter-tag">Tag</label><input id="filter-tag" class="form-control" list="record-tags-options" maxlength="100"></div>
+      <div><label class="form-label" for="filter-skill">Skill</label><input id="filter-skill" class="form-control" list="record-skills-options" maxlength="100"></div>
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
       <div class="mt-auto d-grid gap-2 pt-3"><button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1" aria-hidden="true"></i> Apply filters</button><button class="btn btn-light" id="clear-contractor-filters" type="button">Clear filters</button></div>
     </form>
   </div>
 
   <div class="modal fade" id="contact-note-modal" tabindex="-1" aria-labelledby="contact-note-title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"><div class="modal-content">
       <form id="contact-note-form">
         <div class="modal-header"><h2 class="modal-title h5" id="contact-note-title">Log contact note</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
         <div class="modal-body"><p id="contact-note-timestamp" class="small text-secondary mb-2"></p><label class="form-label" for="contact-note-method">Contact method</label><select class="form-select mb-3" id="contact-note-method" required><option>Email</option><option>Phone</option><option>SMS</option><option>Teams</option><option>Other</option></select><div class="btn-toolbar mb-2" role="toolbar" aria-label="Note formatting"><button type="button" class="btn btn-sm btn-outline-secondary me-1" data-note-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" class="btn btn-sm btn-outline-secondary" data-note-command="italic" aria-label="Italic"><em>I</em></button></div><div id="contact-note-editor" class="form-control contact-note-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Contact note" data-placeholder="Write a brief contact note…"></div><p id="contact-note-message" class="small text-secondary mt-2 mb-0" role="status" aria-live="polite"></p></div>
@@ -252,10 +343,30 @@
     </div></div>
   </div>
 
+<<<<<<< HEAD
   <div class="modal fade" id="record-history-modal" tabindex="-1" aria-labelledby="record-history-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-header"><h2 class="modal-title h5" id="record-history-title">Change History</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><ol id="organization-history-list" class="list-group list-group-flush"></ol></div></div></div>
   </div>
 
+=======
+
+  <div class="modal fade" id="record-tools-modal" tabindex="-1" aria-labelledby="record-tools-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+      <div class="modal-header"><h2 id="record-tools-title" class="modal-title h5">Record tools &amp; history</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close record tools"></button></div>
+      <div class="modal-body p-4" tabindex="0" role="region" aria-label="Record management"><fieldset><legend class="visually-hidden">Record management</legend>
+        <label for="record-tools-record" class="form-label">Record</label><select id="record-tools-record" class="form-select mb-4"></select>
+        <div id="record-tools-badges"></div>
+        <label for="record-tools-tags" class="form-label">Tags (comma separated)</label><input id="record-tools-tags" class="form-control mb-3" maxlength="3000" list="record-tags-options"><datalist id="record-tags-options"></datalist>
+        <label for="record-tools-skills" class="form-label">Skills (comma separated)</label><input id="record-tools-skills" class="form-control mb-3" maxlength="3000" list="record-skills-options"><datalist id="record-skills-options"></datalist>
+        <button id="record-tools-taxonomy" type="button" class="btn btn-primary mb-4">Save tags and skills</button>
+        <div class="row g-2 mb-4"><div class="col"><label for="record-tools-status" class="form-label">Status</label><select id="record-tools-status" class="form-select"></select></div><div class="col-auto align-self-end"><button id="record-tools-save-status" type="button" class="btn btn-outline-primary">Save status</button></div></div>
+        <div id="record-tools-transfer-group" class="mb-4"><label for="record-tools-transfer" class="form-label">Transfer to organization</label><select id="record-tools-transfer" class="form-select mb-2"></select><button id="record-tools-transfer-button" class="btn btn-outline-primary" type="button">Transfer contractor</button></div>
+        <p id="record-tools-message" role="status" class="text-secondary"></p>
+        <h3 class="h6">Contact notes and record history</h3><ol id="record-tools-history" class="record-history" tabindex="0" aria-label="Contact notes and record history"></ol>
+      </fieldset></div>
+    </div></div>
+  </div>
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
   <script src="vendor/bootstrap/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="vendor/jquery/jquery.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
   <script src="vendor/datatables/dataTables.min.js" integrity="sha384-n+4gDsCQ+x0o5YCJeYqFY1Yl+qgW41qmMAilIyF/bJwIUeTK00QB845/VijT5pQq" crossorigin="anonymous"></script>
@@ -263,10 +374,15 @@
   <script src="js/global-ui.js"></script>
   <script src="js/theme-toggle.js"></script>
   <script src="js/tauri-api.js"></script>
-  <script src="vendor/imask/imask.min.js" integrity="sha384-UO8YwPv//GjwHj93ZlwXcDNjv3BSxdBFUB2jtiOuL3d/a0kS9E8sYvHjTBkQI8u8" crossorigin="anonymous"></script>
   <script src="js/contractor-list.js"></script>
+  <script src="vendor/libphonenumber/libphonenumber-min.js" integrity="sha384-M5CRcRpWMuEkaOjTwEjSV/Lxrhtm4FMBIhvuuOGiDQcnswTQmjIecwlO2VDSoXXw" crossorigin="anonymous"></script>
+  <script src="js/phone-input.js"></script>
   <script src="js/add-contractor.js"></script>
   <script src="js/sample-data.js"></script>
+  <script src="js/workspace-tools.js"></script>
+  <script src="js/media-display.js"></script>
+  <script src="js/transfer-ui.js"></script>
+  <script src="js/dictation.js"></script>
   <script src="js/security-lock.js"></script>
 </body>
 </html>

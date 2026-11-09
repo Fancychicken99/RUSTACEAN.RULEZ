@@ -1,10 +1,8 @@
 use rusqlite::Connection;
 
-use secure_crm_backend::database::{
-    add_contractor, add_organization, add_profile_fields, archive_contractor, create_tables,
-};
+use secure_crm_backend::database::{add_contractor, add_organization, archive_contractor};
 
-use secure_crm_backend::contacts::create_contact_table;
+use secure_crm_backend::setup::initialize_database;
 
 use secure_crm_backend::decay::get_contractors_needing_followup;
 
@@ -14,9 +12,7 @@ fn test_contact_decay() -> rusqlite::Result<()> {
     let conn = Connection::open_in_memory()?;
 
     // Prepare the tables
-    create_tables(&conn)?;
-    add_profile_fields(&conn)?;
-    create_contact_table(&conn)?;
+    initialize_database(&conn)?;
 
     // Create fictional organization
     let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi")?;

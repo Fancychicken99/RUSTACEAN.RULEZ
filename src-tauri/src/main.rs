@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod voice;
 
 use commands::AppState;
 use tauri::Manager;
@@ -44,7 +45,24 @@ fn main() {
             commands::filter_contractors,
             commands::import_sample_data,
             commands::record_contact_note,
+<<<<<<< HEAD
             commands::get_record_history
+=======
+            commands::take_recovery_key,
+            commands::recover_password,
+            commands::change_password,
+            commands::remove_original_database,
+            commands::set_organization_region,
+            commands::workspace_snapshot,
+            commands::workspace_action,
+            commands::search_records,
+            commands::load_record_image,
+            commands::export_workspace,
+            commands::import_workspace,
+            commands::open_contact_action,
+            commands::transcribe_audio,
+            commands::cancel_dictation,
+>>>>>>> a34fadfc93ffacce33d97241bf239fa0dc9c0b32
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start Hippo Harbor CRM");

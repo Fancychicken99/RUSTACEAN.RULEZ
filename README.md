@@ -1,16 +1,33 @@
 # RUSTACEAN.RULEZ
 
-Student contractor CRM for Dr. Burchfield. MVP targets Windows and macOS.
-Windows exe/installer and universal macOS app/DMG both passed native CI builds.
-See [build evidence and downloads](docs/mvp-build-evidence.md) for the verified
-source, packages and limits of the checks.
-See [MVP distribution](docs/mvp-distribution.md) for outputs, commands and demo
-steps. The Windows Tauri executable now
-opens the original Northstar layout with real local authentication, saved
-contractor/organization lists, profile selection, and dashboard counts. Full
-MVP contractor create/edit/archive and organization creation are connected;
-SQLite region filtering and explicit repeatable import of 60 fictional profiles
-are also connected. Remaining MVP acceptance checks are listed below.
+## Downloads
+
+[![Download for Windows](https://img.shields.io/badge/Download-Windows_x64-0078D4?style=for-the-badge)](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/download/v0.2.0/Hippo-Harbor-CRM-0.2.0-Windows-x64-setup.exe)
+[![Download for Mac](https://img.shields.io/badge/Download-macOS_universal-202020?style=for-the-badge)](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/download/v0.2.0/Hippo-Harbor-CRM-0.2.0-macOS-universal.dmg)
+
+**Hippo Harbor CRM 0.2.0** — Windows x64 and macOS 13+ (Apple Silicon and Intel).
+Open the Windows setup wizard, or open the Mac DMG and drag the app into Applications.
+Offline Whisper is included; no coding tools are needed.
+
+[Release notes and checksums](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/tag/v0.2.0) · [Installation guide](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/blob/v0.2.0/docs/installation.md)
+
+The Mac class build is ad-hoc signed, not notarized; first opening may require
+approval in Privacy & Security. Save your recovery key during initial setup.
+
+---
+
+Hippo Harbor CRM is a student desktop contractor CRM for Dr. Burchfield. The MVP
+has been demonstrated; current 0.2.0 work targets the full Sprint 2 submission.
+It includes encrypted local workspaces/recovery, contractor and organization
+editing, images, combined filters, tags/skills, contact and audit history,
+archive/restore, encrypted portable transfer and reviewed offline dictation.
+
+See [current verification](docs/final-submission-verification.md) for tests,
+Windows package status and remaining Mac/manual acceptance. The earlier
+[MVP build evidence](docs/mvp-build-evidence.md) documents older artifacts and
+does not establish that the current final source passed on macOS.
+Use the [final demonstration guide](docs/final-demo-guide.md) for the presentation.
+For end users, follow the [Windows/macOS installation guide](docs/installation.md).
 
 ## Repository layout
 
@@ -33,7 +50,7 @@ scripts/                      Build and verification commands
 docs/                         Contracts, scope, development notes, change log
 ```
 
-Broughnut owns all remaining MVP implementation across frontend/backend/bridge.
+Broughnut owns remaining final implementation across frontend/backend/bridge.
 Record edits and their purpose in [integration-changes.md](docs/integration-changes.md)
 and shared interfaces in [ipc-contract.md](docs/ipc-contract.md). Original teammate
 ownership identifies existing work; it does not defer remaining implementation.
@@ -43,6 +60,8 @@ ownership identifies existing work; it does not defer remaining implementation.
 From PowerShell at the repository root:
 
 ```powershell
+npm ci
+npm run prepare:voice
 .\scripts\desktop.ps1 -Action Test
 .\scripts\desktop.ps1 -Action Build
 .\scripts\desktop.ps1 -Action Run
@@ -57,8 +76,9 @@ then `.\scripts\desktop.ps1 -Action Package`. On a Mac, use
 See [desktop development](docs/desktop-development.md) for setup, storage, test
 isolation, inactivity behavior, and platform limitations.
 
-A fresh database starts with password setup and then login. No automatic seed
-or fixture fallback is used. Use Import fictional samples and confirm to add the
+A fresh workspace starts with password setup, recovery-key acknowledgement and
+login. Save the recovery key privately. No automatic seed or fixture fallback is
+used. Use Settings → Import sample records and confirm to add the
 versioned sample dataset; repeat import preserves edits and archives. Opening the HTML directly in a browser shows a
 backend-unavailable error; use the executable for real data.
 

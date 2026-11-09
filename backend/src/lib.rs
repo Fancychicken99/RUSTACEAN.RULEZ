@@ -3,9 +3,11 @@ pub mod auth;
 pub mod contacts;
 pub mod database;
 pub mod decay;
+pub mod details;
 pub mod filtering;
 pub mod history;
 pub mod images;
+pub mod media;
 pub mod profiles;
 pub mod protected;
 pub mod search;
@@ -13,6 +15,10 @@ pub mod seed;
 pub mod session;
 pub mod setup;
 pub mod skills;
+pub mod tags;
+pub mod transfer_dialog;
+pub mod vault;
+pub mod workspace;
 #[cfg(test)]
 mod tests {
     use super::database::{
@@ -93,8 +99,7 @@ mod tests {
     fn test_archive_contractor() {
         let conn = Connection::open_in_memory().unwrap();
 
-        create_tables(&conn).unwrap();
-        add_profile_fields(&conn).unwrap();
+        crate::setup::initialize_database(&conn).unwrap();
 
         // Create a fictional organization
         let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi").unwrap();
@@ -180,9 +185,7 @@ mod tests {
     fn test_get_contractor_details() {
         let conn = Connection::open_in_memory().unwrap();
 
-        // Create database tables and new fields
-        create_tables(&conn).unwrap();
-        add_profile_fields(&conn).unwrap();
+        crate::setup::initialize_database(&conn).unwrap();
 
         // Create fictional organization
         let org_id = add_organization(&conn, "Example Defense LLC", "East Nairobi").unwrap();

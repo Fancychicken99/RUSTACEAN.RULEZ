@@ -1,9 +1,26 @@
 # Local voice input: first workflow and acceptance plan
 
+## Current implementation — November 7, 2026
+
+The completed input inventory and user's explicit full-final-submission request
+supersede the historical deferral below. Source now implements reviewed offline
+dictation for free-text name/address/notes/custom fields. Credentials, telephone,
+email, country/region and selectors are excluded. Whisper 1.8.2 CPU runtime and
+multilingual base model are pinned and bundled; no runtime model download.
+Real engine transcription passed; actual microphone capture and macOS permission
+acceptance remain separate checks. See final-submission-verification.md and
+scripts/voice-resources.json for current evidence and checksums. The remainder
+of this document records earlier planning rather than current implementation.
+
 Recorded November 4, 2026. Step 1 defines behavior; no voice implementation or
 platform verification is claimed here.
 
 ## Current decision: implementation deferred
+
+November 6: [input inventory](input-contract-inventory.md) now covers current,
+generated and planned controls, sensitivity and provisional dictation suitability.
+The actual voice-enabled field set/languages/model remain unselected. Completing
+the source inventory alone does not authorize installing Whisper or recording UI.
 
 The user directed that Whisper implementation wait until all fields requiring
 user input are known. Do not install/download the engine or models, build a
