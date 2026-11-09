@@ -3,7 +3,7 @@ name: Windows and macOS final submission builds
 on:
   workflow_dispatch:
   push:
-    branches: [dev]
+    branches: [dev, "codex/**"]
     tags: ["v*"]
 
 permissions:
