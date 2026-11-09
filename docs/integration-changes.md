@@ -510,7 +510,11 @@ assets and their GitHub digests, and publishes stable asset names for latest-rel
 homepage links. Python is release tooling on the GitHub runner, not app runtime.
 Local checks: 50 backend tests, six bridge/voice tests, full Windows UI regression,
 and focused history/closure/archive/restart/accessibility checks passed. Native
-packaging and public download publication are next; v0.2.0 remains available.
+run 42662290005 succeeded on both platforms. Publisher 42668101875 verified source
+and asset digests and published v0.2.1. Main README commit 25834af and dev README
+use stable latest-release URLs; both public installer links returned HTTP 200.
+v0.2.0 remains available as an older release. Publication changes are documentation
+and release operations; no additional application regression needed afterward.
 
 Frontend changes to Connor's UI: darker light-theme navigation/shortcut text and
 warning button colors address actual axe contrast failures; brand link uses its

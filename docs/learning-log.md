@@ -1,5 +1,14 @@
 # Rust learning log
 
+## Latest download reconciliation — November 9, 2026
+
+The newest commit was not a usable installer: committed merge markers and competing
+field/schema definitions prevented compilation. Reconciled one typed details
+contract while retaining archive/history/closure features. A compiler pass, data
+upgrade test, desktop test and packaged build prove different things. Release
+publication is gated on the exact successful build, with stable latest-download
+URLs. No new user exercise or independent Rust proficiency was assessed.
+
 ## GitHub download delivery — November 7, 2026
 
 Release assets are versioned installer files; source ZIPs are different and do not

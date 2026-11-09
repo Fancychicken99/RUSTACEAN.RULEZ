@@ -1,6 +1,6 @@
 # Session handoff
 
-## Download update in progress — November 9, 2026
+## Download update complete — November 9, 2026
 
 User authorized updating homepage downloads to the newest code. HEAD 474a90d had
 committed merge markers across 15 live files; native run 42564003274 failed on both
@@ -9,9 +9,14 @@ platforms. Reconciled overlap without dropping newer archives/history/closure UI
 Local: 50 backend tests, six bridge/voice tests and full Windows regression passed;
 focused history/company closure/archive/restart scans also passed (smoke-jv6Yog).
 Fast conflict-marker guard and explicit successful-run release publisher added.
-Next: push repaired source, native Windows/Mac build, dispatch verified publisher,
-then update default main and dev README to latest-release stable asset URLs.
-Old v0.2.0 downloads remain until verified replacements exist. User authorization
+Repaired source 6c9e6d8 is pushed. Native build 42662290005 SUCCEEDED on Windows
+and Mac, including packages and startup checks. Publisher 42668101875 SUCCEEDED
+and published v0.2.1 from those exact artifacts after digest/size verification.
+Default main README commit 25834af now uses latest-release stable installer links;
+dev README matches. Both public download URLs verified HTTP 200. INSTALL.md and
+SHA256SUMS.txt included. v0.2.0 retained as older release. Main publisher workflow
+was installed in e6810e4; manually dispatch it for future successful exact-source
+native runs. No branch switch or app-source merge into main. User authorization
 includes necessary commit/push/publication for this download update. No ordinary
 user workspace migrated or reset. Manual acceptance/signing limits still apply.
 

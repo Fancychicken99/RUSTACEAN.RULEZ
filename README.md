@@ -2,14 +2,14 @@
 
 ## Downloads
 
-[![Download for Windows](https://img.shields.io/badge/Download-Windows_x64-0078D4?style=for-the-badge)](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/download/v0.2.0/Hippo-Harbor-CRM-0.2.0-Windows-x64-setup.exe)
-[![Download for Mac](https://img.shields.io/badge/Download-macOS_universal-202020?style=for-the-badge)](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/download/v0.2.0/Hippo-Harbor-CRM-0.2.0-macOS-universal.dmg)
+[![Download for Windows](https://img.shields.io/badge/Download-Windows_x64-0078D4?style=for-the-badge)](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/latest/download/Hippo-Harbor-CRM-Windows-x64-setup.exe)
+[![Download for Mac](https://img.shields.io/badge/Download-macOS_universal-202020?style=for-the-badge)](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/latest/download/Hippo-Harbor-CRM-macOS-universal.dmg)
 
-**Hippo Harbor CRM 0.2.0** — Windows x64 and macOS 13+ (Apple Silicon and Intel).
+**Hippo Harbor CRM — latest release** — Windows x64 and macOS 13+ (Apple Silicon and Intel).
 Open the Windows setup wizard, or open the Mac DMG and drag the app into Applications.
 Offline Whisper is included; no coding tools are needed.
 
-[Release notes and checksums](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/tag/v0.2.0) · [Installation guide](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/blob/v0.2.0/docs/installation.md)
+[Release notes and checksums](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/latest) · [Installation guide](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/latest/download/INSTALL.md)
 
 The Mac class build is ad-hoc signed, not notarized; first opening may require
 approval in Privacy & Security. Save your recovery key during initial setup.
@@ -17,7 +17,7 @@ approval in Privacy & Security. Save your recovery key during initial setup.
 ---
 
 Hippo Harbor CRM is a student desktop contractor CRM for Dr. Burchfield. The MVP
-has been demonstrated; current 0.2.0 work targets the full Sprint 2 submission.
+has been demonstrated; current 0.2.1 work targets the full Sprint 2 submission.
 It includes encrypted local workspaces/recovery, contractor and organization
 editing, images, combined filters, tags/skills, contact and audit history,
 archive/restore, encrypted portable transfer and reviewed offline dictation.

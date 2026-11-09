@@ -1,5 +1,36 @@
 # Final submission verification — November 7, 2026
 
+## v0.2.1 update — November 9, 2026
+
+Repaired the committed merge conflicts in 474a90d and prepared source
+6c9e6d813fae430dae1dbdcd4c065e040fb8dbde for the updated downloads. Local evidence:
+50 backend tests, six bridge/voice tests, full Windows regression and focused
+archive/history/company-closure/restart checks passed. Schema 7 preserves released
+schema-6 data; staged portable import accepts and upgrades schemas 6/7.
+
+Native [run 42662290005](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/actions/runs/42662290005)
+SUCCEEDED on both platforms, including Windows NSIS/release startup and Mac
+universal package/signature/architecture/startup. The
+[publisher run 42668101875](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/actions/runs/42668101875)
+SUCCEEDED after verifying exact native run/commit/version and uploaded asset
+sizes/digests. [v0.2.1](https://github.com/Fancychicken99/RUSTACEAN.RULEZ/releases/tag/v0.2.1)
+is published/latest; v0.2.0 remains available as an older release.
+
+| Latest installer | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Hippo-Harbor-CRM-Windows-x64-setup.exe | 355604856 | efdbb9ba880f0bfd856e25ace8a9bbc084f40ef86b7cd502801e6a83328031a0 |
+| Hippo-Harbor-CRM-macOS-universal.dmg | 158533671 | d9aaf7e84ac3b0a4493e085b2bc722407cd1bd72251521a5362e12b4a4dc9e91 |
+
+INSTALL.md and SHA256SUMS.txt are also published. Default main homepage commit
+25834af71dc849986e2e23e78ee402b0aeffeaaa replaces pinned links with
+releases/latest/download/ URLs using stable installer names. Both public latest
+installer URLs returned HTTP 200 and are present in the default homepage README.
+The development README uses the same latest links. Future verified releases made
+by the manual publisher retain those names, so the buttons follow newer releases.
+Signing and manual installed-device acceptance limitations below still apply.
+
+## Historical v0.2.0 evidence
+
 The MVP has already been demonstrated. Current work targets the full Sprint 2
 submission, version 0.2.0. This document supersedes older MVP-only completion
 statements; implementation is distinct from platform acceptance.
